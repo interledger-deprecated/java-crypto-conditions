@@ -1,0 +1,17 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+sourceCompatibility = 1.6
+version = '0.1'
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Crypto Conditions',
+                   'Implementation-Version': version
+    }
+}
+
+repositories {
+}
+
+dependencies {
+}
