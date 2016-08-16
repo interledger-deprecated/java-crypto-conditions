@@ -22,7 +22,7 @@ dependencies {
 
 //Maven pom compatibility task:
 
-task createPom << {
+task writePom << {
     pom {
         project {
             inceptionYear '2016'

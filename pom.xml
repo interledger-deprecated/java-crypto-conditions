@@ -6,11 +6,4 @@
   <artifactId>java-crypto-conditions</artifactId>
   <version>0.0.1-alpha</version>
   <inceptionYear>2016</inceptionYear>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
 </project>
