@@ -1,6 +1,5 @@
 package org.interledger.cryptoconditions;
 
-import java.net.URI;
 import java.util.EnumSet;
 
 public interface Condition {	
@@ -13,8 +12,7 @@ public interface Condition {
 	
 	int getMaxFulfillmentLength();
 	
-	URI toURI(); //TODO Should this just return a String?
-	
 	byte[] toBinary();
 	
+	String toString();	
 }

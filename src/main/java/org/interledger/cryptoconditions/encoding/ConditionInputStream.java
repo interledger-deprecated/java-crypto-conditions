@@ -58,7 +58,7 @@ public class ConditionInputStream extends InputStream {
 		return new Condition() {
 			
 			@Override
-			public URI toURI() {
+			public String toString() {
 				// TODO Use writer
 				return null;
 			}
