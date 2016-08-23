@@ -12,7 +12,7 @@ import org.junit.Test;
 public class TestDecodeCondition {
 
 	@Test
-	public final void testReadCondition() throws IOException, UnsupportedConditionException, OerDecodingException {
+	public final void testReadPreimageSha256Condition0x00() throws IOException, UnsupportedConditionException, OerDecodingException {
 		
 		ByteArrayInputStream b = new ByteArrayInputStream(TestData.PreimageSha256Condition0x00);
 		ConditionInputStream in = new ConditionInputStream(b);
