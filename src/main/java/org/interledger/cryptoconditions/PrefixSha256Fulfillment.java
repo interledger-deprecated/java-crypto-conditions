@@ -3,29 +3,30 @@ package org.interledger.cryptoconditions;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.EnumSet;
 
-import org.interledger.cryptoconditions.encoding.ConditionOutputStream;
-import org.interledger.cryptoconditions.util.Crypto;
+import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
 
-//TODO lots of optimizations possible
+/**
+ * Implementation of a PREFIX-SHA-256 crypto-condition fulfillment
+ * 
+ * TODO Safe synchronized access to members?
+ * 
+ * @author adrianhopebailie
+ *
+ */
 public class PrefixSha256Fulfillment implements Fulfillment {
 	
 	private byte[] prefix;
-	private Condition subcondition;
 	private Fulfillment subfulfillment;
+
+	private byte[] payload;
 	
 	public PrefixSha256Fulfillment() {
 		prefix = new byte[0];
-		subcondition = null;
+		payload = null;
 		subfulfillment = null;
 	}
 	
-	public PrefixSha256Fulfillment(byte[] prefix, Condition subcondition) {
-		setPrefix(prefix);
-		setSubCondition(subcondition);
-	}
-
 	public PrefixSha256Fulfillment(byte[] prefix, Fulfillment subfulfillment) {
 		setPrefix(prefix);
 		setSubFulfillment(subfulfillment);
@@ -35,27 +36,18 @@ public class PrefixSha256Fulfillment implements Fulfillment {
 	{
 		//TODO - Should this be immutable? Use ArrayCopy?
 		this.prefix = prefix;
+		this.payload = null;
 	}
 	
 	public byte[] getPrefix() {
 		//TODO - Should this object be immutable? Use ArrayCopy?
 		return prefix;
 	}
-	
-	public void setSubCondition(Condition condition)
-	{
-		this.subcondition = condition;
-	}
-	
-	public Condition getSubCondition()
-	{
-		return subcondition;
-	}
-	
+			
 	public void setSubFulfillment(Fulfillment fulfillment)
 	{
 		this.subfulfillment = fulfillment;
-		setSubCondition(fulfillment.generateCondition());
+		this.payload = null;
 	}
 	
 	public Fulfillment getSubFulfillment()
@@ -64,81 +56,38 @@ public class PrefixSha256Fulfillment implements Fulfillment {
 	}
 	
 	@Override
-	public ConditionType getTypeID() {
+	public ConditionType getType() {
 		return ConditionType.PREFIX_SHA256;
 	}
 
 	@Override
 	public byte[] getPayload() {
-		//TODO concat varlen(prefix) and condition fingerprint
-		return null;
+		if(payload == null) {
+			payload = calculatePayload();
+		}	
+		return payload;
 	}
 
-	@Override
-	public String toString() {
-		// TODO string encoding
-		return null;
-	}
-
-	@Override
-	public byte[] toBinary() {
-		// TODO OER encoding
-		return null;
-	}
-
-	@Override
-	public Condition generateCondition() {
-		final byte[] fingerprint = Crypto.getSha256Hash(this.prefix);
+	private byte[] calculatePayload()
+	{
 		
-		return new Condition() {
-			
-			@Override
-			public String toString() {
-				// TODO string encoding
-				return null;
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		FulfillmentOutputStream stream = new FulfillmentOutputStream(buffer);
+		
+		try {
+			stream.writeOctetString(prefix);
+			stream.writeFulfillment(subfulfillment);
+			stream.flush();
+			return buffer.toByteArray();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		} finally {
+			try {
+				stream.close();
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
 			}
-			
-			@Override
-			public byte[] toBinary() {
-				ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-				ConditionOutputStream stream = new ConditionOutputStream(buffer);
-				try {
-					stream.writeCondition(this);
-					stream.flush();
-					return buffer.toByteArray();
-				} catch (IOException e) {
-					throw new UncheckedIOException(e);
-				} finally {
-					try {
-						stream.close();
-					} catch (IOException e) {
-						throw new UncheckedIOException(e);
-					}
-				}
-			}
-			
-			@Override
-			public ConditionType getType() {
-				return this.getType();
-			}
-			
-			@Override
-			public int getMaxFulfillmentLength() {
-				//TODO calculate
-				return 0;
-			}
-			
-			@Override
-			public byte[] getFingerprint() {
-				//TODO - Should this be immutable? ArrayCopy?
-				return fingerprint;
-			}
-			
-			@Override
-			public EnumSet<FeatureSuite> getFeatures() {
-				return EnumSet.of(FeatureSuite.PREFIX, FeatureSuite.SHA_256);
-			}
-		};
+		}
 	}
 
 }

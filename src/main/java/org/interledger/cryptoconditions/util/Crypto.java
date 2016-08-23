@@ -3,6 +3,12 @@ package org.interledger.cryptoconditions.util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Convenience class for crypto functions
+ * 
+ * @author adrianhopebailie
+ *
+ */
 public class Crypto {
 	
 	/**

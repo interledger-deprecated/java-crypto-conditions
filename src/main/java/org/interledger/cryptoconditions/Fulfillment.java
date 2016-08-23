@@ -1,7 +1,12 @@
 package org.interledger.cryptoconditions;
 
 /**
- * A fulfillment fulfills a crypto-condition. 
+ * Fulfillments are cryptographically verifiable messages that prove an event occurred. 
+ * 
+ * If you transmit a fulfillment, then everyone who has the condition can agree that 
+ * the condition has been met.
+ * 
+ * A fulfillment fulfills a Condition. 
  * 
  * The fulfillment payload and condition type can be used to regenerate the condition
  * so that it is possible to compare the fingerprint of the condition.
@@ -18,7 +23,7 @@ public interface Fulfillment {
 	 * 
 	 * @return the type of the condition that this fulfills
 	 */
-	ConditionType getTypeID();
+	ConditionType getType();
 		
 	/**
 	 * Get the fulfillment data
@@ -27,32 +32,4 @@ public interface Fulfillment {
 	 */
 	byte[] getPayload();
 			
-	/**
-	 * Generate the condition that this fulfillment fulfills
-	 * 
-	 * @return
-	 */
-	Condition generateCondition();
-
-	//TODO Should this be on the interface?
-	//int calculateMaxFullfilmentSize();
-
-	/**
-	 * Get a binary OER encoded representation of this fulfillment
-	 * 
-	 * TODO - Add encoding format
-	 * 
-	 * @return OER encoded fulfillment
-	 */
-	byte[] toBinary();
-
-	/**
-	 * Get a string encoded representation of this fulfillment
-	 * 
-	 * TODO - Add encoding format
-	 * 
-	 * @return string encoded fulfillment
-	 */
-	String toString();
-
 }
