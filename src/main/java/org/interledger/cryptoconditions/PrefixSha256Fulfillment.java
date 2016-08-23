@@ -2,7 +2,6 @@ package org.interledger.cryptoconditions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 
 import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
 
@@ -80,12 +79,12 @@ public class PrefixSha256Fulfillment implements Fulfillment {
 			stream.flush();
 			return buffer.toByteArray();
 		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+			throw new RuntimeException(e);
 		} finally {
 			try {
 				stream.close();
 			} catch (IOException e) {
-				throw new UncheckedIOException(e);
+				throw new RuntimeException(e);
 			}
 		}
 	}

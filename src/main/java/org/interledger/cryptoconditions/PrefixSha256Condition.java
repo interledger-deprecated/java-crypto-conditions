@@ -2,7 +2,6 @@ package org.interledger.cryptoconditions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.EnumSet;
 
 import org.interledger.cryptoconditions.encoding.ConditionOutputStream;
@@ -83,12 +82,12 @@ public class PrefixSha256Condition implements Condition {
 			stream.flush();
 			return buffer.toByteArray();
 		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+			throw new RuntimeException(e);
 		} finally {
 			try {
 				stream.close();
 			} catch (IOException e) {
-				throw new UncheckedIOException(e);
+				throw new RuntimeException(e);
 			}
 		}
 	}
