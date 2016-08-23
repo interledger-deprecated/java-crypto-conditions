@@ -13,7 +13,14 @@ import org.interledger.cryptoconditions.util.Crypto;
  *
  */
 public class PreimageSha256Fulfillment implements Fulfillment {
+
+	private static ConditionType CONDITION_TYPE = ConditionType.PREIMAGE_SHA256;
 	
+	private static EnumSet<FeatureSuite> BASE_FEATURES = EnumSet.of(
+			FeatureSuite.SHA_256, 
+			FeatureSuite.PREIMAGE
+		);
+
 	private byte[] preimage;
 			
 	public PreimageSha256Fulfillment(byte[] preimage) {
@@ -43,30 +50,13 @@ public class PreimageSha256Fulfillment implements Fulfillment {
 
 	@Override
 	public Condition generateCondition() {
-		final byte[] fingerprint = Crypto.getSha256Hash(preimage);
-		final int maxFulfillmentLength = preimage.length;
-		
-		return new Condition() {
-			
-			@Override
-			public ConditionType getType() {
-				return ConditionType.PREIMAGE_SHA256;
-			}
-			
-			@Override
-			public EnumSet<FeatureSuite> getFeatures() {
-				return EnumSet.of(FeatureSuite.SHA_256, FeatureSuite.PREIMAGE);
-			}
-			
-			@Override
-			public byte[] getFingerprint() {
-				return fingerprint;
-			}
-			
-			@Override
-			public int getMaxFulfillmentLength() {
-				return maxFulfillmentLength;
-			}
-		};
+		byte[] fingerprint = Crypto.getSha256Hash(preimage);
+		int maxFulfillmentLength = preimage.length;
+	
+		return new ConditionImpl(
+				CONDITION_TYPE, 
+				BASE_FEATURES, 
+				fingerprint, 
+				maxFulfillmentLength);
 	}
 }

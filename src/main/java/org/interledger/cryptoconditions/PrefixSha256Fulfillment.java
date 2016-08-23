@@ -18,7 +18,12 @@ import org.interledger.cryptoconditions.util.Crypto;
  */
 public class PrefixSha256Fulfillment implements Fulfillment {
 	
-	public static EnumSet<FeatureSuite> BASE_FEATURES = EnumSet.of(FeatureSuite.SHA_256, FeatureSuite.PREFIX);
+	private static ConditionType CONDITION_TYPE = ConditionType.PREFIX_SHA256;
+	
+	private static EnumSet<FeatureSuite> BASE_FEATURES = EnumSet.of(
+			FeatureSuite.SHA_256, 
+			FeatureSuite.PREFIX
+		);
 
 	private byte[] prefix;
 	private Fulfillment subfulfillment;
@@ -75,45 +80,28 @@ public class PrefixSha256Fulfillment implements Fulfillment {
 	@Override
 	public Condition generateCondition() {
 		
-		final Condition subcondition = subfulfillment.generateCondition();
+		Condition subcondition = subfulfillment.generateCondition();
 		
-		final EnumSet<FeatureSuite> features = subcondition.getFeatures();
+		EnumSet<FeatureSuite> features = subcondition.getFeatures();
 		features.addAll(BASE_FEATURES);
 
-		final byte[] fingerprint = Crypto.getSha256Hash(
+		byte[] fingerprint = Crypto.getSha256Hash(
 				calculateFingerPrintContent(
 					prefix, 
 					subcondition
 				)
 			);
 		
-		final int maxFulfillmentLength = calculateMaxFulfillmentLength(
+		int maxFulfillmentLength = calculateMaxFulfillmentLength(
 				prefix, 
 				subcondition
 			);
 		
-		return new Condition() {
-			
-			@Override
-			public ConditionType getType() {
-				return ConditionType.PREFIX_SHA256;
-			}
-			
-			@Override
-			public EnumSet<FeatureSuite> getFeatures() {
-				return features;
-			}
-			
-			@Override
-			public byte[] getFingerprint() {
-				return fingerprint;
-			}
-			
-			@Override
-			public int getMaxFulfillmentLength() {
-				return maxFulfillmentLength;
-			}
-		};
+		return new ConditionImpl(
+				CONDITION_TYPE, 
+				features, 
+				fingerprint, 
+				maxFulfillmentLength);
 	}
 
 	private byte[] calculatePayload()
