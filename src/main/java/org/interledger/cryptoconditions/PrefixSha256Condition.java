@@ -1,11 +1,6 @@
 package org.interledger.cryptoconditions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.EnumSet;
-
-import org.interledger.cryptoconditions.encoding.ConditionOutputStream;
-import org.interledger.cryptoconditions.util.Crypto;
 
 /**
  * Implementation of a PREFIX-SHA-256 crypto-condition
@@ -21,10 +16,14 @@ public class PrefixSha256Condition implements Condition {
 	private byte[] fingerprint;
 	private int maxFulfillmentLength;
 		
-	public PrefixSha256Condition(byte[] fingerprint, EnumSet<FeatureSuite> features, 
+	public PrefixSha256Condition(byte[] fingerprint, EnumSet<FeatureSuite> subcondtion_features, 
 			int maxFulfillmentLength) {
+		
 		this.fingerprint = fingerprint;
-		this.features = features;
+		
+		this.features = BASE_FEATURES.clone();
+		this.features.addAll(subcondtion_features);
+		
 		this.maxFulfillmentLength = maxFulfillmentLength;
 	}
 	
@@ -48,66 +47,4 @@ public class PrefixSha256Condition implements Condition {
 		return maxFulfillmentLength;
 	}
 	
-	public static PrefixSha256Condition fromFulfillment(PrefixSha256Fulfillment fulfillment) {
-		
-		Condition subcondition = ConditionFactory.fromFulfillment(fulfillment.getSubFulfillment());
-		
-		EnumSet<FeatureSuite> features = EnumSet.copyOf(BASE_FEATURES);
-		features.addAll(subcondition.getFeatures());
-		
-		byte[] fingerprint = Crypto.getSha256Hash(
-				calculateFingerPrintContent(
-					fulfillment.getPrefix(), 
-					subcondition
-				)
-			);
-		
-		int maxFulfillmentLength = calculateMaxFulfillmentLength(
-				fulfillment.getPrefix(), 
-				subcondition
-			);
-		
-		return new PrefixSha256Condition(fingerprint, features, maxFulfillmentLength);
-	}
-	
-	private static byte[] calculateFingerPrintContent(byte[] prefix, Condition subcondition)
-	{
-		
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		ConditionOutputStream stream = new ConditionOutputStream(buffer);
-		
-		try {
-			stream.writeOctetString(prefix);
-			stream.writeCondition(subcondition);
-			stream.flush();
-			return buffer.toByteArray();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			try {
-				stream.close();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
-	
-	private static int calculateMaxFulfillmentLength(byte[] prefix, Condition subcondition)
-	{
-		int length = prefix.length;
-		if(length < 128)
-		{
-			length = length + 1;
-		} else if(length <= 255) {
-			length = length + 2;
-		} else if (length <= 65535) {
-			length = length + 3;
-		} else if (length <= 16777215){
-			length = length + 4;
-		} else {
-			throw new IllegalArgumentException("Field lengths of greater than 16777215 are not supported.");
-		}
-		return length + subcondition.getMaxFulfillmentLength();
-	}
-
 }

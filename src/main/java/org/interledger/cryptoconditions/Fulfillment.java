@@ -14,7 +14,7 @@ package org.interledger.cryptoconditions;
  * @author adrianhopebailie
  *
  */
-public interface Fulfillment {
+public interface Fulfillment<T extends Condition>  {
 	
 	/**
 	 * Get the type of condition that is fulfilled by this fulfillment
@@ -32,4 +32,14 @@ public interface Fulfillment {
 	 */
 	byte[] getPayload();
 			
+	
+	/**
+	 * Generate the condition for this fulfillment
+	 * 
+	 * This may be a computationally intensive operation as it will 
+	 * recurse through sub-fulfillments as required to generate sub-conditions.
+	 * 
+	 * @return a Condition that is fulfilled by this object
+	 */
+	T generateCondition(); 
 }

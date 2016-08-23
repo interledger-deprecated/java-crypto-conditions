@@ -1,5 +1,7 @@
 package org.interledger.cryptoconditions;
 
+import org.interledger.cryptoconditions.util.Crypto;
+
 /**
  * Implementation of a PREIMAGE-SHA-256 crypto-condition fulfillment
  * 
@@ -8,7 +10,7 @@ package org.interledger.cryptoconditions;
  * @author adrianhopebailie
  *
  */
-public class PreimageSha256Fulfillment implements Fulfillment {
+public class PreimageSha256Fulfillment implements Fulfillment<PreimageSha256Condition> {
 	
 	private byte[] preimage;
 			
@@ -35,5 +37,12 @@ public class PreimageSha256Fulfillment implements Fulfillment {
 	@Override
 	public byte[] getPayload() {
 		return getPreimage();
+	}
+
+	@Override
+	public PreimageSha256Condition generateCondition() {
+		byte[] fingerprint = Crypto.getSha256Hash(preimage);
+		int maxFulfillmentLength = preimage.length;
+		return new PreimageSha256Condition(fingerprint, maxFulfillmentLength);
 	}
 }

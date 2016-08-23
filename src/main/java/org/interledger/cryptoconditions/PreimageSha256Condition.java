@@ -2,8 +2,6 @@ package org.interledger.cryptoconditions;
 
 import java.util.EnumSet;
 
-import org.interledger.cryptoconditions.util.Crypto;
-
 /**
  * Implementation of a PREIMAGE-SHA-256 crypto-condition
  * 
@@ -39,12 +37,4 @@ public class PreimageSha256Condition implements Condition {
 	public int getMaxFulfillmentLength() {
 		return maxFulfillmentLength;
 	}
-
-	public static PreimageSha256Condition fromFulfillment(PreimageSha256Fulfillment fulfillment) {
-		byte[] fingerprint = Crypto.getSha256Hash(fulfillment.getPreimage());
-		int maxFulfillmentLength = fulfillment.getPreimage().length;
-		return new PreimageSha256Condition(fingerprint, maxFulfillmentLength);
-	}
-	
-
 }
