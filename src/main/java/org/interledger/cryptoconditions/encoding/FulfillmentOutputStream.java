@@ -42,7 +42,7 @@ public class FulfillmentOutputStream extends OerOutputStream {
 	 * @param fulfillment
 	 * @throws IOException
 	 */
-	public void writeFulfillment(Fulfillment<?> fulfillment) throws IOException
+	public void writeFulfillment(Fulfillment fulfillment) throws IOException
 	{
 		writeConditionType(fulfillment.getType());
 		writePayload(fulfillment.getPayload());

@@ -47,7 +47,7 @@ public class FulfillmentInputStream extends OerInputStream {
 	 * @throws OerDecodingException
 	 * @throws UnsupportedConditionException
 	 */
-	public Fulfillment<?> readFulfillment()
+	public Fulfillment readFulfillment()
 	        throws IOException, UnsupportedConditionException, OerDecodingException 
 	{
 		final ConditionType type = readConditiontype();
@@ -60,7 +60,7 @@ public class FulfillmentInputStream extends OerInputStream {
 			ByteArrayInputStream byteStream = new ByteArrayInputStream(payload);
 			FulfillmentInputStream innerStream = new FulfillmentInputStream(byteStream);
 			byte[] prefix = innerStream.readOctetString();
-			Fulfillment<?> subfulfillment = innerStream.readFulfillment();
+			Fulfillment subfulfillment = innerStream.readFulfillment();
 			return new PrefixSha256Fulfillment(prefix, subfulfillment);
 		case RSA_SHA256:
 			//TODO Implement
