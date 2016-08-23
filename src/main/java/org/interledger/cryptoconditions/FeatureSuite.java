@@ -1,5 +1,10 @@
 package org.interledger.cryptoconditions;
 
+/**
+ * Enumeration of crypto-condition features
+ * 
+ * @author adrianhopebailie
+ */
 public enum FeatureSuite {
 	
 	SHA_256(1),

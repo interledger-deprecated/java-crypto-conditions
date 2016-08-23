@@ -1,5 +1,11 @@
 package org.interledger.cryptoconditions;
 
+/**
+ * Enumeration of crypto-condition types
+ * 
+ * @author adrianhopebailie
+ *
+ */
 public enum ConditionType {
 	
 	PREIMAGE_SHA256(0),
@@ -15,6 +21,11 @@ public enum ConditionType {
 		this.typeCode = typeCode;
 	}
 	
+	/**
+	 * Get the ASN.1 enum code for this type
+	 * 
+	 * @return the ASN.1 enumeration
+	 */
 	public int getTypeCode() {
 		return this.typeCode;
 	}
