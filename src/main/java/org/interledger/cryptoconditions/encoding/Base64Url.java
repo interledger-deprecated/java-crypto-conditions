@@ -3,7 +3,7 @@ package org.interledger.cryptoconditions.encoding;
 public class Base64Url {
 	
     private static final String CODES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=";
-    private static final int[] LOOKUP = new int[122]; // (int) 'z' == 122 and is the max
+    private static final int[] LOOKUP = new int[123]; // (int) 'z' == 122 and is the max
     
     static {
     	char[] code_chars = CODES.toCharArray();
@@ -16,9 +16,14 @@ public class Base64Url {
     }
 
     public static byte[] decode(String input)    {
+        int padLength = (input.length() % 4 == 0) ? 0 : 4 - (input.length() % 4);
+        for (int pad=0; pad < padLength; pad++) {
+            input += "=";
+        }
         if (input.length() % 4 != 0)    {
             throw new IllegalArgumentException("Invalid base64url input");
         }
+
         byte decoded[] = new byte[((input.length() * 3) / 4) - (input.indexOf('=') > 0 ? (input.length() - input.indexOf('=')) : 0)];
         char[] inChars = input.toCharArray();
         int j = 0;
@@ -63,11 +68,11 @@ public class Base64Url {
                     out.append(CODES.charAt(b));
                 } else  {
                     out.append(CODES.charAt(b));
-                    out.append('=');
+                    // out.append('=');
                 }
             } else      {
                 out.append(CODES.charAt(b));
-                out.append("==");
+                // out.append("==");
             }
         }
 
