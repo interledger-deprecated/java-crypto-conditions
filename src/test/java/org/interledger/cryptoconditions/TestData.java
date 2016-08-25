@@ -15,7 +15,7 @@ public class TestData {
 			0x01, (byte) 0xFF, //Fingerprint = 0x00
 			0x01, 0x01, //Max fulfillment = 1
 	};	
-	
+
 	public static final String[] Base64URLEncoded = new String[]{ /* "random" Base64URL encoded strings extracted from five-bells-conditions Tests */
 		"ff00ff00abab",
 		"O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik",
