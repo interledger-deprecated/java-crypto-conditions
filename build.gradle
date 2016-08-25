@@ -16,7 +16,7 @@ targetCompatibility = 1.6
 checkstyle {
     configFile file('../google_checks.xml')
     toolVersion '7.1'
-    showViolations = true
+    showViolations = true    
 }
 
 jar {
@@ -51,7 +51,8 @@ task writePom << {
                 "project.build.sourceEncoding" "UTF-8"
                 "maven.compiler.source" "1.6"
                 "maven.compiler.target" "1.6"
-                "checkstyle.config.location" "../google_checks.xml"
+                "checkstyle.config.location" "../google_checks.xml"                
+                "checkstyle.consoleOutput" "true"
             }
             reporting  {
                 plugins {
