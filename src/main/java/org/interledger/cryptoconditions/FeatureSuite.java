@@ -17,7 +17,7 @@ public enum FeatureSuite {
 	ED25519   (1<<5);
 	
 	private static final short mostSignificantBit = 5;
-	private static final int maxByteValue = 2^mostSignificantBit - 1; 
+	private static final int maxByteValue = (2<<(mostSignificantBit)) - 1; 
 	private final short byteValue;
 		
 	FeatureSuite(int byteValue){

@@ -60,8 +60,8 @@ public final class ConditionImpl implements Condition {
 					"serializedCondition '" + URI + "' doesn't match " + ConditionImpl.CONDITION_REGEX);
 
 		String[] pieces = URI.split(":");
-		if (pieces.length != 4) 
-			throw new RuntimeException("The URI for the condition '"+URI+"' was expected to contain 4 fields separated by ':'");
+		if (pieces.length != 5) 
+			throw new RuntimeException("The URI for the condition '"+URI+"' was expected to contain 5 fields separated by ':'");
 
 		String BASE16Type = pieces[1], BASE16FeatureBitMask = pieces[2], 
 				BASE64URLFingerprint = pieces[3], BASE10MaxFulfillmentLength = pieces[4];
