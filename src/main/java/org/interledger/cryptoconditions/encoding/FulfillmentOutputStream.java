@@ -45,7 +45,7 @@ public class FulfillmentOutputStream extends OerOutputStream {
 	public void writeFulfillment(Fulfillment fulfillment) throws IOException
 	{
 		writeConditionType(fulfillment.getType());
-		writePayload(fulfillment.getPayload());
+		writePayload(fulfillment.getPayload().payload);
 		
 	}
 

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.EnumSet;
 
 import org.interledger.cryptoconditions.Condition;
+import org.interledger.cryptoconditions.ConditionImpl;
 import org.interledger.cryptoconditions.ConditionType;
 import org.interledger.cryptoconditions.FeatureSuite;
 import org.interledger.cryptoconditions.UnsupportedConditionException;
@@ -55,30 +56,9 @@ public class ConditionInputStream extends OerInputStream {
 		final ConditionType type = readConditiontype();
 		final EnumSet<FeatureSuite> features = readFeatures();
 		final byte[] fingerprint = readFingerprint();
-		final int maxFulfillmentValue = readMaxFullfilmentValue();		
-		
-		return new Condition() {
-						
-			@Override
-			public ConditionType getType() {
-				return type;
-			}
-			
-			@Override
-			public int getMaxFulfillmentLength() {
-				return maxFulfillmentValue;
-			}
-			
-			@Override
-			public byte[] getFingerprint() {
-				return fingerprint;
-			}
-			
-			@Override
-			public EnumSet<FeatureSuite> getFeatures() {
-				return features;
-			}
-		};
+		final int maxFulfillmentValue = readMaxFullfilmentValue();
+		return new ConditionImpl(type, features, fingerprint, maxFulfillmentValue);
+
 	}
 	
 	protected ConditionType readConditiontype() 

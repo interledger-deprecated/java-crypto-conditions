@@ -1,6 +1,7 @@
 package org.interledger.cryptoconditions.encoding;
 
 import java.io.IOException;
+
 import java.io.OutputStream;
 
 /**
