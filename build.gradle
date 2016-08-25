@@ -1,13 +1,10 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
-<<<<<<< Upstream, based on origin/master
 apply plugin: 'checkstyle'
-=======
 
 targetCompatibility = 1.6
 sourceCompatibility = 1.6
->>>>>>> ebc885f Initial unit tests
 
 group = 'org.interledger'
 version = '0.0.2-alpha'
@@ -32,11 +29,6 @@ jar {
 repositories {    
     maven { url "http://repo.maven.apache.org/maven2" }
     mavenLocal()
-<<<<<<< Upstream, based on origin/master
-    maven { url "https://jitpack.io" }  
-=======
-    maven { url "http://repo.maven.apache.org/maven2" }
->>>>>>> ebc885f Initial unit tests
 }
 
 dependencies {
