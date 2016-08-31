@@ -68,7 +68,7 @@ public interface Condition {
 	 * 
 	 * @return the unique fingerprint of this condition
 	 */
-	byte[] getFingerprint();
+	byte[] getFingerprint(); // TODO:(0) Use wrapper type?
 	
 	/**
 	 * The maximum length of the fulfillment payload that can fulfill this condition, 

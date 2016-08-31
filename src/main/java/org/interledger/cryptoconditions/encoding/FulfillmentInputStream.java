@@ -1,6 +1,7 @@
 package org.interledger.cryptoconditions.encoding;
 
-import java.io.ByteArrayInputStream;
+
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -8,9 +9,11 @@ import org.interledger.cryptoconditions.ConditionType;
 import org.interledger.cryptoconditions.Fulfillment;
 import org.interledger.cryptoconditions.PrefixSha256Fulfillment;
 import org.interledger.cryptoconditions.PreimageSha256Fulfillment;
+import org.interledger.cryptoconditions.Ed25519Fulfillment;
 import org.interledger.cryptoconditions.UnsupportedConditionException;
 import org.interledger.cryptoconditions.UnsupportedLengthException;
 
+import org.interledger.cryptoconditions.types.*;
 /**
  * Reads and decodes Fulfillments from an underlying input stream.
  * 
@@ -51,23 +54,21 @@ public class FulfillmentInputStream extends OerInputStream {
 	        throws IOException, UnsupportedConditionException, OerDecodingException 
 	{
 		final ConditionType type = readConditiontype();
-		final byte[] payload = readFingerprint();
+		final FulfillmentPayload payload = new FulfillmentPayload(readFingerprint());
 		
 		switch (type) {
 		case PREIMAGE_SHA256:
-			return new PreimageSha256Fulfillment(payload);
+			return new PreimageSha256Fulfillment(ConditionType.PREIMAGE_SHA256, payload);
 		case PREFIX_SHA256:
-			ByteArrayInputStream byteStream = new ByteArrayInputStream(payload);
-			FulfillmentInputStream innerStream = new FulfillmentInputStream(byteStream);
-			byte[] prefix = innerStream.readOctetString();
-			Fulfillment subfulfillment = innerStream.readFulfillment();
-			return new PrefixSha256Fulfillment(prefix, subfulfillment);
+			return new PrefixSha256Fulfillment(ConditionType.PREFIX_SHA256, payload);
 		case RSA_SHA256:
-			//TODO Implement
+			// TODO:(0)
+			// return new RSA_SHA256Fulfillment(ConditionType.RSA_SHA256, payload);
 		case ED25519:
-			//TODO Implement
+			return new Ed25519Fulfillment(ConditionType.ED25519, payload);
 		case THRESHOLD_SHA256:
-			//TODO Implement
+			//TODO:(0) 
+			// return new Threshold_SHA256Fulfillment(ConditionType.THRESHOLD_SHA256, payload);
 		default:
 			throw new RuntimeException("Unimplemented fulfillment type encountered.");
 		}

@@ -46,12 +46,12 @@ public enum FeatureSuite {
 		int result = 0;
 		for (FeatureSuite feature : featureSet){
 			switch (feature){
-				case SHA_256  : result = result | SHA_256.toInt(); break;
-				case PREIMAGE : result = result | SHA_256.toInt(); break;
-				case PREFIX   : result = result | SHA_256.toInt(); break;
-				case THRESHOLD: result = result | SHA_256.toInt(); break;
-				case RSA_PSS  : result = result | SHA_256.toInt(); break;
-				case ED25519  : result = result | SHA_256.toInt(); break;
+				case SHA_256  : result = result | SHA_256  .toInt(); break;
+				case PREIMAGE : result = result | PREIMAGE .toInt(); break;
+				case PREFIX   : result = result | PREFIX   .toInt(); break;
+				case THRESHOLD: result = result | THRESHOLD.toInt(); break;
+				case RSA_PSS  : result = result | RSA_PSS  .toInt(); break;
+				case ED25519  : result = result | ED25519  .toInt(); break;
 			}
 		}
 		return result;

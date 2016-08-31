@@ -3,6 +3,9 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'checkstyle'
 
+targetCompatibility = 1.6
+sourceCompatibility = 1.6
+
 group = 'org.interledger'
 version = '0.0.2-alpha'
 description = 'Crypto Conditions'
@@ -13,7 +16,7 @@ targetCompatibility = 1.6
 checkstyle {
     configFile file('../google_checks.xml')
     toolVersion '7.1'
-    showViolations = true
+    showViolations = true    
 }
 
 jar {
@@ -26,11 +29,11 @@ jar {
 repositories {    
     maven { url "http://repo.maven.apache.org/maven2" }
     mavenLocal()
-    maven { url "https://jitpack.io" }  
 }
 
 dependencies {
 	testCompile 'junit:junit:4.12'
+	compile 'net.i2p.crypto:eddsa:0.1.0'
 }
 
 //Maven pom compatibility task:
@@ -49,7 +52,8 @@ task writePom << {
                 "project.build.sourceEncoding" "UTF-8"
                 "maven.compiler.source" "1.6"
                 "maven.compiler.target" "1.6"
-                "checkstyle.config.location" "../google_checks.xml"
+                "checkstyle.config.location" "../google_checks.xml"                
+                "checkstyle.consoleOutput" "true"
             }
             reporting  {
                 plugins {
