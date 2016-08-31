@@ -14,9 +14,10 @@ import org.interledger.cryptoconditions.PreimageSha256Fulfillment;
 public class TestPreimageSha256Fulfillment {
 
     @Test
-    public void testCreate() {
+    public void testCreatePreimageSha256FulfillmentFromPreimage() {
+        System.out.println("testCreatePreimageSha256FulfillmentFromPreimage");
         // TODO:(?) Create unified test data for all different implementations (JS, java, Python, ...)
-        String[][] testData = { // Copy & Paste from five-bells-condition test data
+        String[][] testData01 = { // Copy & Paste from five-bells-condition test data
             /* preimg , fulfillment, condition */
             { ""      , "cf:0:"    , "cc:0:3:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU:0"},
             { "00"    , "cf:0:AA"  , "cc:0:3:bjQLnP-zepicpUTmu3gKLHiQHT-zNzh2hRGjBhevoB0:1"},
@@ -28,16 +29,18 @@ public class TestPreimageSha256Fulfillment {
             { "616263", "cf:0:YWJj", "cc:0:3:ungWv48Bz-pBQUDeXa4iI7ADYaOWF3qctBD_YfIAFa0:3"},
         };
 
-        for (String[] testDataRow : testData) {
-            byte[] preimage = DatatypeConverter.parseHexBinary(testDataRow[0]);
-            String ffURI = testDataRow[1], ccURI = testDataRow[2];
+        for (int idx=0; idx<testData01.length; idx++) {
+            String[] testDataRow01 = testData01[idx];
+            String base16preimage = testDataRow01[0];
+            byte[] preimage = DatatypeConverter.parseHexBinary(base16preimage);
+            String expectedFfURI = testDataRow01[1], expectedCCURI = testDataRow01[2];
             Fulfillment ff = PreimageSha256Fulfillment.BuildFromSecrets(preimage);
 //            System.out.println("                    ffURI:"+ffURI);
-//            System.out.println("ff.toURI()               :"+ff.toURI());
-//            System.out.println("                    ccURI:"+ccURI);
-//            System.out.println("ff.getCondition().toURI():"+ff.getCondition().toURI());
-            assertTrue("ffURI.equals(ff.toURI())"               , ffURI.equals(ff.               toURI()) );
-            assertTrue("ccURI.equals(ff.getCondition().toURI())", ccURI.equals(ff.getCondition().toURI()) );
+//            System.out.println("ff.toURI()               :"+ff.toURI());;
+            assertTrue("ffURI.equals(ff.toURI())"               , expectedFfURI.equals(ff.               toURI()) );
+//            System.out.println("      expectedCCURI:"+expectedCCURI);
+//            System.out.println("Condition().toURI():"+ff.getCondition().toURI());
+            assertTrue(expectedCCURI.equals(ff.getCondition().toURI()) );
         }
     }
 }
