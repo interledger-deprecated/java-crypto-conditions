@@ -1,12 +1,18 @@
 package org.interledger.cryptoconditions;
 
+import java.io.ByteArrayInputStream;
+
 import java.io.ByteArrayOutputStream;
+
+
 import java.io.IOException;
 import java.util.EnumSet;
 
 import org.interledger.cryptoconditions.encoding.ConditionOutputStream;
 import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
+import org.interledger.cryptoconditions.encoding.FulfillmentInputStream;
 import org.interledger.cryptoconditions.util.Crypto;
+import org.interledger.cryptoconditions.types.*;
 
 /**
  * Implementation of a PREFIX-SHA-256 crypto-condition fulfillment
@@ -16,49 +22,72 @@ import org.interledger.cryptoconditions.util.Crypto;
  * @author adrianhopebailie
  *
  */
-public class PrefixSha256Fulfillment implements Fulfillment {
-	
-	private static ConditionType CONDITION_TYPE = ConditionType.PREFIX_SHA256;
-	
+public class PrefixSha256Fulfillment extends FulfillmentBase {
+
+
 	private static EnumSet<FeatureSuite> BASE_FEATURES = EnumSet.of(
 			FeatureSuite.SHA_256, 
 			FeatureSuite.PREFIX
 		);
 
-	private byte[] prefix;
-	private Fulfillment subfulfillment;
+	private final byte[] prefix; // TODO:(0) Wrap into PrefixPayload?
+	private final Fulfillment subfulfillment;
+	
+	public PrefixSha256Fulfillment(ConditionType type, FulfillmentPayload payload) {
+		super(type, payload);
+		ByteArrayInputStream byteStream = new ByteArrayInputStream(payload.payload);
+		FulfillmentInputStream stream = new FulfillmentInputStream(byteStream);
+		try{
+			this.prefix = stream.readOctetString();
+			this.subfulfillment = stream.readFulfillment();
+		}catch(Exception e){
+			throw new RuntimeException(e.toString(), e);
+		} finally {
+			try { 
+				stream.close(); 
+			}catch(Exception e){
+				throw new RuntimeException(e.toString(), e); // Can't recover
+			}
+		}
+	}
 
-	private byte[] payload;
-	
-	public PrefixSha256Fulfillment() {
-		prefix = new byte[0];
-		payload = null;
-		subfulfillment = null;
-	}
-	
-	public PrefixSha256Fulfillment(byte[] prefix, Fulfillment subfulfillment) {
-		setPrefix(prefix);
-		setSubFulfillment(subfulfillment);
+    /*
+     * Make private and use static constructor BuildFromParams. 
+     * That hide many Java specific details with variable scope and makes 
+     * it easy to port to other languages.
+     */
+	private PrefixSha256Fulfillment(byte[] prefix, Fulfillment subfulfillment) {
+	    this.prefix = prefix.clone();
+	    this.subfulfillment = subfulfillment;
+	    
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        FulfillmentOutputStream ffOutputStream = new FulfillmentOutputStream(byteStream);
+        try {
+            ffOutputStream.writeOctetString(prefix);
+            ffOutputStream.writeFulfillment(subfulfillment);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                ffOutputStream.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e.toString(), e);
+            }
+        }
+        this.payload = new FulfillmentPayload(byteStream.toByteArray());
+//        PrefixSha256Fulfillment result = 
+    }
+
+	// TODO:(0) In the JS implementation there is also a Constructor (prefix, subcondition)
+	public static PrefixSha256Fulfillment BuildFromParams(byte[] prefix, Fulfillment subfulfillment) {
+	    PrefixSha256Fulfillment result = new PrefixSha256Fulfillment(prefix, subfulfillment);
+        return result;
 	}
 
-	public void setPrefix(byte[] prefix)
-	{
-		//TODO - Should this be immutable? Use ArrayCopy?
-		this.prefix = prefix;
-		this.payload = null;
-	}
-	
 	public byte[] getPrefix() {
-		//TODO - Should this object be immutable? Use ArrayCopy?
-		return prefix;
+		return prefix.clone();
 	}
-			
-	public void setSubFulfillment(Fulfillment fulfillment)
-	{
-		this.subfulfillment = fulfillment;
-		this.payload = null;
-	}
-	
+
 	public Fulfillment getSubFulfillment()
 	{
 		return subfulfillment;
@@ -70,16 +99,12 @@ public class PrefixSha256Fulfillment implements Fulfillment {
 	}
 
 	@Override
-	public byte[] getPayload() {
-		if(payload == null) {
-			payload = calculatePayload();
-		}	
+	public FulfillmentPayload getPayload() {
 		return payload;
 	}
 
 	@Override
 	public Condition generateCondition() {
-		
 		Condition subcondition = subfulfillment.generateCondition();
 		
 		EnumSet<FeatureSuite> features = subcondition.getFeatures();
@@ -98,15 +123,14 @@ public class PrefixSha256Fulfillment implements Fulfillment {
 			);
 		
 		return new ConditionImpl(
-				CONDITION_TYPE, 
+				ConditionType.PREFIX_SHA256, 
 				features, 
 				fingerprint, 
 				maxFulfillmentLength);
 	}
-
-	private byte[] calculatePayload()
+	
+	protected byte[] calculatePayload()
 	{
-		
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		FulfillmentOutputStream stream = new FulfillmentOutputStream(buffer);
 		
@@ -164,5 +188,20 @@ public class PrefixSha256Fulfillment implements Fulfillment {
 			throw new IllegalArgumentException("Field lengths of greater than 16777215 are not supported.");
 		}
 		return length + subcondition.getMaxFulfillmentLength();
+	}
+
+	@Override
+	public boolean validate(MessagePayload message) {
+		if (this.subfulfillment == null)
+			throw new RuntimeException("subfulfillment not yet initialized ");
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+		try {
+			outputStream.write( this.prefix);
+			outputStream.write( message.payload );
+		} catch (IOException e) {
+			throw new RuntimeException(e.toString());
+		}
+		
+		return this.subfulfillment.validate(new MessagePayload(outputStream.toByteArray()));
 	}
 }

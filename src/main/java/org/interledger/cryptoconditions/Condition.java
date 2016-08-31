@@ -14,8 +14,28 @@ import java.util.EnumSet;
  * @author adrianhopebailie
  *
  */
-public interface Condition {	
-	
+public interface Condition {
+	/*
+	 * TODO: We would like all different Condition implementations to have the next two constructors:
+	 * 
+	 *   ConditionImpl(ConditionType type, EnumSet<FeatureSuite> features, 
+	 * 			byte[] fingerprint, int maxFulfillmentLength)
+	 * 
+	 *   ConditionImpl(String URI)
+	 * 
+	 * Since Java syntax neither allows to declare constructors nor static methods (constructors) 
+	 * for interfaces there would be two solutions:
+	 * 
+	 *    - create a ConditionFactory Interface and then for each Condition implementation 
+	 *      a parallel factory implementation.
+	 *
+	 *    - Use an abstract base class with both constructors and force all Condition
+	 *      implementation inherit from such base class.
+	 * 
+	 *  At this moment there is a single ConditionImpl implementing the interface and
+	 *  "manually" implementing the two constructors.
+	 */
+
 	/**
 	 * The numeric type identifier representing the condition type
 	 * 
@@ -48,7 +68,7 @@ public interface Condition {
 	 * 
 	 * @return the unique fingerprint of this condition
 	 */
-	byte[] getFingerprint();
+	byte[] getFingerprint(); // TODO:(0) Use wrapper type?
 	
 	/**
 	 * The maximum length of the fulfillment payload that can fulfill this condition, 
@@ -62,5 +82,7 @@ public interface Condition {
 	 * @return the maximum length (in bytes) of this condition's fulfillment
 	 */
 	int getMaxFulfillmentLength();
+	
+	String toURI();
 			
 }
