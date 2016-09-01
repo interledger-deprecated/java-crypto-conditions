@@ -21,7 +21,7 @@ public abstract class FulfillmentBase  implements Fulfillment {
 	 * Default constructor. Raise exception to force use of child classes.
 	 */
 	FulfillmentBase() {
-		throw new RuntimeException("Use a child class constructor");
+//		throw new RuntimeException("Use a child class constructor");
 	}
 	
 	/*
@@ -61,8 +61,9 @@ public abstract class FulfillmentBase  implements Fulfillment {
 	
 	@Override
 	public EnumSet<FeatureSuite> getFeatures() {
-		if (this.condition == null)
-			throw new RuntimeException("condition not YET initialized");
+		if (this.condition == null) {
+		    this.condition = this.generateCondition();
+		}   
 		return this.condition.getFeatures();
 	}
 
