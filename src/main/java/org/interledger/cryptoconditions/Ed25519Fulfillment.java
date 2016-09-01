@@ -16,7 +16,6 @@ import java.security.Signature;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAEngine;
-// TODO:(0) Add dependencies in ed25519 external library.
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
@@ -24,17 +23,41 @@ import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
 
 import org.interledger.cryptoconditions.types.*;
 /**
- * Implementation of a PREFIX-SHA-512 crypto-condition fulfillment
- * 
- * TODO Safe synchronized access to members?
+ * Implementation of a Ed25519 crypto-condition fulfillment
  * 
  * @author earizon<enrique.arizon.benito@everis.com>
  *
  */
 
 public class Ed25519Fulfillment extends FulfillmentBase {
-    // TODO:(?) Create utility classes to generate public/private keys
-	//     for example for a site that just one a one-time-use public/private key.
+    /*
+     *  TODO:(?) Create utility classes to generate public/private keys
+     *      for example for a site that just one a one-time-use public/private key.
+     */
+	
+	/*
+	 * Note: 
+     *  The java Ed25519 implementation uses a private Key Seed while some other
+     *  implementations use the "expanded private key". 
+     *  Extracted from 
+     *  http://stackoverflow.com/questions/23092549/interoperability-between-java-and-javascript-ed25519-implementations
+     *  
+     *  """
+     *      Some work with an expanded private key, others ask for both the 
+     *      seed and the public key when signing
+     *      This difference only applies to the signing function, not 
+     *      the verification function.
+     *  ...
+     *   """
+     *   FROM https://blog.mozilla.org/warner/2011/11/29/ed25519-keys/:
+     *   private Sheed to Expanded private key:
+     *   32-byte(256bits) SHEED -> HASH SHA512 -> 64bytes(512bits) -> split [left(32bytes),right(32bytes)]
+     *   left -> "massaged into curve25519 private scalar "a" by setting and clearing a few
+     *          high/low-order bits. -> pubkey (32bytes, group element "A") = private scalar "a" * "B"
+     *          "B" beeing the generator.
+     *   (it’s the multiplications that take the most time: everything else is trivial by comparison)
+     */
+	
     
     private static boolean userIsAwareOfSecurityIssues = false;
     public static final int PUBKEY_LENGTH = 32; 
@@ -74,30 +97,26 @@ public class Ed25519Fulfillment extends FulfillmentBase {
     		KeyPayload priv_key_sheed, MessagePayload message)
     {
         if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) { throwSecurityIssuesWarning(); }
-        if (java.math.BigDecimal.ONE.equals("")) throw new RuntimeException("Not implemented"); // TODO:(0)
 
-        // const keyPair = ed25519.MakeKeypair(privateKey)
-        // this.signature = ed25519.Sign(message, keyPair)
-        
         // TODO:(?) generating the PrivateKey from the key_sheed is "slow". Allow to use a precomputed one?
         EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(priv_key_sheed.payload, spec);
     	PrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
     	PublicKey  pubKey = _publicKeyFromPrivateKey(privKeySpec);
         
         // Ref: EdDSAEngineTest.java
-        // TODO:(0) Check reuse of sgr
+        // TODO:(?) Check reuse of sgr
         SignaturePayload signature;
         try {
             Signature sgr;
             sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
             sgr.initSign(privKey);
             sgr.update(message.payload);
-            signature = new SignaturePayload(sgr.sign()); // TODO:(0) Check sgr.sign() "invented"
+            signature = new SignaturePayload(sgr.sign());
         }catch(Exception e){
         	throw new RuntimeException(e.toString(), e);
         }
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte[] PublicKey32Bytes = ((EdDSAPublicKey)pubKey).getA().toByteArray(); // TODO:(0) check
+        byte[] PublicKey32Bytes = ((EdDSAPublicKey)pubKey).getA().toByteArray();
 
         try {
         	buffer.write(PublicKey32Bytes);
@@ -155,10 +174,9 @@ public class Ed25519Fulfillment extends FulfillmentBase {
     public Condition generateCondition() 
     {
         if (this.publicKey == null ) {
-        	// TODO:(0) This will fail now. generateCondition is called before privateKey is set
             throw new RuntimeException("this.publicKey not yet defined ");
         }
-        EnumSet<FeatureSuite> features = EnumSet.of(FeatureSuite.ED25519); // TODO:(0) Recheck
+        EnumSet<FeatureSuite> features = EnumSet.of(FeatureSuite.ED25519);
 
 //        PrivateKey sKey = new EdDSAPrivateKey(
 //                new EdDSAPrivateKeySpec(
