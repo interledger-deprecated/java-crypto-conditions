@@ -14,11 +14,13 @@ import java.security.Signature;
 
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
+import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 // TODO:(0) Add dependencies in ed25519 external library.
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
+import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
 
 import org.interledger.cryptoconditions.types.*;
 /**
@@ -45,17 +47,23 @@ public class Ed25519Fulfillment extends FulfillmentBase {
     private static EdDSAParameterSpec spec = EdDSANamedCurveTable.getByName("ed25519-sha-512");
 
 
+    private static PrivateKey _privateKeyFromByteArray(KeyPayload priv_key_sheed)
+    {
+    	EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(priv_key_sheed.payload, spec);
+    	return new EdDSAPrivateKey(privKeySpec);
+    }
+
     private static PublicKey _publicKeyFromByteArray(KeyPayload pub_key)
     {
         EdDSAPublicKeySpec pubKey = new EdDSAPublicKeySpec(pub_key.payload, spec);
         return new EdDSAPublicKey(pubKey);
     }
-    
-    private static PrivateKey _privateFromByteArray(KeyPayload priv_key)
+
+    private static PublicKey _publicKeyFromPrivateKey(EdDSAPrivateKeySpec privKey)
     {
-    	throw new RuntimeException("Not implemented"); // TODO:(0)
+    	EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), spec);
+        return new EdDSAPublicKey(pubKeySpec);
     }
-    
 
     /*
      * Returns an initialized instance.
@@ -63,22 +71,19 @@ public class Ed25519Fulfillment extends FulfillmentBase {
      * if publicKeySource is null it's generated from the privateKey.
      */
     public static Ed25519Fulfillment BuildFromSecrets(
-    		KeyPayload privateKeySource, KeyPayload publicKeySource, MessagePayload message)
+    		KeyPayload priv_key_sheed, MessagePayload message)
     {
         if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) { throwSecurityIssuesWarning(); }
         if (java.math.BigDecimal.ONE.equals("")) throw new RuntimeException("Not implemented"); // TODO:(0)
 
         // const keyPair = ed25519.MakeKeypair(privateKey)
         // this.signature = ed25519.Sign(message, keyPair)
-    	PrivateKey privKey = _privateFromByteArray(privateKeySource);
-
-        PublicKey publicKey = null; // TODO:(0)
-        if (publicKeySource != null) {
-        	publicKey = _publicKeyFromByteArray(publicKeySource);
-        } else {
-        	// TODO:(0) Precalculate publicKey/publicKeySource from privKey
-        	publicKeySource = new KeyPayload(publicKey.getEncoded());
-        }
+        
+        // TODO:(?) generating the PrivateKey from the key_sheed is "slow". Allow to use a precomputed one?
+        EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(priv_key_sheed.payload, spec);
+    	PrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
+    	PublicKey  pubKey = _publicKeyFromPrivateKey(privKeySpec);
+        
         // Ref: EdDSAEngineTest.java
         // TODO:(0) Check reuse of sgr
         SignaturePayload signature;
@@ -92,13 +97,16 @@ public class Ed25519Fulfillment extends FulfillmentBase {
         	throw new RuntimeException(e.toString(), e);
         }
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] PublicKey32Bytes = ((EdDSAPublicKey)pubKey).getA().toByteArray(); // TODO:(0) check
+
         try {
-            buffer.write(publicKeySource.payload);
+        	buffer.write(PublicKey32Bytes);
             buffer.write(signature.payload);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
+        byte[] payload = buffer.toByteArray();
+
         Ed25519Fulfillment result = new 
                 Ed25519Fulfillment(ConditionType.ED25519, new FulfillmentPayload(buffer.toByteArray()));
         return result;
@@ -113,7 +121,6 @@ public class Ed25519Fulfillment extends FulfillmentBase {
         if (payload.payload.length < FULFILLMENT_LENGTH) {
         	throw new RuntimeException("payload.length <"+ FULFILLMENT_LENGTH);
         }
-        // TODO:(0) Test implementation correct.
         if (payload.payload.length != FULFILLMENT_LENGTH) throw new
             RuntimeException("payload length ("+payload.payload.length+")"
                 + " doesn't match Ed25519 fulfillment length ("+FULFILLMENT_LENGTH+")");

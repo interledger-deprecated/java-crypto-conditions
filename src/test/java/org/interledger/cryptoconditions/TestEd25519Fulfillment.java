@@ -27,18 +27,19 @@ public class TestEd25519Fulfillment {
 
     private static EdDSAParameterSpec spec = EdDSANamedCurveTable.getByName("ed25519-sha-512");
 
-	static {
-	    final byte[] TEST_SEED = Utils.hexToBytes("0000000000000000000000000000000000000000000000000000000000000000");
-        try {
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
-            EdDSAPrivateKeySpec privKey = new EdDSAPrivateKeySpec(TEST_SEED, spec);
-            PrivateKey sKey = new EdDSAPrivateKey(privKey);
-            sgr.initSign(sKey);
+    final byte[] TEST_SEED = Utils.hexToBytes("0000000000000000000000000000000000000000000000000000000000000000");
 
-        }catch(Exception e){
-            throw new RuntimeException(e.toString(), e);
-        }
-	}
+//	static {
+//        try {
+//            Signature sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
+//            EdDSAPrivateKeySpec privKey = new EdDSAPrivateKeySpec(TEST_SEED, spec);
+//            PrivateKey sKey = new EdDSAPrivateKey(privKey);
+//            sgr.initSign(sKey);
+//
+//        }catch(Exception e){
+//            throw new RuntimeException(e.toString(), e);
+//        }
+//	}
     static final byte[] TEST_PK = Utils.hexToBytes("3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29");
     static final byte[] TEST_MSG = "This is a secret message".getBytes(Charset.forName("UTF-8"));
     static final byte[] TEST_MSG_SIG = Utils.hexToBytes(
@@ -46,7 +47,8 @@ public class TestEd25519Fulfillment {
 
 
 	@Test
-	public void testEncode() {
+	public void testEd25519Fulfillment() {
+		System.out.println("testEd25519Fulfillment:");
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		try {
 			buffer.write(TEST_PK);
@@ -56,10 +58,16 @@ public class TestEd25519Fulfillment {
 		} 
 		FulfillmentPayload payload = new FulfillmentPayload(buffer.toByteArray());
 		Ed25519Fulfillment.UserHasReadEd25519JavaDisclaimerAndIsAwareOfSecurityIssues();
+		
+		// Build from payload
 		Fulfillment ff = new Ed25519Fulfillment(ConditionType.ED25519, payload);
 		ff.getCondition();
 		assertTrue("Fulfillment validates TEST_MSG", ff.validate(new MessagePayload(TEST_MSG)));
 		
+		// Build from secret
+		ff = Ed25519Fulfillment.BuildFromSecrets(new KeyPayload(TEST_SEED), new MessagePayload(TEST_MSG));
+		ff.getCondition();
+		assertTrue("Fulfillment validates TEST_MSG", ff.validate(new MessagePayload(TEST_MSG)));
 	}
 
 }
