@@ -8,10 +8,10 @@ package org.interledger.cryptoconditions.encoding;
  */
 public class IllegalLengthIndicatorException extends OerDecodingException {
 
-	private static final long serialVersionUID = 2076963320466312387L;
+    private static final long serialVersionUID = 2076963320466312387L;
 
-	public IllegalLengthIndicatorException(String message) {
-		super(message);
-	}
+    public IllegalLengthIndicatorException(String message) {
+        super(message);
+    }
 
 }

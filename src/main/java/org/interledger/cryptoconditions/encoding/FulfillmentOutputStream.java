@@ -16,48 +16,48 @@ import org.interledger.cryptoconditions.Fulfillment;
  * @author adrianhopebailie
  */
 public class FulfillmentOutputStream extends OerOutputStream {
-			
-	public FulfillmentOutputStream(OutputStream stream)
-	{
-		super(stream);
-	}
-	
-	/**
-	 * Write the fulfillment to the underlying stream using OER encoding
-	 * per the specification:
-	 * 
-	 * Fulfillment ::= SEQUENCE {
-	 *     type ConditionType,
-	 *     payload OCTET STRING
-	 * }
-	 * 
-	 * ConditionType ::= INTEGER {
-	 *     preimageSha256(0),
-	 *     rsaSha256(1),
-	 *     prefixSha256(2),
-	 *     thresholdSha256(3),
-	 *     ed25519(4)
-	 * } (0..65535)
-	 * 
-	 * @param fulfillment
-	 * @throws IOException
-	 */
-	public void writeFulfillment(Fulfillment fulfillment) throws IOException
-	{
-		writeConditionType(fulfillment.getType());
-		writePayload(fulfillment.getPayload().payload);
-		
-	}
+            
+    public FulfillmentOutputStream(OutputStream stream)
+    {
+        super(stream);
+    }
+    
+    /**
+     * Write the fulfillment to the underlying stream using OER encoding
+     * per the specification:
+     * 
+     * Fulfillment ::= SEQUENCE {
+     *     type ConditionType,
+     *     payload OCTET STRING
+     * }
+     * 
+     * ConditionType ::= INTEGER {
+     *     preimageSha256(0),
+     *     rsaSha256(1),
+     *     prefixSha256(2),
+     *     thresholdSha256(3),
+     *     ed25519(4)
+     * } (0..65535)
+     * 
+     * @param fulfillment
+     * @throws IOException
+     */
+    public void writeFulfillment(Fulfillment fulfillment) throws IOException
+    {
+        writeConditionType(fulfillment.getType());
+        writePayload(fulfillment.getPayload().payload);
+        
+    }
 
-	protected void writeConditionType(ConditionType type) 
-			throws IOException
-	{
-		write16BitUInt(type.getTypeCode());
-	}
-	
+    protected void writeConditionType(ConditionType type) 
+            throws IOException
+    {
+        write16BitUInt(type.getTypeCode());
+    }
+    
 
-	protected void writePayload(byte[] payload) 
-			throws IOException {
-		writeOctetString(payload);			
-	}	
+    protected void writePayload(byte[] payload) 
+            throws IOException {
+        writeOctetString(payload);            
+    }    
 }

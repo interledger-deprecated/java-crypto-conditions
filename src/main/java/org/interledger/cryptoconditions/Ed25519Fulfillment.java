@@ -34,9 +34,9 @@ public class Ed25519Fulfillment extends FulfillmentBase {
      *  TODO:(?) Create utility classes to generate public/private keys
      *      for example for a site that just one a one-time-use public/private key.
      */
-	
-	/*
-	 * Note: 
+    
+    /*
+     * Note: 
      *  The java Ed25519 implementation uses a private Key Seed while some other
      *  implementations use the "expanded private key". 
      *  Extracted from 
@@ -57,7 +57,7 @@ public class Ed25519Fulfillment extends FulfillmentBase {
      *          "B" beeing the generator.
      *   (it’s the multiplications that take the most time: everything else is trivial by comparison)
      */
-	
+    
     
     private static boolean userIsAwareOfSecurityIssues = false;
     public static final int PUBKEY_LENGTH = 32; 
@@ -72,8 +72,8 @@ public class Ed25519Fulfillment extends FulfillmentBase {
 
     private static PrivateKey _privateKeyFromByteArray(KeyPayload priv_key_sheed)
     {
-    	EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(priv_key_sheed.payload, spec);
-    	return new EdDSAPrivateKey(privKeySpec);
+        EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(priv_key_sheed.payload, spec);
+        return new EdDSAPrivateKey(privKeySpec);
     }
 
     private static PublicKey _publicKeyFromByteArray(KeyPayload pub_key)
@@ -84,7 +84,7 @@ public class Ed25519Fulfillment extends FulfillmentBase {
 
     private static PublicKey _publicKeyFromPrivateKey(EdDSAPrivateKeySpec privKey)
     {
-    	EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), spec);
+        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), spec);
         return new EdDSAPublicKey(pubKeySpec);
     }
 
@@ -94,14 +94,14 @@ public class Ed25519Fulfillment extends FulfillmentBase {
      * if publicKeySource is null it's generated from the privateKey.
      */
     public static Ed25519Fulfillment BuildFromSecrets(
-    		KeyPayload priv_key_sheed, MessagePayload message)
+            KeyPayload priv_key_sheed, MessagePayload message)
     {
         if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) { throwSecurityIssuesWarning(); }
 
         // TODO:(?) generating the PrivateKey from the key_sheed is "slow". Allow to use a precomputed one?
         EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(priv_key_sheed.payload, spec);
-    	PrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
-    	PublicKey  pubKey = _publicKeyFromPrivateKey(privKeySpec);
+        PrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
+        PublicKey  pubKey = _publicKeyFromPrivateKey(privKeySpec);
         
         // Ref: EdDSAEngineTest.java
         // TODO:(?) Check reuse of sgr
@@ -113,13 +113,13 @@ public class Ed25519Fulfillment extends FulfillmentBase {
             sgr.update(message.payload);
             signature = new SignaturePayload(sgr.sign());
         }catch(Exception e){
-        	throw new RuntimeException(e.toString(), e);
+            throw new RuntimeException(e.toString(), e);
         }
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         byte[] PublicKey32Bytes = ((EdDSAPublicKey)pubKey).getA().toByteArray();
 
         try {
-        	buffer.write(PublicKey32Bytes);
+            buffer.write(PublicKey32Bytes);
             buffer.write(signature.payload);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -138,7 +138,7 @@ public class Ed25519Fulfillment extends FulfillmentBase {
         super(type, payload);
         if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) { throwSecurityIssuesWarning(); }
         if (payload.payload.length < FULFILLMENT_LENGTH) {
-        	throw new RuntimeException("payload.length <"+ FULFILLMENT_LENGTH);
+            throw new RuntimeException("payload.length <"+ FULFILLMENT_LENGTH);
         }
         if (payload.payload.length != FULFILLMENT_LENGTH) throw new
             RuntimeException("payload length ("+payload.payload.length+")"
@@ -153,7 +153,7 @@ public class Ed25519Fulfillment extends FulfillmentBase {
         publicKey = _publicKeyFromByteArray(new KeyPayload(
         Arrays.copyOfRange(payload.payload, 0, Ed25519Fulfillment.PUBKEY_LENGTH)) );
         this.signature = new SignaturePayload(
-        	Arrays.copyOfRange(payload.payload, Ed25519Fulfillment.PUBKEY_LENGTH, Ed25519Fulfillment.FULFILLMENT_LENGTH));
+            Arrays.copyOfRange(payload.payload, Ed25519Fulfillment.PUBKEY_LENGTH, Ed25519Fulfillment.FULFILLMENT_LENGTH));
     }
 
 
@@ -194,17 +194,17 @@ public class Ed25519Fulfillment extends FulfillmentBase {
 
     @Override
     public boolean validate(MessagePayload message) {
-    	if (this.publicKey == null) {
-    		throw new RuntimeException("publicKey not initialized");
-    	}
+        if (this.publicKey == null) {
+            throw new RuntimeException("publicKey not initialized");
+        }
         try{
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
             sgr.initVerify(this.publicKey);
             sgr.update(message.payload);
             return sgr.verify(signature.payload);
-    	}catch(Exception e){
-    		throw new RuntimeException(e.toString(), e);
-    	}
+        }catch(Exception e){
+            throw new RuntimeException(e.toString(), e);
+        }
     }
     
     public static void UserHasReadEd25519JavaDisclaimerAndIsAwareOfSecurityIssues() {
