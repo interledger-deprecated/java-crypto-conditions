@@ -55,6 +55,7 @@ public class TestEd25519Fulfillment {
 			throw new RuntimeException(e);
 		} 
 		FulfillmentPayload payload = new FulfillmentPayload(buffer.toByteArray());
+		Ed25519Fulfillment.UserHasReadEd25519JavaDisclaimerAndIsAwareOfSecurityIssues();
 		Fulfillment ff = new Ed25519Fulfillment(ConditionType.ED25519, payload);
 		ff.getCondition();
 		assertTrue("Fulfillment validates TEST_MSG", ff.validate(new MessagePayload(TEST_MSG)));

@@ -33,6 +33,8 @@ import org.interledger.cryptoconditions.types.*;
 public class Ed25519Fulfillment extends FulfillmentBase {
     // TODO:(?) Create utility classes to generate public/private keys
 	//     for example for a site that just one a one-time-use public/private key.
+    
+    private static boolean userIsAwareOfSecurityIssues = false;
     public static final int PUBKEY_LENGTH = 32; 
     public static final int SIGNATURE_LENGTH = 64; 
     public static final int FULFILLMENT_LENGTH = PUBKEY_LENGTH + SIGNATURE_LENGTH;
@@ -63,6 +65,7 @@ public class Ed25519Fulfillment extends FulfillmentBase {
     public static Ed25519Fulfillment BuildFromSecrets(
     		KeyPayload privateKeySource, KeyPayload publicKeySource, MessagePayload message)
     {
+        if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) { throwSecurityIssuesWarning(); }
         if (java.math.BigDecimal.ONE.equals("")) throw new RuntimeException("Not implemented"); // TODO:(0)
 
         // const keyPair = ed25519.MakeKeypair(privateKey)
@@ -106,6 +109,7 @@ public class Ed25519Fulfillment extends FulfillmentBase {
      */
     public Ed25519Fulfillment(ConditionType type, FulfillmentPayload payload) {
         super(type, payload);
+        if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) { throwSecurityIssuesWarning(); }
         if (payload.payload.length < FULFILLMENT_LENGTH) {
         	throw new RuntimeException("payload.length <"+ FULFILLMENT_LENGTH);
         }
@@ -176,5 +180,28 @@ public class Ed25519Fulfillment extends FulfillmentBase {
     	}catch(Exception e){
     		throw new RuntimeException(e.toString(), e);
     	}
+    }
+    
+    public static void UserHasReadEd25519JavaDisclaimerAndIsAwareOfSecurityIssues() {
+        userIsAwareOfSecurityIssues = true;
+    }
+    
+    private static void throwSecurityIssuesWarning() {
+        throw new RuntimeException(
+            "\n"
+          + "WARN: \n"
+          + "  | C&P From https://github.com/str4d/ed25519-java:\n"
+          + "  | Disclaimer:\n"
+          + "  | There are no guarantees that this is secure for all uses.\n"
+          + "  | All unit tests are passing, including tests against the data from the Python implementation,\n"
+          + "  | and the code has been reviewed by an independent developer, but it has not yet been audited\n"
+          + "  | by a professional cryptographer. In particular, the constant-time signing properties of ref10\n "
+          + "  | may not have been completely retained (although this is the eventual goal for the\n"
+          + "  | Ed25519-specific implementation).\n"
+          + "  |\n"
+          + "  | To use Ed25519Fulfillment you must first activate it executing the next code:\n"
+          + "  |     Ed25519Fulfillment.UserHasReadEd25519JavaDisclaimerAndIsAwareOfSecurityIssues();"
+          + "\n\n\n"
+        );
     }
 }
