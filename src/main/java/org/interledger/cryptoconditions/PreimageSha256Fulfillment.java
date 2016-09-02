@@ -15,7 +15,7 @@ import org.interledger.cryptoconditions.types.*;
  */
 public class PreimageSha256Fulfillment extends FulfillmentBase {
 
-    byte[] preimage;
+    private byte[] preimage;
     public static PreimageSha256Fulfillment BuildFromSecrets(byte[] preimage){
         FulfillmentPayload payload = new FulfillmentPayload(preimage);
         PreimageSha256Fulfillment result = new PreimageSha256Fulfillment(ConditionType.PREIMAGE_SHA256, payload);
@@ -31,8 +31,8 @@ public class PreimageSha256Fulfillment extends FulfillmentBase {
 		this.preimage = payload.payload;
 	}
 
-	private static EnumSet<FeatureSuite> BASE_FEATURES = EnumSet.of(
-			FeatureSuite.SHA_256, 
+	private static final EnumSet<FeatureSuite> BASE_FEATURES = EnumSet.of(
+			FeatureSuite.SHA_256,
 			FeatureSuite.PREIMAGE
 		);
 
@@ -58,11 +58,12 @@ public class PreimageSha256Fulfillment extends FulfillmentBase {
 	    }
 		byte[] fingerprint = Crypto.getSha256Hash(preimage);
 		int maxFulfillmentLength = preimage.length; // TODO:(0) Recheck
-		return new ConditionImpl(
+		Condition result = new ConditionImpl(
 				ConditionType.PREIMAGE_SHA256, 
 				BASE_FEATURES, 
 				fingerprint, 
 				maxFulfillmentLength);
+		return result;
 	}
 	
 

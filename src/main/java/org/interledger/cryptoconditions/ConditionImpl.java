@@ -79,7 +79,7 @@ public final class ConditionImpl implements Condition {
 	
 	@Override
 	public EnumSet<FeatureSuite> getFeatures(){
-		return this.features;
+		return this.features.clone();
 	}
 	
 
