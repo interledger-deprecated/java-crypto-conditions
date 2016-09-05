@@ -57,7 +57,10 @@ public class FulfillmentInputStream extends OerInputStream {
             throws IOException, UnsupportedConditionException, OerDecodingException 
     {
         final ConditionType type = readConditiontype();
+System.out.println("deleteme  ConditionType type = readConditiontype()"+ type.getTypeCode() );
+
         final FulfillmentPayload payload =  new FulfillmentPayload(this.readPayload()); 
+System.out.println("deleteme  FulfillmentPayload payload =  new FulfillmentPayload(this.readPayload())"+ Utils.bytesToHex(payload.payload));
 
         ByteArrayInputStream byteStream = new ByteArrayInputStream(payload.payload);
         FulfillmentInputStream stream01 = new FulfillmentInputStream(byteStream);
@@ -85,9 +88,10 @@ public class FulfillmentInputStream extends OerInputStream {
 //                byte[] bytesPublicKey = new byte[Ed25519Fulfillment.PUBKEY_LENGTH],
 //                       bytesSignature = new byte[Ed25519Fulfillment.SIGNATURE_LENGTH];
                 byte[] bytesPublicKey =     stream01.readOctetString();
-
+System.out.println("deleteme  byte[] bytesPublicKey =     stream01.readOctetString()"+ Utils.bytesToHex(bytesPublicKey));
                 byte[] bytesSignature = stream01.readOctetString();
                 java.security.PublicKey publicKey = Ed25519Fulfillment.publicKeyFromByteArray(new KeyPayload(bytesPublicKey) );
+
                 SignaturePayload signature = new SignaturePayload(bytesSignature);
                 return new Ed25519Fulfillment(ConditionType.ED25519, payload, publicKey, signature);
             case THRESHOLD_SHA256:
