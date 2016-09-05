@@ -8,6 +8,8 @@ public class FulfillmentRegistry {
     static {
         typeRegistry.put(ConditionType.PREFIX_SHA256  , PrefixSha256Fulfillment  .class);
         typeRegistry.put(ConditionType.PREIMAGE_SHA256, PreimageSha256Fulfillment.class);
+        typeRegistry.put(ConditionType.ED25519       ,  Ed25519Fulfillment       .class);
+
         // TODO:(0) Add the other conditions.
     }
     

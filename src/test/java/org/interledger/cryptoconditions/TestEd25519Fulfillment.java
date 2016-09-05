@@ -38,6 +38,9 @@ public class TestEd25519Fulfillment {
         "94825896c7075c31bcb81f06dba2bdcd9dcf16e79288d4b9f87c248215c8468d475f429f3de3b4a2cf67fe17077ae19686020364d6d4fa7a0174bab4a123ba0f");
     static final byte[] TEST_KO_MSG_SIG = Utils.hexToBytes(
         "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
+    
+    static final String FF_OK_URI = "cf:4:IDtqJ7zOtqQtYqOo0CpvDXNlMhV3HeJDpjrASKGLWdopQJSCWJbHB1wxvLgfBtuivc2dzxbnkojUufh8JIIVyEaNR19Cnz3jtKLPZ_4XB3rhloYCA2TW1Pp6AXS6tKEjug8";
+
 
     private Fulfillment getPayload(byte[] ffOEREncoded) throws IOException, UnsupportedConditionException, OerDecodingException{
         ByteArrayInputStream auxi = new ByteArrayInputStream(ffOEREncoded);
@@ -53,6 +56,7 @@ public class TestEd25519Fulfillment {
     	// Build from stream
         System.out.println("testEd25519Fulfillment start:");
         Fulfillment ff_ok = getPayload(TEST_INPUT_STREAM_FF_OK);
+        assertTrue(FF_OK_URI.equals(ff_ok.toURI()));
         ff_ok.getCondition();
         assertTrue("Fulfillment validates TEST_MSG",  ff_ok.validate(new MessagePayload(TEST_MSG)));
         assertFalse("Fulfillment validates TEST_KO_MSG", ff_ok.validate(new MessagePayload(TEST_KO_MSG)));
@@ -61,6 +65,10 @@ public class TestEd25519Fulfillment {
         ff_wrong.getCondition();
         assertFalse("Fulfillment does not validates TEST_MSG",  ff_wrong.validate(new MessagePayload(TEST_MSG)));
         assertFalse("Fulfillment does not validates TEST_KO_MSG", ff_wrong.validate(new MessagePayload(TEST_KO_MSG)));
+
+        // Build from URI
+        ff_ok = FulfillmentFactory.getFulfillmentFromURI(FF_OK_URI);
+        assertTrue("Fulfillment validates TEST_MSG",  ff_ok.validate(new MessagePayload(TEST_MSG)));
 
 
 
@@ -72,7 +80,6 @@ public class TestEd25519Fulfillment {
         ff_ok = Ed25519Fulfillment.BuildFromSecrets(new KeyPayload(TEST_SEED), new MessagePayload(TEST_KO_MSG));
         ff_ok.getCondition();
         assertFalse("Fulfillment validates TEST_MSG", ff_ok.validate(new MessagePayload(TEST_MSG)));
-        
 
        
         
