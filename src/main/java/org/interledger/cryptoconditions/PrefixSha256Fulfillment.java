@@ -99,11 +99,6 @@ public class PrefixSha256Fulfillment extends FulfillmentBase {
     }
 
     @Override
-    public FulfillmentPayload getPayload() {
-        return payload;
-    }
-
-    @Override
     public Condition generateCondition() {
         Condition subcondition = subfulfillment.generateCondition();
         

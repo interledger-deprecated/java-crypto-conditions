@@ -47,11 +47,6 @@ public class PreimageSha256Fulfillment extends FulfillmentBase {
     }
 
     @Override
-    public FulfillmentPayload getPayload() {
-        return payload;
-    }
-
-    @Override
     public Condition generateCondition() {
         if (preimage == null ) {
             throw new RuntimeException("preimage not initialized");

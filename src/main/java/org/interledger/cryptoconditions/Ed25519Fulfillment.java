@@ -156,18 +156,9 @@ public class Ed25519Fulfillment extends FulfillmentBase {
             Arrays.copyOfRange(payload.payload, Ed25519Fulfillment.PUBKEY_LENGTH, Ed25519Fulfillment.FULFILLMENT_LENGTH));
     }
 
-
-
-
     @Override
     public ConditionType getType() {
         return ConditionType.ED25519;
-    }
-
-    @Override
-    public FulfillmentPayload getPayload() 
-    {
-        return payload;
     }
 
     @Override
@@ -178,9 +169,6 @@ public class Ed25519Fulfillment extends FulfillmentBase {
         }
         EnumSet<FeatureSuite> features = EnumSet.of(FeatureSuite.ED25519);
 
-//        PrivateKey sKey = new EdDSAPrivateKey(
-//                new EdDSAPrivateKeySpec(
-//                        this.privateKey, EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.CURVE_ED25519_SHA512)));
         try {
             return new ConditionImpl(
                     ConditionType.ED25519, 
