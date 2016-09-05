@@ -15,6 +15,8 @@ import org.interledger.cryptoconditions.UnsupportedConditionException;
 import org.interledger.cryptoconditions.UnsupportedLengthException;
 
 import org.interledger.cryptoconditions.types.*;
+
+import net.i2p.crypto.eddsa.Utils;
 /**
  * Reads and decodes Fulfillments from an underlying input stream.
  * 
@@ -55,17 +57,18 @@ public class FulfillmentInputStream extends OerInputStream {
             throws IOException, UnsupportedConditionException, OerDecodingException 
     {
         final ConditionType type = readConditiontype();
-        final FulfillmentPayload payload = new FulfillmentPayload(readFingerprint());
+        final FulfillmentPayload payload =  new FulfillmentPayload(this.readPayload()); 
 
         ByteArrayInputStream byteStream = new ByteArrayInputStream(payload.payload);
-        FulfillmentInputStream stream = new FulfillmentInputStream(byteStream);
+        FulfillmentInputStream stream01 = new FulfillmentInputStream(byteStream);
+        
         try { 
             switch (type) {
             case PREIMAGE_SHA256:
                 return new PreimageSha256Fulfillment(ConditionType.PREIMAGE_SHA256, payload);
             case PREFIX_SHA256:
-                byte[] prefix = stream.readOctetString();
-                Fulfillment subfulfillment = stream.readFulfillment();
+                byte[] prefix = stream01.readOctetString();
+                Fulfillment subfulfillment = stream01.readFulfillment();
                 return new PrefixSha256Fulfillment(ConditionType.PREFIX_SHA256, payload, prefix, subfulfillment);
             case RSA_SHA256:
 
@@ -81,9 +84,9 @@ public class FulfillmentInputStream extends OerInputStream {
                  */
 //                byte[] bytesPublicKey = new byte[Ed25519Fulfillment.PUBKEY_LENGTH],
 //                       bytesSignature = new byte[Ed25519Fulfillment.SIGNATURE_LENGTH];
-                byte[] bytesPublicKey =     stream.readOctetString();
-                byte[] bytesSignature = stream.readOctetString();
-                stream.read(bytesSignature, 0, Ed25519Fulfillment.SIGNATURE_LENGTH);
+                byte[] bytesPublicKey =     stream01.readOctetString();
+
+                byte[] bytesSignature = stream01.readOctetString();
                 java.security.PublicKey publicKey = Ed25519Fulfillment.publicKeyFromByteArray(new KeyPayload(bytesPublicKey) );
                 SignaturePayload signature = new SignaturePayload(bytesSignature);
                 return new Ed25519Fulfillment(ConditionType.ED25519, payload, publicKey, signature);
@@ -97,7 +100,7 @@ public class FulfillmentInputStream extends OerInputStream {
             throw new RuntimeException(e.toString(), e);
         } finally {
             try {
-                stream.close();
+                stream01.close();
             } catch(Exception e){
                 // TODO: review 
                 // When the stream is closed the data has already been read, so no need to raise
@@ -115,7 +118,7 @@ public class FulfillmentInputStream extends OerInputStream {
     }
 
 
-    protected byte[] readFingerprint() 
+    protected byte[] readPayload() 
             throws IOException, UnsupportedLengthException, IllegalLengthIndicatorException {
         
         return readOctetString();

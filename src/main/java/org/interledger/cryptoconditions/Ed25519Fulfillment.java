@@ -20,6 +20,7 @@ import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
 
+import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
 import org.interledger.cryptoconditions.types.*;
 /**
  * Implementation of a Ed25519 crypto-condition fulfillment
@@ -108,13 +109,16 @@ public class Ed25519Fulfillment extends FulfillmentBase {
             throw new RuntimeException(e.toString(), e);
         }
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        FulfillmentOutputStream ffos = new FulfillmentOutputStream(buffer);
         byte[] PublicKey32Bytes = ((EdDSAPublicKey)pubKey).getA().toByteArray();
 
         try {
-            buffer.write(PublicKey32Bytes);
-            buffer.write(signature.payload);
+        	ffos.writeOctetString(PublicKey32Bytes);
+        	ffos.writeOctetString(signature.payload);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+        	try{ ffos.close(); }catch(Exception e) {/*nothing to do*/} 
         }
 
         Ed25519Fulfillment result = new 

@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import org.interledger.cryptoconditions.ConditionType;
 import org.interledger.cryptoconditions.Fulfillment;
 
+import net.i2p.crypto.eddsa.Utils;
+
 /**
  * Writes an OER encoded fulfillment to a stream.
  * 

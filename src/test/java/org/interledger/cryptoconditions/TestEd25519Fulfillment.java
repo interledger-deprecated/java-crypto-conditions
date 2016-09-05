@@ -28,7 +28,8 @@ public class TestEd25519Fulfillment {
     final byte[] TEST_SEED = Utils.hexToBytes("0000000000000000000000000000000000000000000000000000000000000000");
     static final byte[] TEST_PK = Utils.hexToBytes("3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29");
     static final byte[] TEST_MSG = "This is a secret message".getBytes(Charset.forName("UTF-8"));
-    static final byte[] TEST_FF_PAYLOAD = Utils.hexToBytes("O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2imUgliWxwdcMby4Hwbbor3Nnc8W55KI1Ln4fCSCFchGjUdfQp8947Siz2f-Fwd64ZaGAgNk1tT6egF0urShI7oP");
+    static final byte[] TEST_FF_PAYLOAD = Utils.hexToBytes(
+         "0004603b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da2994825896c7075c31bcb81f06dba2bdcd9dcf16e79288d4b9f87c248215c8468d475f429f3de3b4a2cf67fe17077ae19686020364d6d4fa7a0174bab4a123ba0f");
     static final byte[] TEST_KO_MSG = "This is a wrong secret message".getBytes(Charset.forName("UTF-8"));
     static final byte[] TEST_MSG_SIG = Utils.hexToBytes(
         "94825896c7075c31bcb81f06dba2bdcd9dcf16e79288d4b9f87c248215c8468d475f429f3de3b4a2cf67fe17077ae19686020364d6d4fa7a0174bab4a123ba0f");
@@ -39,6 +40,7 @@ public class TestEd25519Fulfillment {
         ByteArrayInputStream auxi = new ByteArrayInputStream(ffOEREncoded);
         FulfillmentInputStream ffOut = new FulfillmentInputStream(auxi);
         Fulfillment  result = ffOut.readFulfillment();
+        
         ffOut.close();
         return result;
     }
@@ -47,7 +49,7 @@ public class TestEd25519Fulfillment {
     public void testEd25519Fulfillment() throws IOException, UnsupportedConditionException, OerDecodingException {
         Fulfillment ff;
         System.out.println("testEd25519Fulfillment start:");
-        ff = getPayload(TEST_FF_PAYLOAD);
+//        ff = getPayload(TEST_FF_PAYLOAD);
 //        ff.getCondition();
 //
 //        assertTrue("Fulfillment validates TEST_MSG", ff.validate(new MessagePayload(TEST_MSG)));
@@ -64,7 +66,6 @@ public class TestEd25519Fulfillment {
         ff = Ed25519Fulfillment.BuildFromSecrets(new KeyPayload(TEST_SEED), new MessagePayload(TEST_MSG));
         ff.getCondition();
         assertTrue("Fulfillment validates TEST_MSG", ff.validate(new MessagePayload(TEST_MSG)));
-System.out.println("deleteme >>>"+ff.toURI());
         
         ff = Ed25519Fulfillment.BuildFromSecrets(new KeyPayload(TEST_SEED), new MessagePayload(TEST_KO_MSG));
         ff.getCondition();
