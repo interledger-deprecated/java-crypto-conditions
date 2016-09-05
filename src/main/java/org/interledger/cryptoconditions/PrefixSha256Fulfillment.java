@@ -10,7 +10,6 @@ import java.util.EnumSet;
 
 import org.interledger.cryptoconditions.encoding.ConditionOutputStream;
 import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
-import org.interledger.cryptoconditions.encoding.FulfillmentInputStream;
 import org.interledger.cryptoconditions.util.Crypto;
 import org.interledger.cryptoconditions.types.*;
 
@@ -33,22 +32,10 @@ public class PrefixSha256Fulfillment extends FulfillmentBase {
     private final byte[] prefix; // TODO:(0) Wrap into PrefixPayload?
     private final Fulfillment subfulfillment;
     
-    public PrefixSha256Fulfillment(ConditionType type, FulfillmentPayload payload) {
+    public PrefixSha256Fulfillment(ConditionType type, FulfillmentPayload payload, byte[] prefix, Fulfillment subfulfillment) {
         super(type, payload);
-        ByteArrayInputStream byteStream = new ByteArrayInputStream(payload.payload);
-        FulfillmentInputStream stream = new FulfillmentInputStream(byteStream);
-        try{
-            this.prefix = stream.readOctetString();
-            this.subfulfillment = stream.readFulfillment();
-        }catch(Exception e){
-            throw new RuntimeException(e.toString(), e);
-        } finally {
-            try { 
-                stream.close(); 
-            }catch(Exception e){
-                throw new RuntimeException(e.toString(), e); // Can't recover
-            }
-        }
+        this.prefix = prefix;
+        this.subfulfillment = subfulfillment;
     }
 
     /*

@@ -1,6 +1,5 @@
 package org.interledger.cryptoconditions;
 
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -69,14 +68,7 @@ public class Ed25519Fulfillment extends FulfillmentBase {
 
     private static EdDSAParameterSpec spec = EdDSANamedCurveTable.getByName("ed25519-sha-512");
 
-
-    private static PrivateKey _privateKeyFromByteArray(KeyPayload priv_key_sheed)
-    {
-        EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(priv_key_sheed.payload, spec);
-        return new EdDSAPrivateKey(privKeySpec);
-    }
-
-    private static PublicKey _publicKeyFromByteArray(KeyPayload pub_key)
+    public static PublicKey publicKeyFromByteArray(KeyPayload pub_key)
     {
         EdDSAPublicKeySpec pubKey = new EdDSAPublicKeySpec(pub_key.payload, spec);
         return new EdDSAPublicKey(pubKey);
@@ -124,36 +116,22 @@ public class Ed25519Fulfillment extends FulfillmentBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        byte[] payload = buffer.toByteArray();
 
         Ed25519Fulfillment result = new 
-                Ed25519Fulfillment(ConditionType.ED25519, new FulfillmentPayload(buffer.toByteArray()));
+                Ed25519Fulfillment(
+                        ConditionType.ED25519, new FulfillmentPayload(buffer.toByteArray()),
+                        pubKey, signature);
         return result;
     }
 
     /*
      * public key and signarutes are extracted from the payload
      */
-    public Ed25519Fulfillment(ConditionType type, FulfillmentPayload payload) {
+    public Ed25519Fulfillment(ConditionType type, FulfillmentPayload payload, PublicKey publicKey, SignaturePayload signature) {
         super(type, payload);
         if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) { throwSecurityIssuesWarning(); }
-        if (payload.payload.length < FULFILLMENT_LENGTH) {
-            throw new RuntimeException("payload.length <"+ FULFILLMENT_LENGTH);
-        }
-        if (payload.payload.length != FULFILLMENT_LENGTH) throw new
-            RuntimeException("payload length ("+payload.payload.length+")"
-                + " doesn't match Ed25519 fulfillment length ("+FULFILLMENT_LENGTH+")");
-        /*
-         * REF: https://interledger.org/five-bells-condition/spec.html#rfc.section.4.5.2
-         * Ed25519FulfillmentPayload ::= SEQUENCE {
-         *     publicKey OCTET STRING (SIZE(32)),
-         *     signature OCTET STRING (SIZE(64))
-         * }
-         */
-        publicKey = _publicKeyFromByteArray(new KeyPayload(
-        Arrays.copyOfRange(payload.payload, 0, Ed25519Fulfillment.PUBKEY_LENGTH)) );
-        this.signature = new SignaturePayload(
-            Arrays.copyOfRange(payload.payload, Ed25519Fulfillment.PUBKEY_LENGTH, Ed25519Fulfillment.FULFILLMENT_LENGTH));
+        this.publicKey = publicKey;
+        this.signature = signature;
     }
 
     @Override

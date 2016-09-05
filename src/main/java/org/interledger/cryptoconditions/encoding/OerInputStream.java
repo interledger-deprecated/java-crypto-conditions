@@ -1,6 +1,7 @@
 package org.interledger.cryptoconditions.encoding;
 
 import java.io.EOFException;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -37,7 +38,7 @@ public class OerInputStream extends InputStream {
         int next = stream.read();
         verifyNotEOF(next);
         
-        return value + (next << 8);
+        return next + (value << 8);
     }
 
     public int readVarUInt() throws IOException, UnsupportedLengthException, IllegalLengthIndicatorException {
@@ -69,16 +70,17 @@ public class OerInputStream extends InputStream {
     }
     
     public byte[] readOctetString() throws IOException, UnsupportedLengthException, IllegalLengthIndicatorException {
-        
+System.out.println("----------------------");
         int length = readLengthIndicator();
         byte[] value = new byte[length];
-        
-        int bytesRead = stream.read(value, 0, length);
-        
-        if(bytesRead < length) {
-            throw new EOFException("Unexpected EOF when trying to decode OER data.");
+        int totalBytesRead = 0;
+        while (totalBytesRead >= 0) {
+            totalBytesRead = stream.read(value, 0, length - totalBytesRead);
         }
-
+//        if(bytesRead < length) {
+//            throw new EOFException("Unexpected EOF when trying to decode OER data.");
+//        }
+System.out.println("deleteme length:"+length+" readOctetString payload: Input :" + org.interledger.cryptoconditions.encoding.Base64Url.encode(value));
         return value;
     }
         
@@ -90,6 +92,7 @@ public class OerInputStream extends InputStream {
     protected int readLengthIndicator() 
             throws IOException, UnsupportedLengthException, IllegalLengthIndicatorException {
         int length = stream.read();
+
         verifyNotEOF(length);
         
         if(length < 128) {

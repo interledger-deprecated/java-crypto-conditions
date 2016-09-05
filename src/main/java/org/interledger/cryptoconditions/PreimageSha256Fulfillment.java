@@ -26,6 +26,7 @@ public class PreimageSha256Fulfillment extends FulfillmentBase {
     private void setPreimage(byte[] preimage){
         this.preimage = preimage;
     }
+
     public PreimageSha256Fulfillment(ConditionType type, FulfillmentPayload payload) {
         super(type, payload);
         this.preimage = payload.payload;

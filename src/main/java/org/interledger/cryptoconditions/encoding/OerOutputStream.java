@@ -74,16 +74,16 @@ public class OerOutputStream extends OutputStream {
     
     public void writeOctetString(byte[] bytes) throws IOException {
         writeLengthIndicator(bytes.length);
-        stream.write(bytes);        
+        
+
+        stream.write(bytes);
     }
     
     protected void writeLengthIndicator(int length) throws IOException {
         
-        if(length < 128)
-        {
+        if(length < 128) {
             stream.write(length);
-        }
-        else if(length <= 255) {
+        } else if(length <= 255) {
             //Write length of length byte "1000 0001"
             stream.write(128 + 1);
             stream.write(length);

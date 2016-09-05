@@ -49,7 +49,7 @@ public class FulfillmentOutputStream extends OerOutputStream {
         
     }
 
-    protected void writeConditionType(ConditionType type) 
+    public void writeConditionType(ConditionType type) 
             throws IOException
     {
         write16BitUInt(type.getTypeCode());
