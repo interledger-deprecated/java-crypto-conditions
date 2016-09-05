@@ -28,8 +28,10 @@ public class TestEd25519Fulfillment {
     final byte[] TEST_SEED = Utils.hexToBytes("0000000000000000000000000000000000000000000000000000000000000000");
     static final byte[] TEST_PK = Utils.hexToBytes("3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29");
     static final byte[] TEST_MSG = "This is a secret message".getBytes(Charset.forName("UTF-8"));
-    static final byte[] TEST_INPUT_STREAM = Utils.hexToBytes(
+    static final byte[] TEST_INPUT_STREAM_FF_OK = Utils.hexToBytes(
          "000462203b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da294094825896c7075c31bcb81f06dba2bdcd9dcf16e79288d4b9f87c248215c8468d475f429f3de3b4a2cf67fe17077ae19686020364d6d4fa7a0174bab4a123ba0f");
+    static final byte[] TEST_INPUT_STREAM_FF_WRONG = Utils.hexToBytes(
+         "000462203b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da294094825896c7075c31bcb81f06dba2bdcd9dcf16e79288d4b9f87c248215c8468d475f429f3de3b4a2cf67fe17077ae19686020364d6d4fa7a0174bab4a1111111");
 
     static final byte[] TEST_KO_MSG = "This is a wrong secret message".getBytes(Charset.forName("UTF-8"));
     static final byte[] TEST_MSG_SIG = Utils.hexToBytes(
@@ -48,29 +50,28 @@ public class TestEd25519Fulfillment {
 
     @Test
     public void testEd25519Fulfillment() throws IOException, UnsupportedConditionException, OerDecodingException {
-        Fulfillment ff;
+    	// Build from stream
         System.out.println("testEd25519Fulfillment start:");
-        ff = getPayload(TEST_INPUT_STREAM);
-//        ff.getCondition();
-//
-//        assertTrue("Fulfillment validates TEST_MSG", ff.validate(new MessagePayload(TEST_MSG)));
-
-//        byteStream = new ByteArrayInputStream( getPayload(TEST_PK, TEST_MSG_SIG) );
-//        stream = new FulfillmentInputStream(byteStream);
-//        Fulfillment ffKO = stream.readFulfillment();
-//        stream.close();
-//        ff.getCondition();
-//        assertFalse("Fulfillment validates TEST_MSG", ffKO.validate(new MessagePayload(TEST_MSG)));
+        Fulfillment ff_ok = getPayload(TEST_INPUT_STREAM_FF_OK);
+        ff_ok.getCondition();
+        assertTrue("Fulfillment validates TEST_MSG",  ff_ok.validate(new MessagePayload(TEST_MSG)));
+        assertFalse("Fulfillment validates TEST_KO_MSG", ff_ok.validate(new MessagePayload(TEST_KO_MSG)));
         
+        Fulfillment ff_wrong = getPayload(TEST_INPUT_STREAM_FF_WRONG);
+        ff_wrong.getCondition();
+        assertFalse("Fulfillment does not validates TEST_MSG",  ff_wrong.validate(new MessagePayload(TEST_MSG)));
+        assertFalse("Fulfillment does not validates TEST_KO_MSG", ff_wrong.validate(new MessagePayload(TEST_KO_MSG)));
+
+
 
         // Build from secret
-        ff = Ed25519Fulfillment.BuildFromSecrets(new KeyPayload(TEST_SEED), new MessagePayload(TEST_MSG));
-        ff.getCondition();
-        assertTrue("Fulfillment validates TEST_MSG", ff.validate(new MessagePayload(TEST_MSG)));
+        ff_ok = Ed25519Fulfillment.BuildFromSecrets(new KeyPayload(TEST_SEED), new MessagePayload(TEST_MSG));
+        ff_ok.getCondition();
+        assertTrue("Fulfillment validates TEST_MSG", ff_ok.validate(new MessagePayload(TEST_MSG)));
         
-        ff = Ed25519Fulfillment.BuildFromSecrets(new KeyPayload(TEST_SEED), new MessagePayload(TEST_KO_MSG));
-        ff.getCondition();
-        assertFalse("Fulfillment validates TEST_MSG", ff.validate(new MessagePayload(TEST_MSG)));
+        ff_ok = Ed25519Fulfillment.BuildFromSecrets(new KeyPayload(TEST_SEED), new MessagePayload(TEST_KO_MSG));
+        ff_ok.getCondition();
+        assertFalse("Fulfillment validates TEST_MSG", ff_ok.validate(new MessagePayload(TEST_MSG)));
         
 
        
