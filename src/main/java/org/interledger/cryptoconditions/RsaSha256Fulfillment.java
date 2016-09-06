@@ -7,6 +7,8 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.EnumSet;
 
 import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
+import org.interledger.cryptoconditions.types.FulfillmentPayload;
+import org.interledger.cryptoconditions.types.MessagePayload;
 import org.interledger.cryptoconditions.util.Crypto;
 
 /**
@@ -31,7 +33,6 @@ public class RsaSha256Fulfillment implements Fulfillment {
     private byte[] modulus;
     private byte[] signature;
     
-    private byte[] payload;
             
     public RsaSha256Fulfillment(byte[] modulus, byte[] signature) {
         setModulus(modulus);
@@ -83,14 +84,6 @@ public class RsaSha256Fulfillment implements Fulfillment {
     }
 
     @Override
-    public byte[] getPayload() {
-        if(payload == null) {
-            payload = calculatePayload();
-        }    
-        return payload;
-    }
-
-    @Override
     public Condition generateCondition() {
         byte[] fingerprint = Crypto.getSha256Hash(modulus);
         int maxFulfillmentLength = modulus.length;
@@ -122,5 +115,35 @@ public class RsaSha256Fulfillment implements Fulfillment {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public EnumSet<FeatureSuite> getFeatures() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public FulfillmentPayload getPayload() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Condition getCondition() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String toURI() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean validate(MessagePayload message) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
