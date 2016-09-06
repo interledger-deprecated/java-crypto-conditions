@@ -2,12 +2,10 @@ package org.interledger.cryptoconditions;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.lang.reflect.Constructor;
 
 
 import org.interledger.cryptoconditions.encoding.Base64Url;
 import org.interledger.cryptoconditions.encoding.FulfillmentInputStream;
-import org.interledger.cryptoconditions.types.FulfillmentPayload;
 import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
 
 

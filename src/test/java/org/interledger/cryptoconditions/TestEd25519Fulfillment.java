@@ -3,7 +3,6 @@ package org.interledger.cryptoconditions;
 import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
@@ -12,7 +11,6 @@ import org.junit.Test;
 import net.i2p.crypto.eddsa.Utils;
 
 import org.interledger.cryptoconditions.Fulfillment;
-import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
 import org.interledger.cryptoconditions.encoding.FulfillmentInputStream;
 import org.interledger.cryptoconditions.encoding.OerDecodingException;
 import org.interledger.cryptoconditions.types.*;

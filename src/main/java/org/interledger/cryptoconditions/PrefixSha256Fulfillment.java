@@ -1,7 +1,5 @@
 package org.interledger.cryptoconditions;
 
-import java.io.ByteArrayInputStream;
-
 import java.io.ByteArrayOutputStream;
 
 

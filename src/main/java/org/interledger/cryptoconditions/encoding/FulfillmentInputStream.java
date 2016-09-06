@@ -16,7 +16,6 @@ import org.interledger.cryptoconditions.UnsupportedLengthException;
 
 import org.interledger.cryptoconditions.types.*;
 
-import net.i2p.crypto.eddsa.Utils;
 /**
  * Reads and decodes Fulfillments from an underlying input stream.
  * 

@@ -7,7 +7,6 @@ import java.io.InputStream;
 
 import org.interledger.cryptoconditions.UnsupportedLengthException;
 
-import net.i2p.crypto.eddsa.Utils;
 
 /**
  * OER input stream reads OER encoded data from an underlying stream
