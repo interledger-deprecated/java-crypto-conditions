@@ -53,7 +53,7 @@ public class TestEd25519Fulfillment {
 
     @Test
     public void testEd25519Fulfillment() throws IOException, UnsupportedConditionException, OerDecodingException {
-    	// Build from stream
+        // Build from stream
         System.out.println("testEd25519Fulfillment start:");
         Fulfillment ff_ok = getPayload(TEST_INPUT_STREAM_FF_OK);
         assertTrue(FF_OK_URI.equals(ff_ok.toURI()));

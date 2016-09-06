@@ -113,12 +113,12 @@ public class Ed25519Fulfillment extends FulfillmentBase {
         byte[] PublicKey32Bytes = ((EdDSAPublicKey)pubKey).getA().toByteArray();
 
         try {
-        	ffos.writeOctetString(PublicKey32Bytes);
-        	ffos.writeOctetString(signature.payload);
+            ffos.writeOctetString(PublicKey32Bytes);
+            ffos.writeOctetString(signature.payload);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-        	try{ ffos.close(); }catch(Exception e) {/*nothing to do*/} 
+            try{ ffos.close(); }catch(Exception e) {/*nothing to do*/} 
         }
 
         Ed25519Fulfillment result = new 
