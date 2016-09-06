@@ -2,16 +2,34 @@ package org.interledger.cryptoconditions;
 
 import java.util.EnumSet;
 import java.util.List;
+
+import org.interledger.cryptoconditions.types.FulfillmentPayload;
 import org.interledger.cryptoconditions.types.MessagePayload;
 
 public class ThresholdSHA256 extends FulfillmentBase {
 
+   public class WeightedFulfillment {
+       final int weight;
+       final Fulfillment subff;
+       public WeightedFulfillment(int weight, Fulfillment subfulfillment) {
+           this.weight = weight;
+           this.subff = subfulfillment;
+       }
+   }
    private final int threshold;
-   private final List<Fulfillment> subfulfillments;
+   private final List<WeightedFulfillment> subfulfillments;
    
-   private ThresholdSHA256(int threshold, List<Fulfillment> subfulfillments){
+   private ThresholdSHA256(ConditionType type, FulfillmentPayload payload, 
+           int threshold, List<Integer>weight_l, List<Fulfillment> ff_l){
+       if (weight_l.size() != ff_l.size()) {
+           throw new RuntimeException("Can't zip weight_l && ff_l. Size differs ");
+       }
+       List<WeightedFulfillment> wff_l = new java.util.ArrayList<WeightedFulfillment>();
+       for (int idx=0; idx< weight_l.size(); idx++) {
+           wff_l.add(new WeightedFulfillment(weight_l.get(idx), ff_l.get(idx)));
+       }
        this.threshold = threshold;
-       this.subfulfillments = subfulfillments;
+       this.subfulfillments = wff_l;
        throw new RuntimeException("FIXME Implement?");
    }
     @Override
@@ -26,8 +44,8 @@ public class ThresholdSHA256 extends FulfillmentBase {
 
     private EnumSet<FeatureSuite>  getBitmask () {
       EnumSet<FeatureSuite>  result = super.getFeatures();
-      for (Fulfillment ff : subfulfillments ){
-          EnumSet<FeatureSuite> childFeatures = ff.getFeatures();
+      for (WeightedFulfillment ff : subfulfillments ){
+          EnumSet<FeatureSuite> childFeatures = ff.subff.getFeatures();
           for (FeatureSuite fs : childFeatures) {
               if (! result.contains(fs)) { result.add(fs); }
           }
@@ -99,15 +117,7 @@ public class ThresholdSHA256 extends FulfillmentBase {
 //  return predictor.getSize()
 //}
 //
-//parsePayload (/* OER */reader) { /* Parse a fulfillment payload.(FulfillmentInputStream */
-//  this.setThreshold(reader.readVarUInt())
-//  const conditionCount = reader.readVarUInt()
-//  for (let i = 0; i < conditionCount; i++) {
-//    const weight      = reader.readVarUInt()
-//    const fulfillment = reader.readVarOctetString()
-//      this.addSubfulfillment(Fulfillment.fromBinary(fulfillment), weight)
-//  }
-//}
+
 //
 ////  selects smallest combination of fulfillments meeting a threshold.
 //function calculateSmallestValidFulfillmentSet (threshold, fulfillments, state) {

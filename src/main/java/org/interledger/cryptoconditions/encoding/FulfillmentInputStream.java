@@ -1,6 +1,7 @@
 package org.interledger.cryptoconditions.encoding;
 
 import java.io.ByteArrayInputStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -9,6 +10,7 @@ import org.interledger.cryptoconditions.Fulfillment;
 import org.interledger.cryptoconditions.PrefixSha256Fulfillment;
 import org.interledger.cryptoconditions.PreimageSha256Fulfillment;
 import org.interledger.cryptoconditions.Ed25519Fulfillment;
+import org.interledger.cryptoconditions.ThresholdSHA256;
 import org.interledger.cryptoconditions.UnsupportedConditionException;
 import org.interledger.cryptoconditions.UnsupportedLengthException;
 
@@ -77,8 +79,18 @@ public class FulfillmentInputStream extends OerInputStream {
                     SignaturePayload signature = new SignaturePayload(bytesSignature);
                     return new Ed25519Fulfillment(ConditionType.ED25519, payload, publicKey, signature);
                 case THRESHOLD_SHA256:
-                //TODO:(0) 
-                // return new Threshold_SHA256Fulfillment(ConditionType.THRESHOLD_SHA256, payload);
+                    int threshold = stream01.readVarUInt();
+                    int conditionCount = stream01.readVarUInt();
+                    
+                    java.util.List<Integer>     weight_l = new java.util.ArrayList<Integer>();
+                    java.util.List<Fulfillment> ff_l     = new java.util.ArrayList<Fulfillment>();
+                    for (int idx=0; idx < conditionCount; idx++) {
+                        int weight = stream01.readVarUInt();
+                        weight_l.add(weight);
+                        Fulfillment ff = stream01.readFulfillment();
+                        ff_l.add(ff);
+                    }
+                    return new ThresholdSHA256(ConditionType.THRESHOLD_SHA256, payload, threshold, weight_l, ff_l);
                 default:
                     throw new RuntimeException("Unimplemented fulfillment type encountered.");
             }
