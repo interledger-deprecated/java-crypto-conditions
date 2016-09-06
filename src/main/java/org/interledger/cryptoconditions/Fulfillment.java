@@ -53,7 +53,7 @@ public interface Fulfillment  {
 	 * 
 	 * @return a Condition that is fulfilled by this object
 	 */
-	// TODO:(0) Check if payload argument can be removed
+	// TODO:(0) make private. Only getCondition must call it. 
 	Condition generateCondition();
 	
 	Condition getCondition();

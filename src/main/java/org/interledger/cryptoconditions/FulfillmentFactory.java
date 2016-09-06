@@ -25,10 +25,9 @@ public class FulfillmentFactory {
 		String[] pieces = URI.split(":");
 		
 		String BASE16Type = pieces[1];
-		String BASE64URLPayload = pieces[2];
+		String BASE64URLPayload = (pieces.length == 3 ) ? pieces[2] : "" /*case empty payload*/;
 		
 		ConditionType type = ConditionType.valueOf(Integer.parseInt(BASE16Type, 16));
-		
 		FulfillmentPayload payload = new FulfillmentPayload(Base64Url.decode(BASE64URLPayload));
 
 		// Get Fulfillment class (Sha256, PreimageSha256, ...)
