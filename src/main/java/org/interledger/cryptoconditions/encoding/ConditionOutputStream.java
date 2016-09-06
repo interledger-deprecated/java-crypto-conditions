@@ -20,72 +20,72 @@ import org.interledger.cryptoconditions.FeatureSuite;
  * @author adrianhopebailie
  */
 public class ConditionOutputStream extends OerOutputStream {
-			
-	public ConditionOutputStream(OutputStream stream)
-	{
-		super(stream);
-	}
-	
-	/**
-	 * Write the condition to the underlying stream using OER encoding
-	 * per the specification:
-	 * 
-	 * Condition ::= SEQUENCE {
-	 *     type ConditionType,
-	 *     featureBitmask OCTET STRING,
-	 *     fingerprint OCTET STRING,
-	 *     maxFulfillmentLength INTEGER (0..MAX)
-	 * }
-	 * 
-	 * ConditionType ::= INTEGER {
-	 *     preimageSha256(0),
-	 *     rsaSha256(1),
-	 *     prefixSha256(2),
-	 *     thresholdSha256(3),
-	 *     ed25519(4)
-	 * } (0..65535)
-	 * 
-	 * @param condition
-	 * @throws IOException
-	 */
-	public void writeCondition(Condition condition) throws IOException
-	{
-		writeConditionType(condition.getType());
-		writeFeatures(condition.getFeatures());
-		writeFingerprint(condition.getFingerprint());
-		writeMaxFulfillmentLength(condition.getMaxFulfillmentLength());
-		
-	}
+            
+    public ConditionOutputStream(OutputStream stream)
+    {
+        super(stream);
+    }
+    
+    /**
+     * Write the condition to the underlying stream using OER encoding
+     * per the specification:
+     * 
+     * Condition ::= SEQUENCE {
+     *     type ConditionType,
+     *     featureBitmask OCTET STRING,
+     *     fingerprint OCTET STRING,
+     *     maxFulfillmentLength INTEGER (0..MAX)
+     * }
+     * 
+     * ConditionType ::= INTEGER {
+     *     preimageSha256(0),
+     *     rsaSha256(1),
+     *     prefixSha256(2),
+     *     thresholdSha256(3),
+     *     ed25519(4)
+     * } (0..65535)
+     * 
+     * @param condition
+     * @throws IOException
+     */
+    public void writeCondition(Condition condition) throws IOException
+    {
+        writeConditionType(condition.getType());
+        writeFeatures(condition.getFeatures());
+        writeFingerprint(condition.getFingerprint());
+        writeMaxFulfillmentLength(condition.getMaxFulfillmentLength());
+        
+    }
 
-	protected void writeConditionType(ConditionType type) 
-			throws IOException
-	{
-		write16BitUInt(type.getTypeCode());
-	}
-	
+    protected void writeConditionType(ConditionType type) 
+            throws IOException
+    {
+        write16BitUInt(type.getTypeCode());
+    }
+    
 
-	protected void writeFeatures(EnumSet<FeatureSuite> features) 
-			throws IOException {
-		
-		//TODO - Unsafe if we overflow into a second byte
-		
-		int encoded_bitmask = 0;
-		for (FeatureSuite featureSuite : features) {
-			encoded_bitmask += featureSuite.toInt();
-		}
-		writeLengthIndicator(1);
-		stream.write(encoded_bitmask);
-		
-	}
-	
-	protected void writeFingerprint(byte[] fingerprint) 
-			throws IOException {
-		writeOctetString(fingerprint);			
-	}
+    protected void writeFeatures(EnumSet<FeatureSuite> features) 
+            throws IOException {
+        
+        //TODO - Unsafe if we overflow into a second byte
+        
+        int encoded_bitmask = 0;
+        for (FeatureSuite featureSuite : features) {
+            encoded_bitmask += featureSuite.toInt();
+        }
+        writeLengthIndicator(1);
+        stream.write(encoded_bitmask);
+        
+    }
+    
+    protected void writeFingerprint(byte[] fingerprint) 
+            throws IOException {
+        writeOctetString(fingerprint);            
+    }
 
-	protected void writeMaxFulfillmentLength(int maxFulfillmentLength) 
-			throws IOException {
-		writeVarUInt(maxFulfillmentLength);
-	}
-	
+    protected void writeMaxFulfillmentLength(int maxFulfillmentLength) 
+            throws IOException {
+        writeVarUInt(maxFulfillmentLength);
+    }
+    
 }

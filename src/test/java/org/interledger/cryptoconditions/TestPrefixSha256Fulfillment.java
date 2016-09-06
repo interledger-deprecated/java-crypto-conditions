@@ -13,7 +13,7 @@ public class TestPrefixSha256Fulfillment {
 
     @Test
     public void testCreateFromPrefixAndSubfulfillment() {
-    	String preimage = "616263";
+        String preimage = "616263";
         Fulfillment PreimageSubff = PreimageSha256Fulfillment.BuildFromSecrets(preimage.getBytes());
         byte[] prefix = {1,2,3,4};
         PrefixSha256Fulfillment ffPrefix = PrefixSha256Fulfillment.BuildFromParams(prefix, PreimageSubff);

@@ -1,18 +1,18 @@
 package org.interledger.cryptoconditions.encoding;
 
 public class Base64Url {
-	
+    
     private static final String CODES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=";
     private static final int[] LOOKUP = new int[123]; // (int) 'z' == 122 and is the max
     
     static {
-    	char[] code_chars = CODES.toCharArray();
-    	for (int i = 0; i < 122; i++) {
-			LOOKUP[i] = -1;
-		}
-    	for (int i = 0; i < 65; i++) {
-			LOOKUP[(int) code_chars[i]] = i;
-		}
+        char[] code_chars = CODES.toCharArray();
+        for (int i = 0; i < 122; i++) {
+            LOOKUP[i] = -1;
+        }
+        for (int i = 0; i < 65; i++) {
+            LOOKUP[(int) code_chars[i]] = i;
+        }
     }
 
     public static byte[] decode(String input)    {
@@ -35,9 +35,9 @@ public class Base64Url {
             b[3] = LOOKUP[(int) inChars[i + 3]];
             
             if(b[0] == -1 || b[1] == -1 || b[2] == -1 || b[3] == -1 )
-            	//TODO Return position of bad character
-                throw new IllegalArgumentException("Invalid base64url input, illegal character.");            	
-            	
+                //TODO Return position of bad character
+                throw new IllegalArgumentException("Invalid base64url input, illegal character.");                
+                
             decoded[j++] = (byte) ((b[0] << 2) | (b[1] >> 4));
             if (b[2] < 64)      {
                 decoded[j++] = (byte) ((b[1] << 4) | (b[2] >> 2));
