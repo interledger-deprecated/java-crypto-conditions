@@ -6,41 +6,37 @@ import java.io.OutputStream;
 
 /**
  * OER input stream writes OER encoded data to an underlying stream
- * 
- * Limitations
- * - INTEGER types are only supported up to 3 bytes (UNSIGNED)
- * 
+ *
+ * Limitations - INTEGER types are only supported up to 3 bytes (UNSIGNED)
+ *
  * @author adrianhopebailie
  *
  */
 public class OerOutputStream extends OutputStream {
 
     protected final OutputStream stream;
-    
-    public OerOutputStream(OutputStream stream)
-    {
+
+    public OerOutputStream(OutputStream stream) {
         this.stream = stream;
     }
-    
+
     @Override
     public void write(int b) throws IOException {
         stream.write(b);
     }
-    
+
     public void write8BitUInt(int value) throws IOException {
-        
-        if(value > 255)
-        {
+
+        if (value > 255) {
             throw new IllegalArgumentException(Integer.toString(value) + "is greater than 8 bits.");
         }
 
         stream.write(value);
     }
-    
+
     public void write16BitUInt(int value) throws IOException {
-        
-        if(value > 65535)
-        {
+
+        if (value > 65535) {
             throw new IllegalArgumentException(Integer.toString(value) + "is greater than 16 bits.");
         }
 
@@ -51,10 +47,9 @@ public class OerOutputStream extends OutputStream {
     public void writeVarUInt(int value) throws IOException {
         // We only support a 3 byte length indicator otherwise we go beyond
         // Integer.MAX_SIZE
-        
+
         // TODO add some safe checks
-        
-        if(value <= 255) {
+        if (value <= 255) {
             stream.write(1);
             stream.write(value);
         } else if (value <= 65535) {
@@ -69,21 +64,20 @@ public class OerOutputStream extends OutputStream {
         } else {
             throw new IllegalArgumentException("Integers of greater than 16777215 are not supported.");
         }
-        
+
     }
-    
+
     public void writeOctetString(byte[] bytes) throws IOException {
         writeLengthIndicator(bytes.length);
-        
 
         stream.write(bytes);
     }
-    
+
     protected void writeLengthIndicator(int length) throws IOException {
-        
-        if(length < 128) {
+
+        if (length < 128) {
             stream.write(length);
-        } else if(length <= 255) {
+        } else if (length <= 255) {
             //Write length of length byte "1000 0001"
             stream.write(128 + 1);
             stream.write(length);
@@ -92,7 +86,7 @@ public class OerOutputStream extends OutputStream {
             stream.write(128 + 2);
             stream.write((length >> 8));
             stream.write(length);
-        } else if (length <= 16777215){
+        } else if (length <= 16777215) {
             //Write length of length byte "1000 0011"
             stream.write(128 + 3);
             stream.write((length >> 16));
@@ -102,28 +96,26 @@ public class OerOutputStream extends OutputStream {
             throw new IllegalArgumentException("Field lengths of greater than 16777215 are not supported.");
         }
     }
-    
-   /**
-    * Flushes the stream. This will write any buffered output bytes and flush
-    * through to the underlying stream.
-    *
-    * @throws  IOException If an I/O error has occurred.
-    */
-   public void flush() throws IOException {
-       stream.flush();
-   }
 
-   /**
-    * Closes the stream. This method must be called to release any resources
-    * associated with the stream.
-    *
-    * @throws  IOException If an I/O error has occurred.
-    */
-   public void close() throws IOException {
-       flush();
-       stream.close();
-   }
-    
+    /**
+     * Flushes the stream. This will write any buffered output bytes and flush
+     * through to the underlying stream.
+     *
+     * @throws IOException If an I/O error has occurred.
+     */
+    public void flush() throws IOException {
+        stream.flush();
+    }
 
+    /**
+     * Closes the stream. This method must be called to release any resources
+     * associated with the stream.
+     *
+     * @throws IOException If an I/O error has occurred.
+     */
+    public void close() throws IOException {
+        flush();
+        stream.close();
+    }
 
 }

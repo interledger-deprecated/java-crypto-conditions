@@ -4,9 +4,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import org.interledger.cryptoconditions.Condition;
-import org.interledger.cryptoconditions.ConditionImpl;
-
 public class TestConditionImpl {
 
     @Test

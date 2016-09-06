@@ -6,8 +6,10 @@ package org.interledger.cryptoconditions.types;
  * Used to genereate public/private keys.
  */
 public class KeyPayload {
+
     public final byte[] payload;
-    public KeyPayload(byte[] source){
+
+    public KeyPayload(byte[] source) {
         this.payload = source.clone();
     }
 }

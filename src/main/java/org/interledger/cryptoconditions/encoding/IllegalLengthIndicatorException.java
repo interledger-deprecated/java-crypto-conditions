@@ -2,7 +2,7 @@ package org.interledger.cryptoconditions.encoding;
 
 /**
  * Thrown if an illegal OER length indicator is encountered
- * 
+ *
  * @author adrianhopebailie
  *
  */

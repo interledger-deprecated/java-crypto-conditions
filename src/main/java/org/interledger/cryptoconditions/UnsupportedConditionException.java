@@ -1,9 +1,9 @@
 package org.interledger.cryptoconditions;
 
 /**
- * Base exception for any exceptions thrown when unsupported 
- * crypto-conditions are encountered
- * 
+ * Base exception for any exceptions thrown when unsupported crypto-conditions
+ * are encountered
+ *
  * @author adrianhopebailie
  *
  */

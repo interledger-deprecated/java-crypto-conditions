@@ -3,14 +3,12 @@ package org.interledger.cryptoconditions;
 import java.util.EnumSet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-//import java.nio.charset.Charset;
+
 import java.security.MessageDigest;
 import java.security.PublicKey;
 import java.security.PrivateKey;
 
 import java.security.Signature;
-
-
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
@@ -22,20 +20,21 @@ import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
 
 import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
 import org.interledger.cryptoconditions.types.*;
+
 /**
  * Implementation of a Ed25519 crypto-condition fulfillment
- * 
+ *
  * @author earizon<enrique.arizon.benito@everis.com>
  *
  */
-
 public class Ed25519Fulfillment extends FulfillmentBase {
+
     /*
      *  TODO:(?) Create utility classes to generate public/private keys
      *      for example for a site that just one a one-time-use public/private key.
      */
-    
-    /*
+
+ /*
      * Note: 
      *  The java Ed25519 implementation uses a private Key Seed while some other
      *  implementations use the "expanded private key". 
@@ -57,11 +56,9 @@ public class Ed25519Fulfillment extends FulfillmentBase {
      *          "B" beeing the generator.
      *   (it’s the multiplications that take the most time: everything else is trivial by comparison)
      */
-    
-    
     private static boolean userIsAwareOfSecurityIssues = false;
-    public static final int PUBKEY_LENGTH = 32; 
-    public static final int SIGNATURE_LENGTH = 64; 
+    public static final int PUBKEY_LENGTH = 32;
+    public static final int SIGNATURE_LENGTH = 64;
     public static final int FULFILLMENT_LENGTH = PUBKEY_LENGTH + SIGNATURE_LENGTH;
 
     private final PublicKey publicKey;
@@ -69,14 +66,12 @@ public class Ed25519Fulfillment extends FulfillmentBase {
 
     private static EdDSAParameterSpec spec = EdDSANamedCurveTable.getByName("ed25519-sha-512");
 
-    public static PublicKey publicKeyFromByteArray(KeyPayload pub_key)
-    {
+    public static PublicKey publicKeyFromByteArray(KeyPayload pub_key) {
         EdDSAPublicKeySpec pubKey = new EdDSAPublicKeySpec(pub_key.payload, spec);
         return new EdDSAPublicKey(pubKey);
     }
 
-    private static PublicKey _publicKeyFromPrivateKey(EdDSAPrivateKeySpec privKey)
-    {
+    private static PublicKey _publicKeyFromPrivateKey(EdDSAPrivateKeySpec privKey) {
         EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), spec);
         return new EdDSAPublicKey(pubKeySpec);
     }
@@ -87,15 +82,16 @@ public class Ed25519Fulfillment extends FulfillmentBase {
      * if publicKeySource is null it's generated from the privateKey.
      */
     public static Ed25519Fulfillment BuildFromSecrets(
-            KeyPayload priv_key_sheed, MessagePayload message)
-    {
-        if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) { throwSecurityIssuesWarning(); }
+            KeyPayload priv_key_sheed, MessagePayload message) {
+        if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) {
+            throwSecurityIssuesWarning();
+        }
 
         // TODO:(?) generating the PrivateKey from the key_sheed is "slow". Allow to use a precomputed one?
         EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(priv_key_sheed.payload, spec);
         PrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
-        PublicKey  pubKey = _publicKeyFromPrivateKey(privKeySpec);
-        
+        PublicKey pubKey = _publicKeyFromPrivateKey(privKeySpec);
+
         // Ref: EdDSAEngineTest.java
         // TODO:(?) Check reuse of sgr
         SignaturePayload signature;
@@ -105,12 +101,12 @@ public class Ed25519Fulfillment extends FulfillmentBase {
             sgr.initSign(privKey);
             sgr.update(message.payload);
             signature = new SignaturePayload(sgr.sign());
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e.toString(), e);
         }
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         FulfillmentOutputStream ffos = new FulfillmentOutputStream(buffer);
-        byte[] PublicKey32Bytes = ((EdDSAPublicKey)pubKey).getA().toByteArray();
+        byte[] PublicKey32Bytes = ((EdDSAPublicKey) pubKey).getA().toByteArray();
 
         try {
             ffos.writeOctetString(PublicKey32Bytes);
@@ -118,13 +114,15 @@ public class Ed25519Fulfillment extends FulfillmentBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            try{ ffos.close(); }catch(Exception e) {/*nothing to do*/} 
+            try {
+                ffos.close();
+            } catch (Exception e) {/*nothing to do*/
+            }
         }
 
-        Ed25519Fulfillment result = new 
-                Ed25519Fulfillment(
-                        ConditionType.ED25519, new FulfillmentPayload(buffer.toByteArray()),
-                        pubKey, signature);
+        Ed25519Fulfillment result = new Ed25519Fulfillment(
+                ConditionType.ED25519, new FulfillmentPayload(buffer.toByteArray()),
+                pubKey, signature);
         return result;
     }
 
@@ -133,7 +131,9 @@ public class Ed25519Fulfillment extends FulfillmentBase {
      */
     public Ed25519Fulfillment(ConditionType type, FulfillmentPayload payload, PublicKey publicKey, SignaturePayload signature) {
         super(type, payload);
-        if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) { throwSecurityIssuesWarning(); }
+        if (!Ed25519Fulfillment.userIsAwareOfSecurityIssues) {
+            throwSecurityIssuesWarning();
+        }
         this.publicKey = publicKey;
         this.signature = signature;
     }
@@ -144,18 +144,17 @@ public class Ed25519Fulfillment extends FulfillmentBase {
     }
 
     @Override
-    public Condition generateCondition() 
-    {
-        if (this.publicKey == null ) {
+    public Condition generateCondition() {
+        if (this.publicKey == null) {
             throw new RuntimeException("this.publicKey not yet defined ");
         }
         EnumSet<FeatureSuite> features = EnumSet.of(FeatureSuite.ED25519);
 
         try {
             return new ConditionImpl(
-                    ConditionType.ED25519, 
+                    ConditionType.ED25519,
                     features,
-                    this.publicKey.getEncoded(), 
+                    this.publicKey.getEncoded(),
                     FULFILLMENT_LENGTH);
         } catch (Exception e) {
             throw new RuntimeException(e.toString(), e);
@@ -167,36 +166,36 @@ public class Ed25519Fulfillment extends FulfillmentBase {
         if (this.publicKey == null) {
             throw new RuntimeException("publicKey not initialized");
         }
-        try{
+        try {
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
             sgr.initVerify(this.publicKey);
             sgr.update(message.payload);
             return sgr.verify(signature.payload);
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e.toString(), e);
         }
     }
-    
+
     public static void UserHasReadEd25519JavaDisclaimerAndIsAwareOfSecurityIssues() {
         userIsAwareOfSecurityIssues = true;
     }
-    
+
     private static void throwSecurityIssuesWarning() {
         throw new RuntimeException(
-            "\n"
-          + "WARN: \n"
-          + "  | C&P From https://github.com/str4d/ed25519-java:\n"
-          + "  | Disclaimer:\n"
-          + "  | There are no guarantees that this is secure for all uses.\n"
-          + "  | All unit tests are passing, including tests against the data from the Python implementation,\n"
-          + "  | and the code has been reviewed by an independent developer, but it has not yet been audited\n"
-          + "  | by a professional cryptographer. In particular, the constant-time signing properties of ref10\n "
-          + "  | may not have been completely retained (although this is the eventual goal for the\n"
-          + "  | Ed25519-specific implementation).\n"
-          + "  |\n"
-          + "  | To use Ed25519Fulfillment you must first activate it executing the next code:\n"
-          + "  |     Ed25519Fulfillment.UserHasReadEd25519JavaDisclaimerAndIsAwareOfSecurityIssues();"
-          + "\n\n\n"
+                "\n"
+                + "WARN: \n"
+                + "  | C&P From https://github.com/str4d/ed25519-java:\n"
+                + "  | Disclaimer:\n"
+                + "  | There are no guarantees that this is secure for all uses.\n"
+                + "  | All unit tests are passing, including tests against the data from the Python implementation,\n"
+                + "  | and the code has been reviewed by an independent developer, but it has not yet been audited\n"
+                + "  | by a professional cryptographer. In particular, the constant-time signing properties of ref10\n "
+                + "  | may not have been completely retained (although this is the eventual goal for the\n"
+                + "  | Ed25519-specific implementation).\n"
+                + "  |\n"
+                + "  | To use Ed25519Fulfillment you must first activate it executing the next code:\n"
+                + "  |     Ed25519Fulfillment.UserHasReadEd25519JavaDisclaimerAndIsAwareOfSecurityIssues();"
+                + "\n\n\n"
         );
     }
 }

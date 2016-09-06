@@ -3,7 +3,7 @@ package org.interledger.cryptoconditions;
 /**
  * Thrown by implementations that encounter a max fulfillment value that exceeds
  * the size considered safe to process
- * 
+ *
  * @author adrianhopebailie
  *
  */

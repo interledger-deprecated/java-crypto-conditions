@@ -2,7 +2,7 @@ package org.interledger.cryptoconditions;
 
 /**
  * Thrown when a field length exceeds supported bounds
- * 
+ *
  * @author adrianhopebailie
  *
  */

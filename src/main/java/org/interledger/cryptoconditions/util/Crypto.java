@@ -5,17 +5,17 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * Convenience class for crypto functions
- * 
+ *
  * @author adrianhopebailie
  *
  */
 public class Crypto {
-    
+
     /**
      * Get the Sha256 hash of a pre-image.
-     * 
+     *
      * Convenience function which hides NoSuchAlgorithmException.
-     * 
+     *
      * @param preimage
      * @return hash of preimage
      */
@@ -27,5 +27,5 @@ public class Crypto {
             throw new IllegalArgumentException(e);
         }
     }
-    
+
 }
