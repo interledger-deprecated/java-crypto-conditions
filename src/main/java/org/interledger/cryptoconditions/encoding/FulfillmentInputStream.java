@@ -56,7 +56,8 @@ public class FulfillmentInputStream extends OerInputStream {
     public Fulfillment readFulfillment()
             throws IOException, UnsupportedConditionException, OerDecodingException 
     {
-        final ConditionType type = readConditiontype();        final FulfillmentPayload payload =  new FulfillmentPayload(this.readPayload()); 
+        final ConditionType type = readConditiontype();
+        final FulfillmentPayload payload =  new FulfillmentPayload(this.readPayload()); 
 
         ByteArrayInputStream byteStream = new ByteArrayInputStream(payload.payload);
         FulfillmentInputStream stream01 = new FulfillmentInputStream(byteStream);
@@ -81,8 +82,6 @@ public class FulfillmentInputStream extends OerInputStream {
                  *     signature OCTET STRING (SIZE(64))
                  * }
                  */
-//                byte[] bytesPublicKey = new byte[Ed25519Fulfillment.PUBKEY_LENGTH],
-//                       bytesSignature = new byte[Ed25519Fulfillment.SIGNATURE_LENGTH];
                 byte[] bytesPublicKey =     stream01.readOctetString();
                 byte[] bytesSignature = stream01.readOctetString();
                 java.security.PublicKey publicKey = Ed25519Fulfillment.publicKeyFromByteArray(new KeyPayload(bytesPublicKey) );

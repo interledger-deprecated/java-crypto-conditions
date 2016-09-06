@@ -73,6 +73,7 @@ public class OerInputStream extends InputStream {
     
     public byte[] readOctetString() throws IOException, UnsupportedLengthException, IllegalLengthIndicatorException {
         int length = readLengthIndicator();
+        if (length == 0 ) return new byte[] {};
         byte[] value = new byte[length];
         int bytesRead = 0;
         bytesRead = stream.read(value, 0, length);
