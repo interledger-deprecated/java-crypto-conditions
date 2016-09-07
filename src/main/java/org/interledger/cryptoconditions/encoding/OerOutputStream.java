@@ -44,6 +44,16 @@ public class OerOutputStream extends OutputStream {
         stream.write(value);
     }
 
+    public void write32BitUInt(long value) throws IOException {
+        if (value > ((1<<32)-1)) {
+            throw new IllegalArgumentException(Long.toString(value) + "is greater than 32 bits.");
+        }
+        stream.write((byte)(value>>24 & 255));
+        stream.write((byte)(value>>16 & 255));
+        stream.write((byte)(value>> 8 & 255));
+        stream.write((byte)(value>> 0 & 255));
+    }
+
     public void writeVarUInt(int value) throws IOException {
         // We only support a 3 byte length indicator otherwise we go beyond
         // Integer.MAX_SIZE
