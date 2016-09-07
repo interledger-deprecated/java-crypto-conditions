@@ -2,7 +2,9 @@ package org.interledger.cryptoconditions;
 
 import java.util.EnumSet;
 
+
 import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -176,18 +178,18 @@ public class ThresholdSHA256 extends FulfillmentBase {
         //
         //  return fulfillments.every((f) => f.body.validate(message))
         //}
-        throw new RuntimeException("not implemented"); // FIXME
+        throw new RuntimeException("not implemented"); // FIXME TODO
     }
 
     private EnumSet<FeatureSuite>  getBitmask() { // Used to generate the Condition
-      EnumSet<FeatureSuite>  result = super.getFeatures();
-      for (WeightedFulfillment ff : subfulfillments ){
-          EnumSet<FeatureSuite> childFeatures = ff.subff.getFeatures();
-          for (FeatureSuite fs : childFeatures) {
-              if (! result.contains(fs)) { result.add(fs); }
-          }
-      }
-      return result;
+        EnumSet<FeatureSuite> result = super.getFeatures();
+        for (WeightedFulfillment ff : subfulfillments ){
+            EnumSet<FeatureSuite> childFeatures = ff.subff.getFeatures();
+            for (FeatureSuite fs : childFeatures) {
+                if (! result.contains(fs)) { result.add(fs); }
+            }
+        }
+        return result;
     }
 
     /** Calculate the worst case length of a set of conditions.
@@ -206,14 +208,26 @@ public class ThresholdSHA256 extends FulfillmentBase {
         return cond.serializeBinary().length; 
     }
 
-//    static int predictSubfulfillmentLength(Fulfillment ff) {
-//        throw new RuntimeException("Not implemented"); // FIXME TODO
-//        const fulfillmentLength = getMaxFulfillmentLength()
-//        predictor.writeUInt16()                                      // type
-//        predictor.writeVarOctetString({ length: fulfillmentLength }) // payload
-//        return predictor.getSize()
-//    }
-    
+    static int predictSubfulfillmentLength(Fulfillment ff) {
+        int fulfillmentLength = ff.getCondition().getMaxFulfillmentLength();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        OerOutputStream cos = new OerOutputStream(baos);
+        try {
+            cos.write16BitUInt(0 /* type Undefined */);
+            byte[] bytes = new byte[fulfillmentLength];
+            java.util.Arrays.fill( bytes, (byte) 0 );
+
+            cos.writeOctetString(bytes);
+            int result = baos.size();
+            return result;
+        }catch(Exception e) {
+            throw new RuntimeException(e.toString(), e);
+        } finally {
+            // FIXME: Refactor all *Stream.close in one utility function.
+            try { cos.close(); } catch (Exception e) { System.out.println(e.toString()); /* TODO: Inject Logger */ }
+        }
+    }
+
     /*
      * Calculates the longest possible fulfillment length.
      * In a threshold condition, the maximum length of the fulfillment depends on
@@ -226,7 +240,7 @@ public class ThresholdSHA256 extends FulfillmentBase {
      */
     int calculateMaxFulfillmentLength () { // Calculate length of longest fulfillments
         int totalConditionLength = 0;
-        
+
         List<WeightAndSize> WeightAndSize_l = new java.util.ArrayList<WeightAndSize>();
         for (int idx=0; idx < this.subfulfillments.size(); idx++) {
             WeightedFulfillment wfulf = this.subfulfillments.get(idx);
@@ -266,37 +280,47 @@ public class ThresholdSHA256 extends FulfillmentBase {
     }
 
     //selects smallest combination of fulfillments meeting a threshold.
-    static Set<WeightedFulfillment> calculateSmallestValidFulfillmentSet (long threshold) {
-        Set<WeightedFulfillment> result = null; // FIXME
-//        throw new RuntimeException("not implemented");
-//    state = state || { index: 0, size: 0, set: [] }
-//    if (threshold <= 0) { return  size: state.size, set: state.set }
-//    if (state.index > fulfillments.length) return { size: Infinity }
-//    nextFF = fulfillments[state.index]
-//    withNext = this.calculateSmallestValidFulfillmentSet(
-//      threshold - nextFF.weight, fulfillments,
-//      { size: state.size + nextFF.size,
-//        index: state.index + 1,
-//        set: state.set.concat(nextFF.index) } )
-//    withoutNext = this.calculateSmallestValidFulfillmentSet(
-//      threshold,                 fulfillments,
-//      { size: state.size + nextFF.omitSize,
-//        index: state.index + 1,
-//        set: state.set } )
-//    return withNext.size < withoutNext.size ? withNext : withoutNext
-        return result;
+    static class calcSmallestFFSetState { // TODO:(0) What static means for inner classes??
+        int index = 0;
+        int size  = 0;
+        Set<Integer> set = new HashSet<Integer>();
+        calcSmallestFFSetState(int index, int size, Set<Integer> set) {
+            this.index = index;
+            this.size  = size;
+            this.set   = set;
+        }
+    }
+
+    static calcSmallestFFSetState calculateSmallestValidFulfillmentSet (long threshold, List<WeightedFulfillment> ff_l, calcSmallestFFSetState state) {
+        if (threshold < 0) { return state; }
+        if (state.index > ff_l.size()) { state.size = 2^31; /* FIXME TODO In JS Infinity */ }
+        WeightedFulfillment nextFF = ff_l.get(state.index);
+
+        Set<Integer> set_with_next = new HashSet<Integer>(state.set);
+                     set_with_next.add(nextFF.idx);
+        calcSmallestFFSetState with_next = ThresholdSHA256.calculateSmallestValidFulfillmentSet(
+                threshold  - nextFF.weight, ff_l, 
+                new ThresholdSHA256.calcSmallestFFSetState(state.size + nextFF.getSize(), state.index+1, set_with_next) 
+                );
+        calcSmallestFFSetState without_next = ThresholdSHA256.calculateSmallestValidFulfillmentSet(
+                threshold , ff_l, 
+                new ThresholdSHA256.calcSmallestFFSetState(state.size + nextFF.getOmitSize(), state.index+1, state.set) 
+                );
+        return (with_next.size < without_next.size) ? with_next : without_next;
     }
 
     private byte[] writePayload() {
         // FIXME: This function is called by the constructor to generate the OER payload.
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         FulfillmentOutputStream ffos = new FulfillmentOutputStream(buffer);
-        Set<WeightedFulfillment> smallestFFSet = ThresholdSHA256.calculateSmallestValidFulfillmentSet(this.threshold);
+        
+        calcSmallestFFSetState smallestFFSet = ThresholdSHA256.calculateSmallestValidFulfillmentSet(
+            this.threshold, this.subfulfillments, new calcSmallestFFSetState(0, 0, new HashSet<Integer>()));
     
         List<Condition> optimizedConditions = new ArrayList<Condition>();// Take minimum set of fulfillments and turn rest into conditions
         for (int idx=0; idx<this.subfulfillments.size(); idx++) {
             WeightedFulfillment subff = this.subfulfillments.get(idx);
-            if (! smallestFFSet.contains(subff) ) {
+            if (! smallestFFSet.set.contains(subff.idx) ) {
                 optimizedConditions.add(subff.subff.getCondition());
             }
         }
