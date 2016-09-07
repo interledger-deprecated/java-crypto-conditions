@@ -76,9 +76,20 @@ public interface Fulfillment {
     public boolean validate(MessagePayload message);
 
     /*
-     * TODO:(0)
+     * FIXME TODO:(0)
      * Once the fulfillment has been generated, it's a good
      * practice to clear the secret (preimage, private password, ...)
      */
     // public void clearSecrets();
+
+    /**
+     * Serialize fulfillment to a buffer.
+     *
+     * Encodes the fulfillment as a string of bytes. This is used internally for
+     * encoding subfulfillments, but can also be used to passing around
+     * fulfillments in a binary protocol for instance.
+     *
+     * @return {Buffer} Serialized fulfillment
+     */
+    byte[] serializeBinary();
 }

@@ -1,10 +1,12 @@
 package org.interledger.cryptoconditions;
 
+import java.io.ByteArrayOutputStream;
 import java.util.EnumSet;
 
 import org.interledger.cryptoconditions.types.*;
 
 import org.interledger.cryptoconditions.encoding.Base64Url;
+import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
 
 public abstract class FulfillmentBase implements Fulfillment {
 
@@ -79,4 +81,20 @@ public abstract class FulfillmentBase implements Fulfillment {
         return toURI();
     }
 
+    @Override
+    public byte[] serializeBinary () {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        FulfillmentOutputStream oos = new FulfillmentOutputStream(os);
+        try{
+            oos.write16BitUInt(this.getType().getTypeCode());
+            oos.writeOctetString(this.payload.payload);
+            byte[] result = os.toByteArray();
+            return result;
+        }catch(Exception e) {
+            throw new RuntimeException(e.toString(), e);
+        } finally {
+            // FIXME: Refactor all *Stream.close in one utility function.
+            try { oos.close(); } catch (Exception e) { System.out.println(e.toString()); /* TODO: Inject Logger */ }
+        }
+      }
 }
