@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
 import java.util.Collections;
-import java.util.Comparator;
 
 import org.interledger.cryptoconditions.encoding.OerOutputStream;
 import org.interledger.cryptoconditions.encoding.ConditionOutputStream;
@@ -146,15 +145,11 @@ public class ThresholdSHA256 extends FulfillmentBase {
             throw new RuntimeException(e.toString(), e);
         }
     	
-        final EnumSet<FeatureSuite> BASE_FEATURES = EnumSet.of(
-                FeatureSuite.SHA_256,
-                FeatureSuite.THRESHOLD );
-    	EnumSet<FeatureSuite> features = BASE_FEATURES;
 
     	int fulfillmentMaxLength = 0; // FIXME TODO
         return new ConditionImpl(
                 ConditionType.THRESHOLD_SHA256,
-                features,
+                getFeatureSuiteSet(),
                 fingerprint,
                 fulfillmentMaxLength);
     }
@@ -181,8 +176,11 @@ public class ThresholdSHA256 extends FulfillmentBase {
         throw new RuntimeException("not implemented"); // FIXME TODO
     }
 
-    private EnumSet<FeatureSuite>  getBitmask() { // Used to generate the Condition
-        EnumSet<FeatureSuite> result = super.getFeatures();
+    private EnumSet<FeatureSuite> getFeatureSuiteSet() {
+        final EnumSet<FeatureSuite> BASE_FEATURES = EnumSet.of(
+                FeatureSuite.SHA_256,
+                FeatureSuite.THRESHOLD );
+        EnumSet<FeatureSuite> result = BASE_FEATURES;
         for (WeightedFulfillment ff : subfulfillments ){
             EnumSet<FeatureSuite> childFeatures = ff.subff.getFeatures();
             for (FeatureSuite fs : childFeatures) {
@@ -310,10 +308,6 @@ public class ThresholdSHA256 extends FulfillmentBase {
     }
 
     private byte[] writePayload() {
-        // FIXME: This function is called by the constructor to generate the OER payload.
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        FulfillmentOutputStream ffos = new FulfillmentOutputStream(buffer);
-        
         calcSmallestFFSetState smallestFFSet = ThresholdSHA256.calculateSmallestValidFulfillmentSet(
             this.threshold, this.subfulfillments, new calcSmallestFFSetState(0, 0, new HashSet<Integer>()));
     
