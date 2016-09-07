@@ -84,6 +84,17 @@ public interface Condition {
      */
     int getMaxFulfillmentLength();
 
+    /**
+     * Serialize condition to a buffer.
+     *
+     * Encodes the condition as a string of bytes. This is used internally for
+     * encoding subconditions, but can also be used to passing around conditions
+     * in a binary protocol for instance.
+     *
+     * @return {Buffer} Serialized condition
+     */
+    byte[] serializeBinary ();
+
     String toURI();
 
 }

@@ -1,8 +1,10 @@
 package org.interledger.cryptoconditions;
 
+import java.io.ByteArrayOutputStream;
 import java.util.EnumSet;
 
 import org.interledger.cryptoconditions.encoding.Base64Url;
+import org.interledger.cryptoconditions.encoding.ConditionOutputStream;
 
 public final class ConditionImpl implements Condition {
 
@@ -107,5 +109,23 @@ public final class ConditionImpl implements Condition {
 
     public String toString() {
         return toURI();
+    }
+    
+    public byte[] serializeBinary() {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ConditionOutputStream oos = new ConditionOutputStream(os);
+        try{
+            oos.write16BitUInt(this.getType().getTypeCode());
+            oos.writeFeatures(this.getFeatures());
+            oos.writeOctetString(this.getFingerprint());
+            oos.writeVarUInt(this.getMaxFulfillmentLength());
+            byte[] result = os.toByteArray();
+            return result;
+        }catch(Exception e) {
+            throw new RuntimeException(e.toString(), e);
+        } finally {
+            // FIXME: Refactor all *Stream.close in one utility function.
+            try { oos.close(); } catch (Exception e) { System.out.println(e.toString()); /* TODO: Inject Logger */ }
+        }
     }
 }

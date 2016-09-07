@@ -45,12 +45,12 @@ public class ConditionOutputStream extends OerOutputStream {
 
     }
 
-    protected void writeConditionType(ConditionType type)
+    public void writeConditionType(ConditionType type)
             throws IOException {
         write16BitUInt(type.getTypeCode());
     }
 
-    protected void writeFeatures(EnumSet<FeatureSuite> features)
+    public void writeFeatures(EnumSet<FeatureSuite> features)
             throws IOException {
 
         //TODO - Unsafe if we overflow into a second byte
@@ -63,12 +63,12 @@ public class ConditionOutputStream extends OerOutputStream {
 
     }
 
-    protected void writeFingerprint(byte[] fingerprint)
+    public void writeFingerprint(byte[] fingerprint)
             throws IOException {
         writeOctetString(fingerprint);
     }
 
-    protected void writeMaxFulfillmentLength(int maxFulfillmentLength)
+    public void writeMaxFulfillmentLength(int maxFulfillmentLength)
             throws IOException {
         writeVarUInt(maxFulfillmentLength);
     }
