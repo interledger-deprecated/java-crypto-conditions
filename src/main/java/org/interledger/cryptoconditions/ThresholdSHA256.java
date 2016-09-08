@@ -3,6 +3,7 @@ package org.interledger.cryptoconditions;
 import java.util.EnumSet;
 
 
+
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import org.interledger.cryptoconditions.encoding.OerOutputStream;
 import org.interledger.cryptoconditions.encoding.ConditionOutputStream;
 import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
+import org.interledger.cryptoconditions.encoding.ByteArrayOutputStreamPredictor;
 import org.interledger.cryptoconditions.types.FulfillmentPayload;
 import org.interledger.cryptoconditions.types.MessagePayload;
 
@@ -256,7 +258,7 @@ public class ThresholdSHA256 extends FulfillmentBase {
            throw new RuntimeException("Insufficient subconditions/weights to meet the threshold");
         }
         // Calculate resulting total maximum fulfillment size
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(); // FIXME JS uses a predictor that doesn't consume memory
+        ByteArrayOutputStreamPredictor buffer = new ByteArrayOutputStreamPredictor();
         FulfillmentOutputStream ffos = new FulfillmentOutputStream(buffer);
         try {
             ffos.write32BitUInt(this.threshold);
