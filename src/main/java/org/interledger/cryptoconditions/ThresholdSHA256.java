@@ -2,22 +2,25 @@ package org.interledger.cryptoconditions;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.io.ByteArrayOutputStream;
 import java.util.Collections;
 import java.util.Comparator;
 
+import org.interledger.cryptoconditions.encoding.ConditionOutputStream;
+import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
 import org.interledger.cryptoconditions.types.FulfillmentPayload;
 import org.interledger.cryptoconditions.types.MessagePayload;
 
 public class ThresholdSHA256 extends FulfillmentBase {
 
-    public class WeightedFulfillment implements Comparable<WeightedFulfillment> {
+    private class WeightedFulfillment implements Comparable<WeightedFulfillment> {
         final int weight;
         final Fulfillment subff;
         final byte[] conditionFingerprint;
-        public WeightedFulfillment(int weight, Fulfillment subfulfillment) {
+        private WeightedFulfillment(int weight, Fulfillment subfulfillment) {
             this.weight = weight;
             this.subff = subfulfillment;
-            conditionFingerprint = this.subff.generateCondition().getFingerprint();
+            conditionFingerprint = this.subff.getCondition().getFingerprint();
         }
         
         @Override
@@ -38,9 +41,26 @@ public class ThresholdSHA256 extends FulfillmentBase {
             return lexicoComparation;
         }
     }
-    private final int threshold;
-    private final List<WeightedFulfillment> subfulfillments;
     
+    
+    private class WeightAndSize implements Comparable<WeightAndSize> {
+        public final int  weight;
+        public final int  size;
+        private WeightAndSize(int weight, int size) {
+        	this.weight = weight;
+        	this.size   = size;
+        }
+
+        @Override
+        public int compareTo(WeightAndSize another) {
+            return this.weight - another.weight;
+        }
+    }
+   
+    
+    private final long threshold;
+    private final List<WeightedFulfillment> subfulfillments;
+
     public ThresholdSHA256(ConditionType type, FulfillmentPayload payload, 
             int threshold, List<Integer>weight_l, List<Fulfillment> ff_l){
         if (weight_l.size() != ff_l.size()) {
@@ -55,18 +75,45 @@ public class ThresholdSHA256 extends FulfillmentBase {
         this.subfulfillments = wff_l;
         throw new RuntimeException("FIXME Implement?");
     }
-   
+
     @Override
     public Condition generateCondition() {
         //writeHashPayload (hasher) /* Produce the contents of the condition hash. */ {
         //  const subconditions = this.subconditions // Serialize each subcondition with weight
         //        .map((c) => { writer.writeVarUInt(c.weight),  writer.write(getConditionBinary()) })
-        //  const sortedSubconditions = this.constructor.sortBuffers(subconditions)
         //  hasher.writeUInt32(this.threshold)
         //  hasher.writeVarUInt(sortedSubconditions.length)
         //  sortedSubconditions.forEach((c) => hasher.write(c))
         //}
-        throw new RuntimeException("not implemented"); // FIXME
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	byte[] fingerprint;
+        try {
+            ConditionOutputStream cos = new ConditionOutputStream(baos);
+            cos.write32BitUInt((long)this.threshold);
+            cos.writeVarUInt(this.subfulfillments.size());
+            for (int idx = 0; idx < this.subfulfillments.size(); idx++) {
+            	WeightedFulfillment w_ff = this.subfulfillments.get(idx);
+                cos.writeVarUInt(w_ff.weight);
+                cos.writeCondition(w_ff.subff.generateCondition());
+            }
+            fingerprint = baos.toByteArray();
+            cos.close();
+        } catch(Exception e){
+            throw new RuntimeException(e.toString(), e);
+        }
+    	
+        final EnumSet<FeatureSuite> BASE_FEATURES = EnumSet.of(
+                FeatureSuite.SHA_256,
+                FeatureSuite.THRESHOLD );
+    	EnumSet<FeatureSuite> features = BASE_FEATURES;
+
+    	int fulfillmentMaxLength = 0; // FIXME TODO
+        return new ConditionImpl(
+                ConditionType.THRESHOLD_SHA256,
+                features,
+                fingerprint,
+                fulfillmentMaxLength);
     }
 
     @Override
@@ -102,53 +149,65 @@ public class ThresholdSHA256 extends FulfillmentBase {
       return result;
     }
 
-}
+    /** Calculate the worst case length of a set of conditions.
+    * longest possible length for valid, minimal set of subconditions. */
+//    static calculateWorstCaseLength (int threshold, weight_size_l, idx = 0) {
+//         if (threshold <= 0) return 0
+//         if (idx > weight_size_l.length) return -Infinity
+//         ws = weight_size_l[index]; size = ws.size; weight = ws.weight; idx++;
+//         return Math.max(
+//           size+calculateWorstCaseLength(threshold-.weight,weight_size_l,idx)
+//                calculateWorstCaseLength(threshold        ,weight_size_l,idx) )
+//    }
+
+/* Calculates the longest possible fulfillment length.
+ * In a threshold condition, the maximum length of the fulfillment depends on
+ * the maximum lengths of the fulfillments of the subconditions. However,
+ * usually not all subconditions must be fulfilled in order to meet the
+ * threshold.
+ * Consequently, this method relies on an algorithm to determine which
+ * combination of fulfillments, where no fulfillment can be left out, results
+ * in the largest total fulfillment size. */
+
+    int calculateMaxFulfillmentLength () { // Calculate length of longest fulfillments
+        int totalConditionLength = 0;
+        
+        List<WeightAndSize> WeightAndSize_l = new java.util.ArrayList<WeightAndSize>();
+        for (int idx=0; idx < this.subfulfillments.size(); idx++){
+            WeightedFulfillment wfulf = this.subfulfillments.get(idx);
+            Condition   cond = this.subfulfillments.get(idx).subff.getCondition();
+            int conditionLength   = -1; // FIXME ThresholdSHA256.predictSubconditionLength(cond)
+            int fulfillmentLength = -1; // FIXME ThresholdSHA256.predictSubfulfillmentLength(wfulf.subff)
+            totalConditionLength += conditionLength;
+            WeightAndSize_l.add(
+                new WeightAndSize_l(wfulf.weight, fulfillmentLength - conditionLength));
+        }
+        Collections.sort(WeightAndSize_l);
+        int worstCaseFulfillmentsLength = totalConditionLength +
+            ThresholdSHA256.calculateWorstCaseLength( this.threshold, weight_size_l);
+        if (worstCaseFulfillmentsLength < 1<<30 /* FIXME In JS: -Infinity */) {
+           throw new RuntimeException("Insufficient subconditions/weights to meet the threshold");
+        }
+        // Calculate resulting total maximum fulfillment size
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream(); // FIXME JS uses a predictor that doesn't consume memory
+        FulfillmentOutputStream ffos = new FulfillmentOutputStream(buffer);
+        ffos.write32BitUInt(this.threshold);
+        ffos.writeVarUInt(this.subfulfillments.size());
+        for (int idx=0; idx< this.subfulfillments.size() ; idx++) {
+            ffos.write8BitUInt(0 /*FIXME empty presence bitmask in JS*/);
+            WeightedFulfillment wff = this.subfulfillments.get(idx);
+            if (wff.weight != 1) ffos.write32BitUInt(wff.weight);
+        }
+        // Represents the sum of CONDITION/FULFILLMENT values
+        // FIXME: predictor.skip(worstCaseFulfillmentsLength)
+        int result = buffer.size(); 
+        return result;
+    }
 
 
-///** Calculate the worst case length of a set of conditions.
-// * longest possible length for valid, minimal set of subconditions. */
-//static calculateWorstCaseLength (threshold, weight_size_l, idx = 0) {
-//    if (threshold <= 0) return 0
-//    if (idx > weight_size_l.length) return -Infinity
-//    ws = weight_size_l[index]; size = ws.size; weight = ws.weight; idx++;
-//    return Math.max(
-//      size+calculateWorstCaseLength(threshold-.weight,weight_size_l,idx)
-//           calculateWorstCaseLength(threshold        ,weight_size_l,idx) )
-//}
-///* Calculates the longest possible fulfillment length.
-// * In a threshold condition, the maximum length of the fulfillment depends on
-// * the maximum lengths of the fulfillments of the subconditions. However,
-// * usually not all subconditions must be fulfilled in order to meet the
-// * threshold.
-// * Consequently, this method relies on an algorithm to determine which
-// * combination of fulfillments, where no fulfillment can be left out, results
-// * in the largest total fulfillment size. */
 
-//calculateMaxFulfillmentLength () { // Calculate length of longest fulfillments
-//  let totalConditionLength = 0
-//  const weight_size_l = this.subconditions
-//    .map((cond) => {
-//      const conditionLength = this.constructor.predictSubconditionLength(cond)
-//      const fulfillmentLength = this.constructor.predictSubfulfillmentLength(cond)
-//      totalConditionLength += conditionLength
-//      return { weight: cond.weight,size: fulfillmentLength - conditionLength}
-//    }).sort((a, b) => b.weight - a.weight)
-//  const worstCaseFulfillmentsLength = totalConditionLength +
-//    this.constructor.calculateWorstCaseLength( this.threshold, weight_size_l)
-//  if (worstCaseFulfillmentsLength === -Infinity) 
-//    throw new MissingDataError('Insufficient subconditions/weights to meet the threshold')
-//  // Calculate resulting total maximum fulfillment size
-//  const predictor = new Predictor()
-//  predictor.writeUInt32(this.threshold)              // threshold
-//  predictor.writeVarUInt(this.subconditions.length)  // count
-//  this.subconditions.forEach((cond) => {
-//    predictor.writeUInt8()                 // presence bitmask
-//    if (cond.weight !== 1) predictor.writeUInt32(cond.weight)
-//  })
-//  // Represents the sum of CONDITION/FULFILLMENT values
-//  predictor.skip(worstCaseFulfillmentsLength)
-//  return predictor.getSize()
-//}
+
+
 
 
 //static predictSubconditionLength(cond){return cond.body.getConditionBinary().length}
