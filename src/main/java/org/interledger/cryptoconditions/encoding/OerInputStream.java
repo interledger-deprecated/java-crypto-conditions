@@ -39,6 +39,19 @@ public class OerInputStream extends InputStream {
         return next + (value << 8);
     }
 
+    public long read32BitUInt() throws IOException {
+        // TODO: UnitTest read32BitUInt/write32BitUInt
+        int byte4 = stream.read();
+        verifyNotEOF(byte4);
+        int byte3 = stream.read();
+        verifyNotEOF(byte3);
+        int byte2 = stream.read();
+        verifyNotEOF(byte2);
+        int byte1 = stream.read();
+        verifyNotEOF(byte1);
+        return byte1 + (byte2 << 8) + (byte3 << 16) + (byte4 << 24);
+    }
+
     public int readVarUInt() throws IOException, UnsupportedLengthException, IllegalLengthIndicatorException {
 
         // We only support a 3 byte length indicator otherwise we go beyond
