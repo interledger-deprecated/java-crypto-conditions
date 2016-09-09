@@ -114,10 +114,7 @@ public class Ed25519Fulfillment extends FulfillmentBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            try {
-                ffos.close();
-            } catch (Exception e) {/*nothing to do*/
-            }
+            ffos.close();
         }
 
         Ed25519Fulfillment result = new Ed25519Fulfillment(

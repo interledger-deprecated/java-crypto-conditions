@@ -123,9 +123,15 @@ public class OerOutputStream extends OutputStream {
      *
      * @throws IOException If an I/O error has occurred.
      */
-    public void close() throws IOException {
-        flush();
-        stream.close();
+    public void close() {
+        try {
+            flush();
+            stream.close();
+        } catch(Exception e) {
+            // TODO: Improvement. Inject Logger.
+            System.out.println("WARN: Couldn't properly close the stream due to "+
+                e.toString()+", Some data could have not been flushed to disk");
+        }
     }
 
 }

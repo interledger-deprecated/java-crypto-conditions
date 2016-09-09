@@ -18,7 +18,7 @@ import org.interledger.cryptoconditions.encoding.ByteArrayOutputStreamPredictor;
 import org.interledger.cryptoconditions.types.FulfillmentPayload;
 import org.interledger.cryptoconditions.types.MessagePayload;
 
-public class ThresholdSHA256 extends FulfillmentBase {
+public class ThresholdSHA256Fulfillment extends FulfillmentBase {
 
     private class OrderableByteBuffer implements Comparable<OrderableByteBuffer> {
         byte[] buffer;
@@ -102,7 +102,7 @@ public class ThresholdSHA256 extends FulfillmentBase {
     private final long threshold; // FIXME Check that it's smaller than 2<<31 since it must be converted to int.
     private final List<WeightedFulfillment> subfulfillments;
 
-    public ThresholdSHA256(ConditionType type, FulfillmentPayload payload, 
+    public ThresholdSHA256Fulfillment(ConditionType type, FulfillmentPayload payload, 
             int threshold, List<Integer>weight_l, List<Fulfillment> ff_l){
         if (weight_l.size() != ff_l.size()) {
             throw new RuntimeException("Can't zip weight_l && ff_l. Size differs ");
@@ -131,9 +131,9 @@ public class ThresholdSHA256 extends FulfillmentBase {
         //}
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    	byte[] fingerprint;
+        byte[] fingerprint;
+        ConditionOutputStream cos = new ConditionOutputStream(baos);
         try {
-            ConditionOutputStream cos = new ConditionOutputStream(baos);
             cos.write32BitUInt((long)this.threshold);
             cos.writeVarUInt(this.subfulfillments.size());
             for (int idx = 0; idx < this.subfulfillments.size(); idx++) {
@@ -142,13 +142,13 @@ public class ThresholdSHA256 extends FulfillmentBase {
                 cos.writeCondition(w_ff.subff.generateCondition());
             }
             fingerprint = baos.toByteArray();
-            cos.close();
         } catch(Exception e){
             throw new RuntimeException(e.toString(), e);
+        } finally {
+            cos.close();
         }
-    	
 
-    	int fulfillmentMaxLength = 0; // FIXME TODO
+    	int fulfillmentMaxLength = this.calculateMaxFulfillmentLength();
         return new ConditionImpl(
                 ConditionType.THRESHOLD_SHA256,
                 getFeatureSuiteSet(),
@@ -223,8 +223,7 @@ public class ThresholdSHA256 extends FulfillmentBase {
         }catch(Exception e) {
             throw new RuntimeException(e.toString(), e);
         } finally {
-            // FIXME: Refactor all *Stream.close in one utility function.
-            try { cos.close(); } catch (Exception e) { System.out.println(e.toString()); /* TODO: Inject Logger */ }
+            cos.close();
         }
     }
 
@@ -238,22 +237,22 @@ public class ThresholdSHA256 extends FulfillmentBase {
      * combination of fulfillments, where no fulfillment can be left out, results
      * in the largest total fulfillment size. 
      */
-    int calculateMaxFulfillmentLength () { // Calculate length of longest fulfillments
+    private int calculateMaxFulfillmentLength () { // Calculate length of longest fulfillments
         int totalConditionLength = 0;
 
         List<WeightAndSize> WeightAndSize_l = new java.util.ArrayList<WeightAndSize>();
         for (int idx=0; idx < this.subfulfillments.size(); idx++) {
             WeightedFulfillment wfulf = this.subfulfillments.get(idx);
             Condition cond = this.subfulfillments.get(idx).subff.getCondition();
-            int conditionLength   = ThresholdSHA256.predictSubconditionLength(cond);
-            int fulfillmentLength = ThresholdSHA256.predictSubfulfillmentLength(wfulf.subff);
+            int conditionLength   = ThresholdSHA256Fulfillment.predictSubconditionLength(cond);
+            int fulfillmentLength = ThresholdSHA256Fulfillment.predictSubfulfillmentLength(wfulf.subff);
             totalConditionLength += conditionLength;
             WeightAndSize_l.add(
                 new WeightAndSize(wfulf.weight, fulfillmentLength - conditionLength));
         }
         Collections.sort(WeightAndSize_l);
         int worstCaseFulfillmentsLength = totalConditionLength +
-            ThresholdSHA256.calculateWorstCaseLength( this.threshold, WeightAndSize_l, /*idx*/0);
+            ThresholdSHA256Fulfillment.calculateWorstCaseLength( this.threshold, WeightAndSize_l, /*idx*/0);
         if (worstCaseFulfillmentsLength < 1<<30 /* FIXME In JS: -Infinity */) {
            throw new RuntimeException("Insufficient subconditions/weights to meet the threshold");
         }
@@ -275,7 +274,7 @@ public class ThresholdSHA256 extends FulfillmentBase {
         } catch(Exception e) {
             throw new RuntimeException(e.toString(), e);
         } finally { 
-            try { ffos.close(); } catch (Exception e) { System.out.println(e.toString()); /* TODO: Inject Logger */ }
+            ffos.close();
         }
     }
 
@@ -298,19 +297,19 @@ public class ThresholdSHA256 extends FulfillmentBase {
 
         Set<Integer> set_with_next = new HashSet<Integer>(state.set);
                      set_with_next.add(nextFF.idx);
-        calcSmallestFFSetState with_next = ThresholdSHA256.calculateSmallestValidFulfillmentSet(
+        calcSmallestFFSetState with_next = ThresholdSHA256Fulfillment.calculateSmallestValidFulfillmentSet(
                 threshold  - nextFF.weight, ff_l, 
-                new ThresholdSHA256.calcSmallestFFSetState(state.size + nextFF.getSize(), state.index+1, set_with_next) 
+                new ThresholdSHA256Fulfillment.calcSmallestFFSetState(state.size + nextFF.getSize(), state.index+1, set_with_next) 
                 );
-        calcSmallestFFSetState without_next = ThresholdSHA256.calculateSmallestValidFulfillmentSet(
+        calcSmallestFFSetState without_next = ThresholdSHA256Fulfillment.calculateSmallestValidFulfillmentSet(
                 threshold , ff_l, 
-                new ThresholdSHA256.calcSmallestFFSetState(state.size + nextFF.getOmitSize(), state.index+1, state.set) 
+                new ThresholdSHA256Fulfillment.calcSmallestFFSetState(state.size + nextFF.getOmitSize(), state.index+1, state.set) 
                 );
         return (with_next.size < without_next.size) ? with_next : without_next;
     }
 
     private byte[] writePayload() {
-        calcSmallestFFSetState smallestFFSet = ThresholdSHA256.calculateSmallestValidFulfillmentSet(
+        calcSmallestFFSetState smallestFFSet = ThresholdSHA256Fulfillment.calculateSmallestValidFulfillmentSet(
             this.threshold, this.subfulfillments, new calcSmallestFFSetState(0, 0, new HashSet<Integer>()));
     
         List<Condition> optimizedConditions = new ArrayList<Condition>();// Take minimum set of fulfillments and turn rest into conditions
@@ -334,8 +333,7 @@ public class ThresholdSHA256 extends FulfillmentBase {
             }catch(Exception e) {
                 throw new RuntimeException(e.toString(), e);
             } finally {
-                // FIXME: Refactor all *Stream.close in one utility function.
-                try { cos.close(); } catch (Exception e) { System.out.println(e.toString()); /* TODO: Inject Logger */ }
+                cos.close();
             }
         }
         Collections.sort(sortedSubconditions);
@@ -356,8 +354,7 @@ public class ThresholdSHA256 extends FulfillmentBase {
         }catch(Exception e) {
             throw new RuntimeException(e.toString(), e);
         } finally {
-            // FIXME: Refactor all *Stream.close in one utility function.
-            try { cos.close(); } catch (Exception e) { System.out.println(e.toString()); /* TODO: Inject Logger */ }
+            cos.close();
         }
 
     }

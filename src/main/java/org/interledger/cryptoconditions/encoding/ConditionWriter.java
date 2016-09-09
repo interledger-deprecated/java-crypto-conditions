@@ -97,7 +97,14 @@ public class ConditionWriter extends Writer {
 
     @Override
     public void close() throws IOException {
-        writer.close();
+        try {
+            writer.flush();
+            writer.close();
+        } catch(Exception e) {
+            // TODO: Improvement. Inject Logger.
+            System.out.println("WARN: Couldn't properly close the stream due to "+
+                e.toString()+", Some data could have not been flushed to disk");
+        }
     }
 
 }

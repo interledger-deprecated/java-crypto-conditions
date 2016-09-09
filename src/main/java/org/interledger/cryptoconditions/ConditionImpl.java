@@ -124,8 +124,7 @@ public final class ConditionImpl implements Condition {
         }catch(Exception e) {
             throw new RuntimeException(e.toString(), e);
         } finally {
-            // FIXME: Refactor all *Stream.close in one utility function.
-            try { oos.close(); } catch (Exception e) { System.out.println(e.toString()); /* TODO: Inject Logger */ }
+            oos.close();
         }
     }
 }

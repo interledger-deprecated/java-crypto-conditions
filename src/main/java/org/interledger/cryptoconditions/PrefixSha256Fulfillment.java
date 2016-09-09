@@ -51,11 +51,7 @@ public class PrefixSha256Fulfillment extends FulfillmentBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            try {
-                ffOutputStream.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e.toString(), e);
-            }
+            ffOutputStream.close();
         }
         this.payload = new FulfillmentPayload(byteStream.toByteArray());
 //        PrefixSha256Fulfillment result = 
@@ -118,11 +114,7 @@ public class PrefixSha256Fulfillment extends FulfillmentBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            stream.close();
         }
     }
 
@@ -139,11 +131,7 @@ public class PrefixSha256Fulfillment extends FulfillmentBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            stream.close();
         }
     }
 

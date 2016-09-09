@@ -10,7 +10,7 @@ import org.interledger.cryptoconditions.Fulfillment;
 import org.interledger.cryptoconditions.PrefixSha256Fulfillment;
 import org.interledger.cryptoconditions.PreimageSha256Fulfillment;
 import org.interledger.cryptoconditions.Ed25519Fulfillment;
-import org.interledger.cryptoconditions.ThresholdSHA256;
+import org.interledger.cryptoconditions.ThresholdSHA256Fulfillment;
 import org.interledger.cryptoconditions.UnsupportedConditionException;
 import org.interledger.cryptoconditions.UnsupportedLengthException;
 
@@ -90,21 +90,14 @@ public class FulfillmentInputStream extends OerInputStream {
                         Fulfillment ff = stream01.readFulfillment();
                         ff_l.add(ff);
                     }
-                    return new ThresholdSHA256(ConditionType.THRESHOLD_SHA256, payload, threshold, weight_l, ff_l);
+                    return new ThresholdSHA256Fulfillment(ConditionType.THRESHOLD_SHA256, payload, threshold, weight_l, ff_l);
                 default:
                     throw new RuntimeException("Unimplemented fulfillment type encountered.");
             }
         } catch (Exception e) {
             throw new RuntimeException(e.toString(), e);
         } finally {
-            try {
-                stream01.close();
-            } catch (Exception e) {
-                // TODO: review 
-                // When the stream is closed the data has already been read, so no need to raise
-                // exception (but an resource can be leaked). This must be something very un-usual.
-                System.out.println("WARN: Exception raised while closing the stream due to " + e.toString());
-            }
+            stream01.close();
         }
 
     }

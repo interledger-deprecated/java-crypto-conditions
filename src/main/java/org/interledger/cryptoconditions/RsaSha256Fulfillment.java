@@ -1,15 +1,19 @@
 package org.interledger.cryptoconditions;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.EnumSet;
 
+import org.interledger.cryptoconditions.FulfillmentBase;
+import org.interledger.cryptoconditions.encoding.ByteArrayOutputStreamPredictor;
 import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
 import org.interledger.cryptoconditions.types.FulfillmentPayload;
 import org.interledger.cryptoconditions.types.MessagePayload;
 import org.interledger.cryptoconditions.util.Crypto;
+
 
 /**
  * Implementation of a PREIMAGE-SHA-256 crypto-condition fulfillment
@@ -19,7 +23,7 @@ import org.interledger.cryptoconditions.util.Crypto;
  * @author adrianhopebailie
  *
  */
-public class RsaSha256Fulfillment implements Fulfillment {
+public class RsaSha256Fulfillment extends FulfillmentBase {
 
     private static final ConditionType CONDITION_TYPE = ConditionType.RSA_SHA256;
     private static final EnumSet<FeatureSuite> BASE_FEATURES = EnumSet.of(
@@ -84,10 +88,26 @@ public class RsaSha256Fulfillment implements Fulfillment {
         return ConditionType.PREIMAGE_SHA256;
     }
 
+    private int calculateMaxFulfillmentLength() {
+        // Calculate resulting total maximum fulfillment size
+        ByteArrayOutputStreamPredictor buffer = new ByteArrayOutputStreamPredictor();
+        FulfillmentOutputStream ffos = new FulfillmentOutputStream(buffer);
+        try {
+            ffos.writeOctetString(this.modulus); // TODO: FIXME. Recheck. Twice the modulus??
+            ffos.writeOctetString(this.modulus);
+            int result = buffer.size();
+            return result;
+        } catch(Exception e) {
+            throw new RuntimeException(e.toString(), e);
+        } finally {
+            ffos.close(); 
+        }
+    }
+    
     @Override
     public Condition generateCondition() {
         byte[] fingerprint = Crypto.getSha256Hash(modulus);
-        int maxFulfillmentLength = modulus.length;
+        int maxFulfillmentLength = this.calculateMaxFulfillmentLength();
 
         return new ConditionImpl(
                 CONDITION_TYPE,
@@ -96,54 +116,33 @@ public class RsaSha256Fulfillment implements Fulfillment {
                 maxFulfillmentLength);
     }
 
-    private byte[] calculatePayload() {
-
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        FulfillmentOutputStream stream = new FulfillmentOutputStream(buffer);
-
-        try {
-            stream.writeOctetString(modulus);
-            stream.writeOctetString(signature);
-            stream.flush();
-            return buffer.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    @Override
-    public EnumSet<FeatureSuite> getFeatures() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public FulfillmentPayload getPayload() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Condition getCondition() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String toURI() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    private byte[] calculatePayload() {
+//
+//        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+//        FulfillmentOutputStream stream = new FulfillmentOutputStream(buffer);
+//
+//        try {
+//            stream.writeOctetString(modulus);
+//            stream.writeOctetString(signature);
+//            stream.flush();
+//            return buffer.toByteArray();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        } finally {
+//            stream.close();
+//        }
+//    }
 
     @Override
     public boolean validate(MessagePayload message) {
-        // TODO Auto-generated method stub
-        return false;
+//        const pssResult = rsa.verify(this.modulus, message, this.signature)
+//
+//        if (!pssResult) {
+//          throw new ValidationError('Invalid RSA signature')
+//        }
+//
+//        return true;
+        throw new RuntimeException("Not implemented"); // TODO: FIXME
     }
+
 }
