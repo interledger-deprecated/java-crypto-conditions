@@ -47,18 +47,14 @@ public class FulfillmentFactory {
             FulfillmentInputStream ffis = new FulfillmentInputStream(bais);
             Fulfillment result = ffis.readFulfillment();
             try {
-                ffis.close();
-            } catch (Exception e) {/*no exceptions for in-memory bytearrays*/
-            }
+                ffis.close(); // TODO: FIXME Drop throw IOException
+            } catch (Exception e) {/*no exceptions for in-memory bytearrays*/ }
             return result;
         } catch (Exception e) {
             // This must never happen. The stream sources are in-memory byte arrays.
             throw new RuntimeException(e.toString(), e);
         } finally {
-            try {
-                ffos.close();
-            } catch (Exception e) {/*no exceptions for in-memory bytearrays*/
-            }
+            ffos.close();
         }
 
 //        // Get Fulfillment class (Sha256, PreimageSha256, ...)

@@ -40,7 +40,7 @@ public abstract class FulfillmentBase implements Fulfillment {
         // this.condition = this.generateCondition(payload);
     }
 
-    public Condition getCondition() {
+    final public Condition getCondition() {
         if (condition == null) {
             condition = generateCondition();
         }
@@ -53,7 +53,7 @@ public abstract class FulfillmentBase implements Fulfillment {
     }
 
     @Override
-    public FulfillmentPayload getPayload() {
+    final public FulfillmentPayload getPayload() {
         if (this.payload == null) {
             throw new RuntimeException("Payload not YET initialized");
         }
@@ -62,7 +62,7 @@ public abstract class FulfillmentBase implements Fulfillment {
     }
 
     @Override
-    public EnumSet<FeatureSuite> getFeatures() {
+    final public EnumSet<FeatureSuite> getFeatures() {
         if (this.condition == null) {
             this.condition = this.generateCondition();
         }
@@ -70,19 +70,19 @@ public abstract class FulfillmentBase implements Fulfillment {
     }
 
     @Override
-    public String toURI() {
+    final public String toURI() {
         return "cf"
                 + ":" + Integer.toHexString(this.getType().getTypeCode())
                 + ":" + Base64Url.encode(this.getPayload().payload);
     }
 
     @Override
-    public String toString() {
+    final public String toString() {
         return toURI();
     }
 
     @Override
-    public byte[] serializeBinary () {
+    final public byte[] serializeBinary () {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         FulfillmentOutputStream oos = new FulfillmentOutputStream(os);
         try{
@@ -93,8 +93,7 @@ public abstract class FulfillmentBase implements Fulfillment {
         }catch(Exception e) {
             throw new RuntimeException(e.toString(), e);
         } finally {
-            // FIXME: Refactor all *Stream.close in one utility function.
-            try { oos.close(); } catch (Exception e) { System.out.println(e.toString()); /* TODO: Inject Logger */ }
+            oos.close();
         }
       }
 }
