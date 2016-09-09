@@ -16,13 +16,13 @@ public class Crypto {
      *
      * Convenience function which hides NoSuchAlgorithmException.
      *
-     * @param preimage
-     * @return hash of preimage
+     * @param input
+     * @return hash of input
      */
-    public static byte[] getSha256Hash(byte[] preimage) {
+    public static byte[] getSha256Hash(byte[] input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return digest.digest(preimage);
+            return digest.digest(input);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e);
         }
