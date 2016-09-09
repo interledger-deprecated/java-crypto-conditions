@@ -15,6 +15,7 @@ import java.security.spec.RSAPrivateKeySpec;
 //import java.security.spec.RSAPublicKeySpec;
 
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.KeyFactory;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -61,14 +62,19 @@ public class RsaSha256Fulfillment extends FulfillmentBase {
 
     static {
         try {
-            signatureEngine = Signature.getInstance("SHA1withRSA", "BC");
-            kf = KeyFactory.getInstance("RSA"); 
+            signatureEngine = Signature.getInstance("SHA1withRSA"/*, "BC"*/);
         } catch (Exception e) {
             throw new RuntimeException("Couldn't start Signature Engine bouncycastle. \n"
                     + "Check that bcprov*.jar is on your classpath.\n"
                     + "This code was originally compiled against bcprov-jdk15-1.46.jar from the Maven repository available at. \n"
                     + "http://repo2.maven.org/maven2/org/bouncycastle/bcprov-jdk15/1.46/bcprov-jdk15-1.46.jar ");
         }
+        try {
+            kf = KeyFactory.getInstance("RSA");
+        } catch (Exception e) {
+            throw new RuntimeException(e.toString(), e);
+        }
+
     }
 
     public static RsaSha256Fulfillment BuildFromSecrets(KeyPayload privateKey, byte[] message) {
