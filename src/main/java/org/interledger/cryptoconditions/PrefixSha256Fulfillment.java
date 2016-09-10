@@ -78,7 +78,7 @@ public class PrefixSha256Fulfillment extends FulfillmentBase {
 
     @Override
     public Condition generateCondition() {
-        Condition subcondition = subfulfillment.generateCondition();
+        Condition subcondition = subfulfillment.getCondition();
 
         EnumSet<FeatureSuite> features = subcondition.getFeatures();
         features.addAll(BASE_FEATURES);

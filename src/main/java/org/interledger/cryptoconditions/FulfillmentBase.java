@@ -96,4 +96,15 @@ public abstract class FulfillmentBase implements Fulfillment {
             oos.close();
         }
       }
+    
+    /**
+     * Generate the condition for this fulfillment
+     *
+     * This may be a computationally intensive operation as it will recurse
+     * through sub-fulfillments as required to generate sub-conditions.
+     *
+     * @return a Condition that is fulfilled by this object
+     */
+    // TODO:(0) make private. Only getCondition must call it. 
+    abstract protected Condition generateCondition();
 }

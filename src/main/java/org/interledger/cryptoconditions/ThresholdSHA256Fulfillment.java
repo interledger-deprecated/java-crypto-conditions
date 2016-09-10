@@ -139,7 +139,7 @@ public class ThresholdSHA256Fulfillment extends FulfillmentBase {
             for (int idx = 0; idx < this.subfulfillments.size(); idx++) {
             	WeightedFulfillment w_ff = this.subfulfillments.get(idx);
                 cos.writeVarUInt(w_ff.weight);
-                cos.writeCondition(w_ff.subff.generateCondition());
+                cos.writeCondition(w_ff.subff.getCondition());
             }
             fingerprint = baos.toByteArray();
         } catch(Exception e){

@@ -162,7 +162,7 @@ public class RsaSha256Fulfillment extends FulfillmentBase {
     }
     
     @Override
-    public Condition generateCondition() {
+    protected Condition generateCondition() {
         byte[] fingerprint = Crypto.getSha256Hash(modulus.toByteArray());
         int maxFulfillmentLength = this.calculateMaxFulfillmentLength();
 
