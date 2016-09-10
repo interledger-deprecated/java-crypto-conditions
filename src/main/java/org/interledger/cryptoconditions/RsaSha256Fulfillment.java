@@ -1,10 +1,13 @@
 package org.interledger.cryptoconditions;
 
 import java.math.BigInteger;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPublicKeySpec;
+//import java.security.spec.PKCS8EncodedKeySpec;
+
 import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.EnumSet;
+import java.util.Enumeration;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -14,6 +17,7 @@ import java.security.PublicKey;
 import java.security.spec.RSAPrivateKeySpec;
 //import java.security.spec.RSAPublicKeySpec;
 
+import sun.security.util.DerInputStream;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.KeyFactory;
@@ -21,7 +25,9 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
 
-
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.util.encoders.Base64;
 import org.interledger.cryptoconditions.FulfillmentBase;
 import org.interledger.cryptoconditions.encoding.ByteArrayOutputStreamPredictor;
 import org.interledger.cryptoconditions.encoding.FulfillmentOutputStream;
@@ -77,13 +83,15 @@ public class RsaSha256Fulfillment extends FulfillmentBase {
 
     }
 
-    public static RsaSha256Fulfillment BuildFromSecrets(KeyPayload privateKey, byte[] message) {
+    public static RsaSha256Fulfillment BuildFromSecrets(String PEMEncodedPrivateKey, byte[] message) {
         ConditionType type = ConditionType.RSA_SHA256;
-        RSAPrivateKeySpec privKey;
+        
         try {
-            privKey = (RSAPrivateKeySpec)kf.generatePrivate(new PKCS8EncodedKeySpec(privateKey.payload));
-            signatureEngine.initSign((PrivateKey) privKey, new SecureRandom());
-            BigInteger modulus = privKey.getModulus();
+//            privKey = (RSAPrivateKeySpec)kf.generatePrivate(new PKCS8EncodedKeySpec(privateKey.payload));
+            RSAPrivateKeySpec privKeySpec = RsaSha256Fulfillment.parsePEMEncodedPrivateKey(PEMEncodedPrivateKey);
+            PrivateKey privKey = kf.generatePrivate(privKeySpec);
+            signatureEngine.initSign(privKey, new SecureRandom());
+            BigInteger modulus = privKeySpec.getModulus();
             signatureEngine.update(message);
             byte[] signature =  signatureEngine.sign();
     
@@ -133,7 +141,7 @@ public class RsaSha256Fulfillment extends FulfillmentBase {
 
     @Override
     public ConditionType getType() {
-        return ConditionType.PREIMAGE_SHA256;
+        return ConditionType.RSA_SHA256;
     }
 
     private int calculateMaxFulfillmentLength() {
@@ -191,37 +199,44 @@ public class RsaSha256Fulfillment extends FulfillmentBase {
         }
     }
 
-
-  public static void main(String[] args) throws Exception {
-    Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-
-    RSAPrivateKeySpec privKey;
-    PublicKey pubKey;
-
-    if (Boolean.parseBoolean("false") /*generate private key */) {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
-        keyGen.initialize(512, new SecureRandom());
-        KeyPair keyPair = keyGen.generateKeyPair();
-        privKey = (RSAPrivateKeySpec)keyPair.getPrivate();
-        pubKey = keyPair.getPublic();
-    } else if (true /* read private key from Byte Array */) {
-        byte[] privateKeyBytes = "adfafljkhlk ".getBytes();
-        privKey = (RSAPrivateKeySpec)kf.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
+    private static RSAPrivateKeySpec parsePEMEncodedPrivateKey(String privKey) {
+        // REF:stackoverflow.com/questions/7216969/getting-rsa-private-key-from-pem-base64-encoded-private-key-file        
+        String privKeyPEM = privKey
+            .replace("-----BEGIN RSA PRIVATE KEY-----\n", "")
+            .replace("-----END RSA PRIVATE KEY-----"    , "");
         
-        byte[] publicKeyBytes  = "asdlfjahdflak".getBytes();
-        pubKey = kf.generatePublic(new X509EncodedKeySpec(publicKeyBytes));
+        // Base64 decode the data
+        
+        byte[] encodedPrivateKey = Base64.decode(privKeyPEM);
+        
+        try {
+            ASN1Sequence primitive = (ASN1Sequence) ASN1Sequence
+                .fromByteArray(encodedPrivateKey);
+            Enumeration<?> e = primitive.getObjects();
+            BigInteger v = ((DERInteger) e.nextElement()).getValue();
+        
+            int version = v.intValue();
+            if (version != 0 && version != 1) {
+                throw new IllegalArgumentException("wrong version for RSA private key");
+            }
+            /**
+             * In fact only modulus and private exponent are in use.
+             */
+            BigInteger modulus = ((DERInteger) e.nextElement()).getValue();
+            BigInteger publicExponent = ((DERInteger) e.nextElement()).getValue();
+            BigInteger privateExponent = ((DERInteger) e.nextElement()).getValue();
+//            BigInteger prime1 = ((DERInteger) e.nextElement()).getValue();
+//            BigInteger prime2 = ((DERInteger) e.nextElement()).getValue();
+//            BigInteger exponent1 = ((DERInteger) e.nextElement()).getValue();
+//            BigInteger exponent2 = ((DERInteger) e.nextElement()).getValue();
+//            BigInteger coefficient = ((DERInteger) e.nextElement()).getValue();
+        
+            RSAPrivateKeySpec spec = new RSAPrivateKeySpec(modulus, privateExponent);
+            return spec;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.toString(),e);
+        }
     }
 
-    signatureEngine.initSign((PrivateKey) privKey, new SecureRandom());
-
-    byte[] message = "abc".getBytes();
-    signatureEngine.update(message);
-
-    byte[] sigBytes = signatureEngine.sign();
-    
-    
-    signatureEngine.initVerify(pubKey);
-    signatureEngine.update(message);
-    System.out.println(signatureEngine.verify(sigBytes));
-  }
 }
