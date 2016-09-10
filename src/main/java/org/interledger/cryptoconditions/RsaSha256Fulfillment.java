@@ -105,12 +105,13 @@ public class RsaSha256Fulfillment extends FulfillmentBase {
 
     private RsaSha256Fulfillment(ConditionType type, FulfillmentPayload payload, BigInteger modulus, byte[] signature) {
         super(type, payload);
-        if (modulus.compareTo(BigInteger.valueOf(MINIMUM_MODULUS_SIZE)) == -1) {
+        // TODO: CHECK toString(10) fails with test-data
+        if (modulus.toString(16).length() < MINIMUM_MODULUS_SIZE ) {
             throw new RuntimeException("Modulus must be more than "
                     + Integer.toString(MINIMUM_MODULUS_SIZE) + " bytes.");
         }
 
-        if (modulus.compareTo(BigInteger.valueOf(MAXIMUM_MODULUS_SIZE)) == +1 ) {
+        if (modulus.toString(16).length() > MAXIMUM_MODULUS_SIZE ) {
             throw new RuntimeException("Modulus must be less than "
                     + Integer.toString(MAXIMUM_MODULUS_SIZE) + " bytes.");
         }
@@ -216,6 +217,7 @@ public class RsaSha256Fulfillment extends FulfillmentBase {
             BigInteger v = ((DERInteger) e.nextElement()).getValue();
         
             int version = v.intValue();
+
             if (version != 0 && version != 1) {
                 throw new IllegalArgumentException("wrong version for RSA private key");
             }
