@@ -75,8 +75,6 @@ public class FulfillmentInputStream extends OerInputStream {
                     byte[] bytesModulus = stream01.readOctetString();
                     byte[] bytesSignatureRSASHA256 = stream01.readOctetString();
                     BigInteger modulus = new BigInteger(1, bytesModulus); // TODO: RECHECK
-System.out.println(modulus);
-System.out.println(new BigInteger(bytesSignatureRSASHA256));
                     SignaturePayload signature01 = new SignaturePayload(bytesSignatureRSASHA256);
                     return new RsaSha256Fulfillment(ConditionType.RSA_SHA256, payload, modulus, signature01);
                 case ED25519:
