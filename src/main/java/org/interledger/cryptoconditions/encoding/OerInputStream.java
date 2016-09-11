@@ -87,6 +87,7 @@ public class OerInputStream extends InputStream {
         byte[] value = new byte[length];
         int bytesRead = 0;
         bytesRead = stream.read(value, 0, length);
+
         if (bytesRead < length) {
             throw new EOFException("Unexpected EOF when trying to decode OER data.");
         }
@@ -101,23 +102,23 @@ public class OerInputStream extends InputStream {
     protected int readLengthIndicator()
             throws IOException, UnsupportedLengthException, IllegalLengthIndicatorException {
         int length = stream.read();
+System.out.println("deteleme:  byte length = (byte) stream.read():"+length);
 
         verifyNotEOF(length);
 
         if (length < 128) {
             return length;
         } else if (length > 128) {
-            int lengthOfLength = length - 127;
+            int lengthOfLength = length - 128;
             if (lengthOfLength > 3) {
                 throw new UnsupportedLengthException("This implementation only supports "
                         + "variable length fields up to 16777215 bytes.");
             }
-
             length = 0;
-            for (int i = 1; i <= lengthOfLength; i++) {
+            for (int i = lengthOfLength; i > 0; i--) {
                 int next = stream.read();
                 verifyNotEOF(next);
-                length += (next << (8 * (length - i)));
+                length += (next << (8 * (i - 1)));
             }
             return length;
         } else {

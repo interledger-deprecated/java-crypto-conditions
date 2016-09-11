@@ -2,14 +2,17 @@ package org.interledger.cryptoconditions.encoding;
 
 import java.io.ByteArrayInputStream;
 
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 
 import org.interledger.cryptoconditions.ConditionType;
 import org.interledger.cryptoconditions.Fulfillment;
 import org.interledger.cryptoconditions.PrefixSha256Fulfillment;
 import org.interledger.cryptoconditions.PreimageSha256Fulfillment;
 import org.interledger.cryptoconditions.Ed25519Fulfillment;
+import org.interledger.cryptoconditions.RsaSha256Fulfillment;
 import org.interledger.cryptoconditions.ThresholdSHA256Fulfillment;
 import org.interledger.cryptoconditions.UnsupportedConditionException;
 import org.interledger.cryptoconditions.UnsupportedLengthException;
@@ -62,9 +65,20 @@ public class FulfillmentInputStream extends OerInputStream {
                     Fulfillment subfulfillment = stream01.readFulfillment();
                     return new PrefixSha256Fulfillment(ConditionType.PREFIX_SHA256, payload, prefix, subfulfillment);
                 case RSA_SHA256:
-
-                // TODO:(0)
-                // return new RSA_SHA256Fulfillment(ConditionType.RSA_SHA256, payload);
+                    /*
+                     * REF: https://interledger.org/five-bells-condition/spec.html#rfc.section.4.4.2
+                     * RsaSha256FulfillmentPayload ::= SEQUENCE {
+                     * modulus OCTET STRING (SIZE(128..512)),
+                     * signature OCTET STRING (SIZE(128..512))
+                     * }
+                     */
+                    byte[] bytesModulus = stream01.readOctetString();
+                    byte[] bytesSignatureRSASHA256 = stream01.readOctetString();
+                    BigInteger modulus = new BigInteger(1, bytesModulus); // TODO: RECHECK
+System.out.println(modulus);
+System.out.println(new BigInteger(bytesSignatureRSASHA256));
+                    SignaturePayload signature01 = new SignaturePayload(bytesSignatureRSASHA256);
+                    return new RsaSha256Fulfillment(ConditionType.RSA_SHA256, payload, modulus, signature01);
                 case ED25519:
                     /*
                  * REF: https://interledger.org/five-bells-condition/spec.html#rfc.section.4.5.2
@@ -74,10 +88,10 @@ public class FulfillmentInputStream extends OerInputStream {
                  * }
                      */
                     byte[] bytesPublicKey = stream01.readOctetString();
-                    byte[] bytesSignature = stream01.readOctetString();
+                    byte[] bytesSignatureEd25519 = stream01.readOctetString();
                     java.security.PublicKey publicKey = Ed25519Fulfillment.publicKeyFromByteArray(new KeyPayload(bytesPublicKey));
-                    SignaturePayload signature = new SignaturePayload(bytesSignature);
-                    return new Ed25519Fulfillment(ConditionType.ED25519, payload, publicKey, signature);
+                    SignaturePayload signature02 = new SignaturePayload(bytesSignatureEd25519);
+                    return new Ed25519Fulfillment(ConditionType.ED25519, payload, publicKey, signature02);
                 case THRESHOLD_SHA256:
                     int threshold = stream01.readVarUInt();
                     int conditionCount = stream01.readVarUInt();

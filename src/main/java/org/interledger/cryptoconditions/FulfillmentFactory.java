@@ -45,6 +45,7 @@ public class FulfillmentFactory {
             byte[] input_stream = baos.toByteArray();
             ByteArrayInputStream bais = new ByteArrayInputStream(input_stream);
             FulfillmentInputStream ffis = new FulfillmentInputStream(bais);
+
             Fulfillment result = ffis.readFulfillment();
             try {
                 ffis.close(); // TODO: FIXME Drop throw IOException
@@ -56,24 +57,6 @@ public class FulfillmentFactory {
         } finally {
             ffos.close();
         }
-
-//        // Get Fulfillment class (Sha256, PreimageSha256, ...)
-//        Class<?> clazz = FulfillmentRegistry.getClass(type);
-//        Constructor<?> constructor;
-//        try {
-//            constructor = clazz.getConstructor(ConditionType.class, FulfillmentPayload.class);
-//        } catch (NoSuchMethodException e) {
-//            
-//            throw new RuntimeException(clazz.getCanonicalName() +
-//                    " doesn't look to implement constructor "+
-//                    clazz.getSimpleName() + "(ConditionType type, byte[] payload)");
-//        }
-//        try {
-//            Fulfillment result = (Fulfillment)constructor.newInstance( type , payload);
-//            return result;
-//        } catch (Exception e) {
-//            throw new RuntimeException(e.toString(), e);
-//        }
     }
 
     /*
