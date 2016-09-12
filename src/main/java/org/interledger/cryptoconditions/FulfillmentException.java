@@ -7,6 +7,8 @@ package org.interledger.cryptoconditions;
  */
 public class FulfillmentException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * Constructs an instance of {@code FulfillmentException} with the specified
      * detail message.

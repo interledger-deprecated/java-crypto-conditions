@@ -2,6 +2,7 @@ package org.interledger.cryptoconditions;
 
 import java.math.BigInteger;
 
+
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.io.ByteArrayOutputStream;
@@ -13,7 +14,7 @@ import java.security.KeyFactory;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
-import java.security.spec.X509EncodedKeySpec;
+//import java.security.spec.X509EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 
@@ -162,7 +163,6 @@ public class RsaSha256Fulfillment extends FulfillmentBase {
     
     @Override
     protected Condition generateCondition() {
-System.out.println("deleteme generateCondition");
         byte[] fingerprint = Crypto.getSha256Hash(modulus.toByteArray());
         int maxFulfillmentLength = this.calculateMaxFulfillmentLength();
 
@@ -226,7 +226,7 @@ System.out.println("deleteme generateCondition");
              * In fact only modulus and private exponent are in use.
              */
             BigInteger modulus = ((DERInteger) e.nextElement()).getValue();
-            BigInteger publicExponent = ((DERInteger) e.nextElement()).getValue();
+            /*BigInteger publicExponent = */((DERInteger) e.nextElement()).getValue();
             BigInteger privateExponent = ((DERInteger) e.nextElement()).getValue();
 //            BigInteger prime1 = ((DERInteger) e.nextElement()).getValue();
 //            BigInteger prime2 = ((DERInteger) e.nextElement()).getValue();
