@@ -7,7 +7,7 @@ targetCompatibility = 1.6
 sourceCompatibility = 1.6
 
 group = 'org.interledger'
-version = java_crypto_conditions_version
+version = '0.5.0-SNAPSHOT'
 description = 'Crypto Conditions'
 
 sourceCompatibility = 1.6
@@ -32,9 +32,9 @@ repositories {
 }
 
 dependencies {
-    compile     "net.i2p.crypto:eddsa:${eddsa_version}"
-    compile     "org.bouncycastle:bcprov-jdk15:${bcprov_jdk15_version}"
-    testCompile "junit:junit:${junit_version}"
+    compile     "net.i2p.crypto:eddsa:0.1.0"
+    compile     "org.bouncycastle:bcprov-jdk15:1.46"
+    testCompile "junit:junit:4.12"
 }
 
 //Maven pom compatibility task:
