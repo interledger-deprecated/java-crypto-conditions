@@ -21,7 +21,7 @@ public class FulfillmentFactory {
             throw new IllegalArgumentException("serializedFulfillment was an empy string");
         }
         if (!uri.startsWith("cf:")) {
-            throw new IllegalArgumentException("serializedFulfillment must start with 'cf:'");
+            throw new IllegalArgumentException("serializedFulfillment '"+uri+"' must start with 'cf:'");
         }
 
         java.util.regex.Matcher m = fulfillmentFormat.matcher(uri);
