@@ -111,9 +111,8 @@ Any contribution is very much appreciated!
 
 ## TODO
 
-  - Parse from URI
-  - Unit tests
-  - Test runner for shared integration tests from [five-bells-condition](https://github.com/interledgerjs/five-bells-condition/tree/master/test).
+  - More Unit tests
+  - Finish implementeing test runner for shared integration tests from [https://github.com/rfcs/crypto-conditions](https://github.com/rfcs/crypto-conditions).
   - Helper functions for generating fulfillments
   	- From private keys and messages
   	- Using a builder
