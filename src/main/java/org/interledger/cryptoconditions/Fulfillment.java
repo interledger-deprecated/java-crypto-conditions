@@ -1,84 +1,13 @@
 package org.interledger.cryptoconditions;
 
-import java.util.EnumSet;
-
-import org.interledger.cryptoconditions.types.*;
-
-/**
- * Fulfillments are cryptographically verifiable messages that prove an event
- * occurred.
- *
- * If you transmit a fulfillment, then everyone who has the condition can agree
- * that the condition has been met.
- *
- * A fulfillment fulfills a Condition.
- *
- * The fulfillment payload and condition type can be used to regenerate the
- * condition so that it is possible to compare the fingerprint of the condition.
- *
- * @author adrianhopebailie
- *
- */
 public interface Fulfillment {
 
-    /**
-     * Get the type of condition that is fulfilled by this fulfillment
-     *
-     * @see ConditionType
-     *
-     * @return the type of the condition that this fulfills
-     */
-    ConditionType getType();
+  ConditionType getType();
 
-    /**
-     * Get the features requited for this fulfillment
-     *
-     * @see FeatureSuite
-     *
-     * @return the type of the condition that this fulfills
-     */
-    EnumSet<FeatureSuite> getFeatures();
+  byte[] getEncoded();
 
-    /**
-     * Get the fulfillment data
-     *
-     * @return raw bytes representing the fulfillment
-     */
-    FulfillmentPayload getPayload();
+  Condition getCondition();
 
-    Condition getCondition();
+  boolean verify(Condition condition, byte[] message);
 
-    /**
-     * Serialize/Print to string the fulfillment
-     *
-     * @return (ASCII-)URI representation of the Fulfillment
-     */
-    public String toURI();
-
-    /**
-     * Validate this fulfillment.
-     *
-     * Final classes must implement this method.
-     *
-     * @return {boolean} Validation result
-     */
-    public boolean validate(MessagePayload message);
-
-    /*
-     * FIXME TODO:(0)
-     * Once the fulfillment has been generated, it's a good
-     * practice to clear the secret (preimage, private password, ...)
-     */
-    // public void clearSecrets();
-
-    /**
-     * Serialize fulfillment to a buffer.
-     *
-     * Encodes the fulfillment as a string of bytes. This is used internally for
-     * encoding subfulfillments, but can also be used to passing around
-     * fulfillments in a binary protocol for instance.
-     *
-     * @return {Buffer} Serialized fulfillment
-     */
-    byte[] serializeBinary();
 }
