@@ -27,7 +27,10 @@ public class CryptoConditionUri {
   
   //This is a stricter version based on limitations of the current
   //implementation. Specifically, we can't handle bitmasks greater than 32 bits.
-  public static final String CONDITION_REGEX_STRICT = "^ni://([A-Za-z0-9_-]?)/sha-256;([a-zA-Z0-9_-]{0,86})\\?(.+)$";
+  public static final String SCHEME_PREFIX = "ni://";
+  public static final String HASH_FUNCTION_NAME = "sha-256";
+  
+  public static final String CONDITION_REGEX_STRICT = "^" + SCHEME_PREFIX + "([A-Za-z0-9_-]?)/" + HASH_FUNCTION_NAME + ";([a-zA-Z0-9_-]{0,86})\\?(.+)$";
   
   public static class QueryParams {
     public static final String COST = "cost";
@@ -40,6 +43,7 @@ public class CryptoConditionUri {
    *
    * @param uri
    *  The crypto-condition formatted as a uri.
+   *  
    * @return
    *  The crypto condition
    */

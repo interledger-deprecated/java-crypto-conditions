@@ -6,10 +6,14 @@ import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.interledger.cryptoconditions.der.DEROutputStream;
 import org.interledger.cryptoconditions.der.DERTags;
+import org.interledger.cryptoconditions.uri.CryptoConditionUri;
+import org.interledger.cryptoconditions.uri.NamedInformationUri;
+import org.interledger.cryptoconditions.uri.NamedInformationUri.HashFunction;
 
 /**
  * The ConditionBase class provides shared logic for 
@@ -90,31 +94,28 @@ public abstract class ConditionBase implements Condition {
 
   @Override
   public URI getUri() {
-    //FIXME: these strings should be constants somewhere, maybe use the ones in 
-    //CryptoConditionUri (or move those to here?)
     
     if(uri == null) {
       
-      StringBuilder sb = new StringBuilder();
-      sb.append("ni:///").append("sha-256;")
-          .append(Base64.getUrlEncoder().withoutPadding().encodeToString(getFingerprint()))
-          .append("?").append("fpt=").append(getType().toString().toLowerCase()).append("&cost=")
-          .append(getCost());
-
+      Map<String, String> params = new HashMap<>();
+      params.put(CryptoConditionUri.QueryParams.TYPE, getType().toString().toLowerCase());
+      params.put(CryptoConditionUri.QueryParams.COST, Long.toString(getCost()));
+      
       if (this instanceof CompoundCondition) {
         CompoundCondition cc = (CompoundCondition)this;
         if (cc.getSubtypes() != null && !cc.getSubtypes().isEmpty()) {
-          sb.append("&subtypes=")
-            .append(ConditionType.getEnumOfTypesAsString(cc.getSubtypes()));
+          params.put(CryptoConditionUri.QueryParams.SUBTYPES, ConditionType.getEnumOfTypesAsString(cc.getSubtypes()));
         }
       }
-
-      uri = URI.create(sb.toString());
+      
+      uri = NamedInformationUri.getUri(HashFunction.SHA_256, getFingerprint(), params);
+      
     }
     
     return uri;
     
   }
+  
 
   /**
    * Overrides the default {@link java.lang.Object#hashCode()} to
