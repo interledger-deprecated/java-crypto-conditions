@@ -33,6 +33,16 @@ public class Ed25519Sha256Fulfillment implements Fulfillment {
   public ConditionType getType() {
     return ConditionType.ED25519_SHA256;
   }
+  
+  public EdDSAPublicKey getPublicKey() {
+    return publicKey;
+  }
+  
+  public byte[] getSignature() {
+    byte[] signature = new byte[this.signature.length];
+    System.arraycopy(this.signature, 0, signature, 0, this.signature.length);
+    return signature;
+  }
 
   @Override
   public byte[] getEncoded() {

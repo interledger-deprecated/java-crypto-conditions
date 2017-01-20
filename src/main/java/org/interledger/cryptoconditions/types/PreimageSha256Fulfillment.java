@@ -24,6 +24,12 @@ public class PreimageSha256Fulfillment implements Fulfillment {
     return ConditionType.PREIMAGE_SHA256;
   }
 
+  public byte[] getPreimage() {
+    byte[] preimage = new byte[this.preimage.length];
+    System.arraycopy(this.preimage, 0, preimage, 0, this.preimage.length);
+    return preimage;
+  }
+  
   @Override
   public byte[] getEncoded() {
     try {

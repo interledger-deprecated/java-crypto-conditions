@@ -43,9 +43,9 @@ public class PrefixSha256Condition extends CompoundSha256Condition implements Co
       // Build prefix and subcondition
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       DEROutputStream out = new DEROutputStream(baos);
-      out.writeOctetString(prefix);
-      out.writeInteger(BigInteger.valueOf(maxMessageLength));
-      out.writeOctetString(subcondition.getEncoded());
+      out.writeTaggedObject(0, prefix);
+      out.writeTaggedObject(1, BigInteger.valueOf(maxMessageLength).toByteArray());
+      out.writeTaggedConstructedObject(2, subcondition.getEncoded());
       out.close();
       byte[] buffer = baos.toByteArray();
 

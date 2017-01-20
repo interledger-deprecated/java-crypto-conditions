@@ -1,4 +1,4 @@
-package org.interledger.cryptoconditions;
+package org.interledger.cryptoconditions.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.EnumSet;
 
+import org.interledger.cryptoconditions.ConditionType;
 import org.junit.Test;
 
 public class Test_ConditionType {
@@ -65,9 +66,9 @@ public class Test_ConditionType {
     
     assertNotNull(bitSet);
     assertEquals(2, bitSet.length);
-    //the bit string should be '10000', right padded to 8 bits. the first byte is the pad length
+    //the bit string should be '00001', right padded to 8 bits. the first byte is the pad length
     assertEquals(3, bitSet[0]);
-    assertEquals(0x80, Byte.toUnsignedInt(bitSet[1])); 
+    assertEquals(0x08, Byte.toUnsignedInt(bitSet[1])); 
   }
   
   @Test
@@ -80,7 +81,7 @@ public class Test_ConditionType {
 
   @Test
   public void test_getEnumOfTypesFromBitString_MSB() {
-    EnumSet<ConditionType> set = ConditionType.getEnumOfTypesFromBitString(new byte[] {0x03, (byte) 0x80});
+    EnumSet<ConditionType> set = ConditionType.getEnumOfTypesFromBitString(new byte[] {0x03, (byte) 0x08});
     
     assertNotNull(set);
     assertEquals(1, set.size());

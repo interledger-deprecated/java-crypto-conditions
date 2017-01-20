@@ -13,12 +13,12 @@ import org.interledger.cryptoconditions.uri.CryptoConditionUri;
 import org.junit.Test;
 
 //directly translated from five-bells-condition tests
-public class Test_CryptoConditionURIParser {
+public class Test_CryptoConditionUri {
 
   @Test
   public void test_parse_preimage_sha_256() throws URIEncodingException {
     URI uri = URI.create(
-        "ni://sha-256;47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU?fpt=preimage-sha-256&cost=0");
+        "ni:///sha-256;47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU?fpt=preimage-sha-256&cost=0");
 
     Condition condition = CryptoConditionUri.parse(uri);
 
@@ -31,7 +31,7 @@ public class Test_CryptoConditionURIParser {
   @Test
   public void test_parse_prefix_sha_256() throws URIEncodingException {
     URI uri = URI.create(
-        "ni://sha-256;47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU?fpt=prefix-sha-256&cost=0&subtypes=preimage-sha-256,prefix-sha-256");
+        "ni:///sha-256;47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU?fpt=prefix-sha-256&cost=0&subtypes=preimage-sha-256,prefix-sha-256");
 
     Condition condition = CryptoConditionUri.parse(uri);
 

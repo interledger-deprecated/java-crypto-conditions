@@ -25,13 +25,27 @@ public class PrefixSha256Fulfillment implements Fulfillment {
 
     this.maxMessageLength = maxMessageLength;
 
-    // FIXME Copy?
+    // FIXME Safe copy?
     this.subfulfillment = subfulfillment;
   }
 
   @Override
   public ConditionType getType() {
     return ConditionType.PREFIX_SHA256;
+  }
+  
+  public byte[] getPrefix() {
+    byte[] prefix = new byte[this.prefix.length];
+    System.arraycopy(this.prefix, 0, prefix, 0, this.prefix.length);
+    return prefix;
+  }
+  
+  public long getMaxMessageLenght() {
+    return maxMessageLength;
+  }
+  
+  public Fulfillment getSubfulfillment() {
+    return subfulfillment;
   }
 
   @Override

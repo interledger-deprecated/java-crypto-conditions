@@ -38,7 +38,7 @@ public class Ed25519Sha256Condition extends Sha256Condition implements SimpleCon
       // Write public key
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       DEROutputStream out = new DEROutputStream(baos);
-      out.writeOctetString(key.getA().toByteArray());
+      out.writeTaggedObject(0, key.getA().toByteArray());
       out.close();
       byte[] buffer = baos.toByteArray();
 

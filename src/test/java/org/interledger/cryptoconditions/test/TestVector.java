@@ -5,6 +5,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TestVector {
+
+  private String name;
   private TestVectorJson json;
   private long cost;
   private List<String> subtypes;
@@ -14,6 +16,14 @@ public class TestVector {
   private String conditionUri;
   private String message;
 
+  public String getName() {
+    return name;
+  }
+  
+  public void setName(String name) {
+    this.name = name;
+  }
+  
   @JsonProperty
   public TestVectorJson getJson() {
     return json;
@@ -85,5 +95,10 @@ public class TestVector {
 
   public void setMessage(String message) {
     this.message = message;
+  }
+  
+  @Override
+  public String toString() {
+    return getName();
   }
 }

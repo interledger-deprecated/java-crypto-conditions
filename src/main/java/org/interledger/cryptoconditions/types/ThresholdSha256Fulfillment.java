@@ -30,6 +30,22 @@ public class ThresholdSha256Fulfillment implements Fulfillment {
     return ConditionType.THRESHOLD_SHA256;
   }
 
+  public int getThreshold() {
+    return subfulfillments.length;
+  }
+
+  public Condition[] getSubconditions() {
+    Condition[] subconditions = new Condition[this.subconditions.length];
+    System.arraycopy(this.subconditions, 0, subconditions, 0, this.subconditions.length);
+    return subconditions;
+  }
+  
+  public Fulfillment[] getSubfulfillments() {
+    Fulfillment[] subfulfillments = new Fulfillment[this.subfulfillments.length];
+    System.arraycopy(this.subfulfillments, 0, subfulfillments, 0, this.subfulfillments.length);
+    return subfulfillments;
+  }
+  
   @Override
   public byte[] getEncoded() {
     try {

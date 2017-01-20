@@ -21,7 +21,7 @@ public class RsaSha256Condition extends Sha256Condition implements SimpleConditi
     super(calculateCost(key));
 
     // Validate key
-    if (key.getPublicExponent().compareTo(BigInteger.valueOf(65537)) != 0) {
+    if (key.getPublicExponent().compareTo(RsaSha256Fulfillment.PUBLIC_EXPONENT) != 0) {
       throw new IllegalArgumentException("Public Exponent of RSA key must be 65537.");
     }
 
@@ -48,7 +48,7 @@ public class RsaSha256Condition extends Sha256Condition implements SimpleConditi
       // Build modulus
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       DEROutputStream out = new DEROutputStream(baos);
-      out.writeOctetString(UnsignedBigInteger.toUnsignedByteArray(key.getModulus()));
+      out.writeTaggedObject(0, UnsignedBigInteger.toUnsignedByteArray(key.getModulus()));
       out.close();
       byte[] buffer = baos.toByteArray();
 
@@ -71,6 +71,6 @@ public class RsaSha256Condition extends Sha256Condition implements SimpleConditi
    * @return cost
    */
   private static long calculateCost(RSAPublicKey key) {
-    return (key.getModulus().bitLength() ^ 2) / 64;
+    return (long) Math.pow(UnsignedBigInteger.toUnsignedByteArray(key.getModulus()).length, 2);
   }
 }

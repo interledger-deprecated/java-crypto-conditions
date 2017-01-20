@@ -48,23 +48,16 @@ public class ThresholdSha256Condition extends CompoundSha256Condition implements
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       DEROutputStream out = new DEROutputStream(baos);
       for (int i = 0; i < subconditions.length; i++) {
-        out.writeOctetString(subconditions[i].getEncoded());
+        out.write(subconditions[i].getEncoded());
       }
       out.close();
       byte[] buffer = baos.toByteArray();
 
-      // Wrap SEQUENCE
-      baos = new ByteArrayOutputStream();
-      out = new DEROutputStream(baos);
-      out.writeEncoded(DERTags.CONSTRUCTED.getTag() + DERTags.SET_OF.getTag(), buffer);
-      out.close();
-      buffer = baos.toByteArray();
-
       // Build threshold and subconditions sequence
       baos = new ByteArrayOutputStream();
       out = new DEROutputStream(baos);
-      out.writeInteger(BigInteger.valueOf(threshold));
-      out.writeOctetString(buffer);
+      out.writeTaggedObject(0, BigInteger.valueOf(threshold).toByteArray());
+      out.writeTaggedConstructedObject(1, buffer);
       out.close();
       buffer = baos.toByteArray();
 
@@ -74,7 +67,7 @@ public class ThresholdSha256Condition extends CompoundSha256Condition implements
       out.writeEncoded(DERTags.CONSTRUCTED.getTag() + DERTags.SEQUENCE.getTag(), buffer);
       out.close();
       return baos.toByteArray();
-
+      
     } catch (IOException e) {
       throw new UncheckedIOException("DER Encoding Error", e);
     }
@@ -92,7 +85,7 @@ public class ThresholdSha256Condition extends CompoundSha256Condition implements
 
       int minLength = Math.min(c1encoded.length, c2encoded.length);
       for (int i = 0; i < minLength; i++) {
-        int result = Byte.compare(c1encoded[i], c2encoded[i]);
+        int result = Integer.compareUnsigned(c1encoded[i], c2encoded[i]);
         if (result != 0) {
           return result;
         }
@@ -113,7 +106,7 @@ public class ThresholdSha256Condition extends CompoundSha256Condition implements
 
     long largestCosts = 0;
     for (int i = 0; i < threshold; i++) {
-      largestCosts += subconditions[i].getCost();
+      largestCosts += sortedConditions[i].getCost();
     }
 
     return largestCosts + (subconditions.length * 1024);

@@ -3,6 +3,7 @@ package org.interledger.cryptoconditions.types;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
@@ -17,6 +18,8 @@ import org.interledger.cryptoconditions.der.DEROutputStream;
 
 public class RsaSha256Fulfillment implements Fulfillment {
 
+  public static final BigInteger PUBLIC_EXPONENT = BigInteger.valueOf(65537);
+  
   private RsaSha256Condition condition;
   private RSAPublicKey publicKey;
   private byte[] signature;
@@ -32,6 +35,16 @@ public class RsaSha256Fulfillment implements Fulfillment {
     return ConditionType.RSA_SHA256;
   }
 
+  public RSAPublicKey getPublicKey() {
+    return publicKey;
+  }
+  
+  public byte[] getSignature() {
+    byte[] signature = new byte[this.signature.length];
+    System.arraycopy(this.signature, 0, signature, 0, this.signature.length);
+    return signature;
+  }
+  
   @Override
   public byte[] getEncoded() {
     try {

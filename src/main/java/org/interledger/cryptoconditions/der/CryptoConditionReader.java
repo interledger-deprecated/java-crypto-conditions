@@ -214,7 +214,7 @@ public class CryptoConditionReader {
 
         bytesRead.addAndGet(innerBytesRead.get());
         
-        RSAPublicKeySpec rsaSpec = new RSAPublicKeySpec(modulus, BigInteger.valueOf(65534));
+        RSAPublicKeySpec rsaSpec = new RSAPublicKeySpec(modulus, RsaSha256Fulfillment.PUBLIC_EXPONENT);
 
         try {
           KeyFactory rsaKeyFactory = KeyFactory.getInstance("RSA");

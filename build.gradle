@@ -35,6 +35,14 @@ dependencies {
     testCompile 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
 }
 
+
+task syncTestVectors(type: Sync) {
+    from 'test-data/test-vectors'
+    into 'src/test/resources/org/interledger/cryptoconditions/test/vectors'
+}
+tasks.processTestResources.dependsOn(syncTestVectors)
+
+
 //Maven pom compatibility task:
 task writePom << {
     pom {
