@@ -1,5 +1,6 @@
 package org.interledger.cryptoconditions;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 
 /**
@@ -128,6 +129,8 @@ public enum ConditionType {
     for (ConditionType conditionType : types) {
       names[i++] = conditionType.toString().toLowerCase();
     }
+    
+    Arrays.sort(names);
 
     return String.join(",", names);
 

@@ -112,7 +112,7 @@ public class Test_ConditionType {
     String s = ConditionType.getEnumOfTypesAsString(set);
     
     assertNotNull(s);
-    assertEquals("preimage-sha-256,prefix-sha-256,threshold-sha-256,rsa-sha-256,ed25519-sha-256", s);
+    assertEquals("ed25519-sha-256,prefix-sha-256,preimage-sha-256,rsa-sha-256,threshold-sha-256", s);
   }
   
   @Test

@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -112,11 +113,11 @@ public class Test_ValidTestVectors {
   }
 
 @Test
-  public void testParseConditionAndGenerateUri() throws URIEncodingException, DEREncodingException {
+  public void testParseConditionAndGenerateUri() throws URIEncodingException, DEREncodingException, UnsupportedEncodingException {
   
-  Condition binaryCondition = CryptoConditionReader.readCondition(HexDump.hexStringToByteArray(testVector.getConditionBinary()));
-  assertEquals(testVector.getName() + " [binary condition => uri]", URI.create(testVector.getConditionUri()), binaryCondition.getUri());
-  
+    Condition binaryCondition = CryptoConditionReader.readCondition(HexDump.hexStringToByteArray(testVector.getConditionBinary()));
+    
+    CryptoConditionAssert.assertUriEqual(testVector.getName() + " [binary condition => uri]", URI.create(testVector.getConditionUri()), binaryCondition.getUri());
   }
 
   @Test

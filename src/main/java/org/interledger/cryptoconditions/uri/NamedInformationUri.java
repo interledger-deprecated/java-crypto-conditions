@@ -3,6 +3,7 @@ package org.interledger.cryptoconditions.uri;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
 
@@ -24,15 +25,19 @@ public class NamedInformationUri {
         .append(hashFunction.getName()).append(";") // Hash function name
         .append(Base64.getUrlEncoder().withoutPadding().encodeToString(hash)); //Hash
     
-    try {
-      if(!queryStringParams.isEmpty()) {
-        sb.append("?");
-        for (String key : queryStringParams.keySet()) {
+    if(!queryStringParams.isEmpty()) {
+      sb.append("?");
+      queryStringParams.forEach((key, value) -> {
+        try {
           sb.append(key).append("=").append(URLEncoder.encode(queryStringParams.get(key), "UTF-8"));
+          sb.append("&");
+        } catch (UnsupportedEncodingException e) {
+          throw new RuntimeException(e);
         }
-      }
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
+      });
+      
+      //Delete the trailing "&"
+      sb.deleteCharAt(sb.length() - 1);
     }
     
     return URI.create(sb.toString());
@@ -40,7 +45,7 @@ public class NamedInformationUri {
   }
   
   private static String getHashFunctionRegexGroup() {
-    return "";
+    return "(" + String.join("|", Arrays.stream(HashFunction.values()).map(s -> s.getName()).toArray(String[]::new))  + ")";
   }
   
   /**
