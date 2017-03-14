@@ -5,7 +5,8 @@ import java.net.URI;
 /**
  * Java implementation of Crypto-conditions
  *
- * @see<a href="https://datatracker.ietf.org/doc/draft-thomas-crypto-conditions/">https://datatracker.ietf.org/doc/draft-thomas-crypto-conditions/</a>
+ * @see <a href="https://datatracker.ietf.org/doc/draft-thomas-crypto-conditions/">
+ * https://datatracker.ietf.org/doc/draft-thomas-crypto-conditions/</a>
  * 
  * @author adrianhopebailie
  *
@@ -25,35 +26,30 @@ public interface Condition {
    * condition as the key, not just the fingerprint - as different conditions of different types may
    * have the same fingerprint.
    * 
-   * <p>
-   * The length and contents of the fingerprint are defined by the condition type. The fingerprint is 
-   * a cryptographically secure hash of the data which defines the condition, such as a public key.
+   * The length and contents of the fingerprint are defined by the condition type. The fingerprint
+   * is a cryptographically secure hash of the data which defines the condition, such as a public
+   * key.
    * 
    * @return the unique fingerprint of this condition
    */
   byte[] getFingerprint();
 
   /**
-   * The estimated "cost" of processing a fulfillment of this condition. For details of how to calculate
-   * this number see the Crypto-conditions specification.
+   * The estimated "cost" of processing a fulfillment of this condition. For details of how to
+   * calculate this number see the crypto-conditions specification.
    * 
-   * 
-   * @return the cost of validating the fulfillment of this conditon
+   * @return the cost of validating the fulfillment of this condition.
    */
   long getCost();
 
   /**
-   * Get the DER encoded condition
-   * 
-   * @return the DER encoded condition
+   * Returns the DER encoded condition.
    */
   byte[] getEncoded();
 
   /**
-   * Get the Named Information URL that describes this condition
-   * 
-   * @return an ni:// URI that identifes this condition
+   * Returns the Named Information URL that describes this condition.
    */
   URI getUri();
-  
+
 }

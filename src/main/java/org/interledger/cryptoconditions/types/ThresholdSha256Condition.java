@@ -1,5 +1,12 @@
 package org.interledger.cryptoconditions.types;
 
+import org.interledger.cryptoconditions.CompoundCondition;
+import org.interledger.cryptoconditions.CompoundSha256Condition;
+import org.interledger.cryptoconditions.Condition;
+import org.interledger.cryptoconditions.ConditionType;
+import org.interledger.cryptoconditions.der.DerOutputStream;
+import org.interledger.cryptoconditions.der.DerTag;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -8,26 +15,35 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
 
-import org.interledger.cryptoconditions.CompoundCondition;
-import org.interledger.cryptoconditions.CompoundSha256Condition;
-import org.interledger.cryptoconditions.Condition;
-import org.interledger.cryptoconditions.ConditionType;
-import org.interledger.cryptoconditions.der.DEROutputStream;
-import org.interledger.cryptoconditions.der.DERTags;
-
+/**
+ * Implements a condition based on a number of subconditions and the SHA-256 function.
+ */
 public class ThresholdSha256Condition extends CompoundSha256Condition implements CompoundCondition {
 
   private int threshold;
   private Condition[] subconditions;
 
+  /**
+   * Constructs an instance of the condition.
+   * 
+   * @param threshold The number of subconditions that must be fulfilled.
+   * @param subconditions A set of subconditions that this condition is dependent on.
+   */
   public ThresholdSha256Condition(int threshold, Condition[] subconditions) {
     super(calculateCost(threshold, subconditions), calculateSubtypes(subconditions));
-    
+
     this.threshold = threshold;
     this.subconditions = Arrays.copyOf(subconditions, subconditions.length);
-    
+
   }
 
+  /**
+   * Constructs an instance of the condition.
+   * 
+   * @param fingerprint The calculcated fingerprint for the condition.
+   * @param cost The calculated cost of this condition.
+   * @param subtypes A set of condition types for the subconditions that this one depends on.
+   */
   public ThresholdSha256Condition(byte[] fingerprint, long cost, EnumSet<ConditionType> subtypes) {
     super(fingerprint, cost, subtypes);
   }
@@ -40,43 +56,45 @@ public class ThresholdSha256Condition extends CompoundSha256Condition implements
   @Override
   protected byte[] getFingerprintContents() {
     try {
-      
-      //Sort
+
+      // Sort
       sortConditions(this.subconditions);
-      
+
       // Build subcondition sequence
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      DEROutputStream out = new DEROutputStream(baos);
+      DerOutputStream out = new DerOutputStream(baos);
       for (int i = 0; i < subconditions.length; i++) {
         out.write(subconditions[i].getEncoded());
       }
       out.close();
-      byte[] buffer = baos.toByteArray();
+      
+      final byte[] subconditionBuffer = baos.toByteArray();
 
       // Build threshold and subconditions sequence
       baos = new ByteArrayOutputStream();
-      out = new DEROutputStream(baos);
+      out = new DerOutputStream(baos);
       out.writeTaggedObject(0, BigInteger.valueOf(threshold).toByteArray());
-      out.writeTaggedConstructedObject(1, buffer);
+      out.writeTaggedConstructedObject(1, subconditionBuffer);
       out.close();
-      buffer = baos.toByteArray();
+      
+      final byte[] thresholdBuffer = baos.toByteArray();
 
       // Wrap SEQUENCE
       baos = new ByteArrayOutputStream();
-      out = new DEROutputStream(baos);
-      out.writeEncoded(DERTags.CONSTRUCTED.getTag() + DERTags.SEQUENCE.getTag(), buffer);
+      out = new DerOutputStream(baos);
+      out.writeEncoded(DerTag.CONSTRUCTED.getTag() + DerTag.SEQUENCE.getTag(), thresholdBuffer);
       out.close();
       return baos.toByteArray();
-      
+
     } catch (IOException e) {
       throw new UncheckedIOException("DER Encoding Error", e);
     }
   }
 
   /**
-   * Sort the given array in ascending lexicographic order
+   * Sorts the given array of conditions into ascending lexicographic order.
    * 
-   * @param conditions an array of Conditions to sort.
+   * @param conditions The array of conditions to sort.
    */
   private static void sortConditions(Condition[] conditions) {
     Arrays.sort(conditions, (Comparator<? super Condition>) (Condition c1, Condition c2) -> {
@@ -94,6 +112,13 @@ public class ThresholdSha256Condition extends CompoundSha256Condition implements
     });
   }
 
+  /**
+   * Calculates the cost of a threshold condition as sum(biggest(t, subcondition_costs)) + 1024 * n
+   * 
+   * @param threshold The number of subconditions that must be met.
+   * @param subconditions The list of subconditions.
+   * @return The calculated cost of a threshold condition.
+   */
   private static long calculateCost(int threshold, Condition[] subconditions) {
 
     // sum(biggest(t, subcondition_costs)) + 1024 * n
@@ -111,8 +136,16 @@ public class ThresholdSha256Condition extends CompoundSha256Condition implements
 
     return largestCosts + (subconditions.length * 1024);
   }
-  
+
+  /**
+   * Determines the set of condition types that are ultimately held via the sub condition.
+   * 
+   * @param subcondition The sub condition that this condition depends on.
+   * @return The set of condition types related to the sub condition.
+   */
   private static EnumSet<ConditionType> calculateSubtypes(Condition[] subconditions) {
+    // TODO: looks suspiciously similar to the Prefix implementiaton - lets refactor into a common
+    // place?
     EnumSet<ConditionType> subtypes = EnumSet.noneOf(ConditionType.class);
     for (int i = 0; i < subconditions.length; i++) {
       subtypes.add(subconditions[i].getType());
@@ -125,7 +158,7 @@ public class ThresholdSha256Condition extends CompoundSha256Condition implements
     if (subtypes.contains(ConditionType.THRESHOLD_SHA256)) {
       subtypes.remove(ConditionType.THRESHOLD_SHA256);
     }
-    
+
     return subtypes;
   }
 

@@ -1,19 +1,27 @@
 package org.interledger.cryptoconditions.types;
 
+import org.interledger.cryptoconditions.Condition;
+import org.interledger.cryptoconditions.ConditionType;
+import org.interledger.cryptoconditions.Fulfillment;
+import org.interledger.cryptoconditions.der.DerOutputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-import org.interledger.cryptoconditions.Condition;
-import org.interledger.cryptoconditions.ConditionType;
-import org.interledger.cryptoconditions.Fulfillment;
-import org.interledger.cryptoconditions.der.DEROutputStream;
-
+/**
+ * Implementation of a fulfillment based on a preimage and the SHA-256 function.
+ */
 public class PreimageSha256Fulfillment implements Fulfillment {
 
   private PreimageSha256Condition condition;
   private byte[] preimage;
 
+  /**
+   * Constructs an instance of the fulfillment.
+   * 
+   * @param preimage The preimage associated with the fulfillment.
+   */
   public PreimageSha256Fulfillment(byte[] preimage) {
     this.preimage = new byte[preimage.length];
     System.arraycopy(preimage, 0, this.preimage, 0, preimage.length);
@@ -24,25 +32,28 @@ public class PreimageSha256Fulfillment implements Fulfillment {
     return ConditionType.PREIMAGE_SHA256;
   }
 
+  /**
+   * Returns a copy of the preimage associated with the fulfillment.
+   */
   public byte[] getPreimage() {
     byte[] preimage = new byte[this.preimage.length];
     System.arraycopy(this.preimage, 0, preimage, 0, this.preimage.length);
     return preimage;
   }
-  
+
   @Override
   public byte[] getEncoded() {
     try {
       // Build preimage sequence
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      DEROutputStream out = new DEROutputStream(baos);
+      DerOutputStream out = new DerOutputStream(baos);
       out.writeTaggedObject(0, preimage);
       out.close();
       byte[] buffer = baos.toByteArray();
-      
+
       // Wrap CHOICE
       baos = new ByteArrayOutputStream();
-      out = new DEROutputStream(baos);
+      out = new DerOutputStream(baos);
       out.writeTaggedConstructedObject(getType().getTypeCode(), buffer);
       out.close();
 
@@ -76,5 +87,5 @@ public class PreimageSha256Fulfillment implements Fulfillment {
 
     return getCondition().equals(condition);
   }
-  
+
 }

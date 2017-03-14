@@ -6,9 +6,9 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Abstract base class for the *-SHA-256 condition types.
  * 
- * Provides concrete implementation of generation of 
- * SHA256 fingerprint via a shared static digest.
- *  
+ * <p>Provides a concrete implementation for the generation of a SHA256 fingerprint via a shared 
+ * static digest.
+ * 
  * @author adrianhopebailie
  *
  */
@@ -23,39 +23,36 @@ public abstract class Sha256Condition extends ConditionBase {
   protected Sha256Condition(byte[] fingerprint, long cost) {
     super(cost);
     this.fingerprint = fingerprint;
-    
-    if(fingerprint.length != 32) {
+
+    if (fingerprint.length != 32) {
       throw new IllegalArgumentException("Fingerprint must be 32 bytes.");
     }
   }
 
   /**
-   * Super-classes must provide the un-hashed fingerprint content
-   * for this condition as defined in the specification.
-   * 
-   * @return
+   * Returns the un-hashed fingerprint content for this condition as defined in the specification.
    */
   protected abstract byte[] getFingerprintContents();
 
   /**
-   * Generates and caches the fingerprint on first call.
-   * 
-   * Returns a copy of the internally cached fingerprint.
+   * Returns a copy of the (internally generated and cached) fingerprint on first call.
    */
   @Override
   public byte[] getFingerprint() {
     if (fingerprint == null) {
       fingerprint = getDigest(getFingerprintContents());
     }
-    
+
     byte[] returnVal = new byte[fingerprint.length];
     System.arraycopy(fingerprint, 0, returnVal, 0, fingerprint.length);
-    
+
     return returnVal;
   }
 
   private static MessageDigest _DIGEST;
 
+  //TODO: we should consider making this public and non-static, so that other classes could simply 
+  //override this method to implement other digests (e.g. SHA512 etc)?
   private static byte[] getDigest(byte[] input) {
     if (_DIGEST == null) {
       try {

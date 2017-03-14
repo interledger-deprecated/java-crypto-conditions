@@ -1,8 +1,8 @@
 package org.interledger.cryptoconditions.uri;
 
-public class URIEncodingException extends Exception {
+public class UriEncodingException extends Exception {
  
-  public URIEncodingException(String message) {
+  public UriEncodingException(String message) {
     super(message);
   }
 

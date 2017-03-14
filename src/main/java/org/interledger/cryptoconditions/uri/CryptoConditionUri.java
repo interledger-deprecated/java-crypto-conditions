@@ -1,5 +1,13 @@
 package org.interledger.cryptoconditions.uri;
 
+import org.interledger.cryptoconditions.Condition;
+import org.interledger.cryptoconditions.ConditionType;
+import org.interledger.cryptoconditions.types.Ed25519Sha256Condition;
+import org.interledger.cryptoconditions.types.PrefixSha256Condition;
+import org.interledger.cryptoconditions.types.PreimageSha256Condition;
+import org.interledger.cryptoconditions.types.RsaSha256Condition;
+import org.interledger.cryptoconditions.types.ThresholdSha256Condition;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -12,86 +20,79 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.interledger.cryptoconditions.Condition;
-import org.interledger.cryptoconditions.ConditionType;
-import org.interledger.cryptoconditions.types.Ed25519Sha256Condition;
-import org.interledger.cryptoconditions.types.PrefixSha256Condition;
-import org.interledger.cryptoconditions.types.PreimageSha256Condition;
-import org.interledger.cryptoconditions.types.RsaSha256Condition;
-import org.interledger.cryptoconditions.types.ThresholdSha256Condition;
-
 /**
- * This class is responsible for parsing a uri-formatted crypto-condition
+ * This class is responsible for parsing a uri-formatted crypto-condition.
  */
 public class CryptoConditionUri {
-  
-  //This is a stricter version based on limitations of the current
-  //implementation. Specifically, we can't handle bitmasks greater than 32 bits.
+
+  // This is a stricter version based on limitations of the current
+  // implementation. Specifically, we can't handle bitmasks greater than 32 bits.
   public static final String SCHEME_PREFIX = "ni://";
   public static final String HASH_FUNCTION_NAME = "sha-256";
-  
-  public static final String CONDITION_REGEX_STRICT = "^" + SCHEME_PREFIX + "([A-Za-z0-9_-]?)/" + HASH_FUNCTION_NAME + ";([a-zA-Z0-9_-]{0,86})\\?(.+)$";
-  
+
+  public static final String CONDITION_REGEX_STRICT = "^" + SCHEME_PREFIX + "([A-Za-z0-9_-]?)/"
+      + HASH_FUNCTION_NAME + ";([a-zA-Z0-9_-]{0,86})\\?(.+)$";
+
   public static class QueryParams {
     public static final String COST = "cost";
     public static final String TYPE = "fpt";
     public static final String SUBTYPES = "subtypes";
   }
-  
+
   /**
-   * Parses a URI formatted crypto-condition
+   * Parses a URI formatted crypto-condition.
    *
-   * @param uri
-   *  The crypto-condition formatted as a uri.
-   *  
-   * @return
-   *  The crypto condition
+   * @param uri The crypto-condition formatted as a URI.
+   * 
+   * @return The equivalent crypto-condition.
    */
-  public static Condition parse(URI uri) throws URIEncodingException {
-    //based strongly on the five bells implementation at 
-    //https://github.com/interledgerjs/five-bells-condition (7b6a97990cd3a51ee41b276c290e4ae65feb7882)
-    
+  public static Condition parse(URI uri) throws UriEncodingException {
+    // based strongly on the five bells implementation at
+    // https://github.com/interledgerjs/five-bells-condition
+    // (7b6a97990cd3a51ee41b276c290e4ae65feb7882)
+
     if (!"ni".equals(uri.getScheme())) {
-      throw new URIEncodingException("Serialized condition must start with 'ni:'");
+      throw new UriEncodingException("Serialized condition must start with 'ni:'");
     }
-    
-    //the regex covers the entire uri format including the 'ni:' scheme
-    Matcher m = Pattern.compile(CONDITION_REGEX_STRICT).matcher(uri.toString());
-    
-    if (!m.matches()) {
-      throw new URIEncodingException("Invalid condition format");
+
+    // the regex covers the entire uri format including the 'ni:' scheme
+    Matcher matcher = Pattern.compile(CONDITION_REGEX_STRICT).matcher(uri.toString());
+
+    if (!matcher.matches()) {
+      throw new UriEncodingException("Invalid condition format");
     }
-    
+
     Map<String, List<String>> queryParams = null;
     try {
       queryParams = splitQuery(uri.getQuery());
     } catch (UnsupportedEncodingException x) {
-      throw new URIEncodingException("Invalid condition format");
-    }    
-    
-    if(!queryParams.containsKey(QueryParams.TYPE)){
-      throw new URIEncodingException("No fingerprint type provided");
+      throw new UriEncodingException("Invalid condition format");
     }
-    
+
+    if (!queryParams.containsKey(QueryParams.TYPE)) {
+      throw new UriEncodingException("No fingerprint type provided");
+    }
+
     ConditionType type = ConditionType.fromString(queryParams.get(QueryParams.TYPE).get(0));
-    
+
     long cost = 0;
     try {
       cost = Long.parseLong(queryParams.get(QueryParams.COST).get(0));
     } catch (NumberFormatException | NullPointerException x) {
-      throw new URIEncodingException("No or invalid cost provided");
+      throw new UriEncodingException("No or invalid cost provided");
     }
-    
-    byte[] fingerprint = Base64.getUrlDecoder().decode(m.group(2));
-    
+
+    byte[] fingerprint = Base64.getUrlDecoder().decode(matcher.group(2));
+
     EnumSet<ConditionType> subtypes = null;
     if (type == ConditionType.PREFIX_SHA256 || type == ConditionType.THRESHOLD_SHA256) {
 
-      if(!queryParams.containsKey(QueryParams.SUBTYPES)){
-        throw new URIEncodingException("No subtypes provided");
+      if (!queryParams.containsKey(QueryParams.SUBTYPES)) {
+        throw new UriEncodingException("No subtypes provided");
       }
-      
-      subtypes = ConditionType.getEnumOfTypesFromString(queryParams.get(QueryParams.SUBTYPES).get(0));
+
+      subtypes =
+          ConditionType.getEnumOfTypesFromString(queryParams.get(QueryParams.SUBTYPES).get(0));
     }
 
     switch (type) {
@@ -105,15 +106,21 @@ public class CryptoConditionUri {
         return new RsaSha256Condition(fingerprint, cost);
       case ED25519_SHA256:
         return new Ed25519Sha256Condition(fingerprint, cost);
-       default:
-         throw new URIEncodingException("No or invalid type provided");
+      default:
+        throw new UriEncodingException("No or invalid type provided");
     }
   }
-  
-  //Lightly adapted from http://stackoverflow.com/questions/13592236/parse-a-uri-string-into-name-value-collection
-  //so that we dont need an external library.
+
+  /**
+   * Unpacks an URL encoded string of query parameters into a map of keys and values.
+   * 
+   * @param queryParams The url-encoded query parameters.
+   * @return A map containing keyed on the query parameter names containing the associated values.
+   */
   private static Map<String, List<String>> splitQuery(String queryParams)
       throws UnsupportedEncodingException {
+    // Used to avoid dependencies on additional libraries. Lightly adapted from
+    // http://stackoverflow.com/questions/13592236/parse-a-uri-string-into-name-value-collection
     final Map<String, List<String>> query_pairs = new LinkedHashMap<String, List<String>>();
     final String[] pairs = queryParams.split("&");
     for (String pair : pairs) {

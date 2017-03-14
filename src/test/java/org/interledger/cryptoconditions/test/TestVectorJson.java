@@ -3,7 +3,7 @@ package org.interledger.cryptoconditions.test;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TestVectorJson {
   private int maxMessageLength;
   private String modulus;
@@ -15,11 +15,11 @@ public class TestVectorJson {
   private TestVectorJson[] subfulfillments;
   private int threshold;
   private String type;
-  
-  //Debug info
+
+  // Debug info
   private String fingerprintContents;
   private String conditionBinary;
-  
+
   @JsonProperty
   public String getFingerprintContents() {
     return fingerprintContents;
@@ -38,8 +38,6 @@ public class TestVectorJson {
     this.conditionBinary = conditionBinary;
   }
 
-  
-  
   @JsonProperty
   public int getMaxMessageLength() {
     return maxMessageLength;
@@ -59,8 +57,8 @@ public class TestVectorJson {
   public String getPreimage() {
     return preimage;
   }
-  
-  
+
+
   @JsonProperty
   public String getPublicKey() {
     return publicKey;

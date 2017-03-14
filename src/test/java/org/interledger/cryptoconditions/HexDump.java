@@ -1,8 +1,3 @@
-package org.interledger.cryptoconditions;
-
-/**
- * Copy from Android Source
- */
 /*
  * Copyright (C) 2006 The Android Open Source Project
  *
@@ -15,6 +10,12 @@ package org.interledger.cryptoconditions;
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
+ */
+
+package org.interledger.cryptoconditions;
+
+/**
+ * Copied from Android Source.
  */
 public class HexDump {
   private final static char[] HEX_DIGITS =

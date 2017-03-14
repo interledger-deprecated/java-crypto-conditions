@@ -1,6 +1,6 @@
 package org.interledger.cryptoconditions.der;
 
-public enum DERTags {
+public enum DerTag {
 
   BOOLEAN(0x01),
   INTEGER(0x02),
@@ -33,7 +33,7 @@ public enum DERTags {
 
   private int tag;
 
-  private DERTags(int tag) {
+  private DerTag(int tag) {
     this.tag = tag;
   }
 

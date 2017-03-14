@@ -4,8 +4,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 /**
- * Utility class for encoding and decoding a {@link BigInteger}
- * as a {@link byte[]} without sign prefix.
+ * Utility class for encoding and decoding a {@link BigInteger} as a {@link byte[]} without sign
+ * prefix.
  * 
  * @author adrianhopebailie
  *
@@ -31,8 +31,6 @@ public class UnsignedBigInteger {
 
   /**
    * Get {@link BigInteger} from byte encoding that assumes the value is >0.
-   * 
-   * Same as calling {@code new BigInteger(1, value);}.
    * 
    * @param value a byte encoded integer
    * @return a positive {@link BigInteger}

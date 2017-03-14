@@ -1,5 +1,11 @@
 package org.interledger.cryptoconditions.types;
 
+import org.interledger.cryptoconditions.Condition;
+import org.interledger.cryptoconditions.ConditionType;
+import org.interledger.cryptoconditions.Fulfillment;
+import org.interledger.cryptoconditions.UnsignedBigInteger;
+import org.interledger.cryptoconditions.der.DerOutputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -10,20 +16,23 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.interfaces.RSAPublicKey;
 
-import org.interledger.cryptoconditions.Condition;
-import org.interledger.cryptoconditions.ConditionType;
-import org.interledger.cryptoconditions.Fulfillment;
-import org.interledger.cryptoconditions.UnsignedBigInteger;
-import org.interledger.cryptoconditions.der.DEROutputStream;
-
+/**
+ * Implementation of a fulfillment based on an RSA key and the SHA-256 function.
+ */
 public class RsaSha256Fulfillment implements Fulfillment {
 
   public static final BigInteger PUBLIC_EXPONENT = BigInteger.valueOf(65537);
-  
+
   private RsaSha256Condition condition;
   private RSAPublicKey publicKey;
   private byte[] signature;
 
+  /**
+   * Constructs an instance of the fulfillment.
+   * 
+   * @param publicKey The public key used with the fulfillment.
+   * @param signature The signature used with the fulfillment.
+   */
   public RsaSha256Fulfillment(RSAPublicKey publicKey, byte[] signature) {
     this.signature = new byte[signature.length];
     System.arraycopy(signature, 0, this.signature, 0, signature.length);
@@ -35,22 +44,28 @@ public class RsaSha256Fulfillment implements Fulfillment {
     return ConditionType.RSA_SHA256;
   }
 
+  /**
+   * Returns the public key used in this fulfillment.
+   */
   public RSAPublicKey getPublicKey() {
     return publicKey;
   }
-  
+
+  /**
+   * Returns a copy of the signature used in this fulfillment.
+   */
   public byte[] getSignature() {
     byte[] signature = new byte[this.signature.length];
     System.arraycopy(this.signature, 0, signature, 0, this.signature.length);
     return signature;
   }
-  
+
   @Override
   public byte[] getEncoded() {
     try {
       // Build preimage sequence
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      DEROutputStream out = new DEROutputStream(baos);
+      DerOutputStream out = new DerOutputStream(baos);
       out.writeTaggedObject(0, UnsignedBigInteger.toUnsignedByteArray(publicKey.getModulus()));
       out.writeTaggedObject(1, signature);
       out.close();
@@ -58,7 +73,7 @@ public class RsaSha256Fulfillment implements Fulfillment {
 
       // Wrap CHOICE
       baos = new ByteArrayOutputStream();
-      out = new DEROutputStream(baos);
+      out = new DerOutputStream(baos);
       out.writeTaggedConstructedObject(getType().getTypeCode(), buffer);
       out.close();
 

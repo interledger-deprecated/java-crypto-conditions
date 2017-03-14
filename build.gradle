@@ -42,42 +42,49 @@ task syncTestVectors(type: Sync) {
 }
 tasks.processTestResources.dependsOn(syncTestVectors)
 
+tasks.withType(Checkstyle) {
+    // Dont bother checking the test Application or HexDump classes, they will probably be removed.
+    exclude 'org/interledger/cryptoconditions/Application*'
+    exclude 'org/interledger/cryptoconditions/HexDump*'
+}
 
 //Maven pom compatibility task:
-task writePom << {
-    pom {
-        project {
-            inceptionYear '2016'            
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution 'repo'
-                }
-            }
-            properties {
-                "project.build.sourceEncoding" "UTF-8"
-                "maven.compiler.source" "1.8"
-                "maven.compiler.target" "1.8"
-                "checkstyle.config.location" "google_checks.xml"                
-                "checkstyle.consoleOutput" "true"
-            }
-            reporting  {
-                plugins {
-                    plugin {
-                        groupId "org.apache.maven.plugins"
-                        artifactId "maven-checkstyle-plugin"
-                        version "2.17"
+task writePom {
+    doLast {
+        pom {
+            project {
+                inceptionYear '2016'            
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
                     }
                 }
-                plugins {
-                    plugin {
-                        groupId "org.apache.maven.plugins"
-                        artifactId "maven-javadoc-plugin"
-                        version "2.10.4"                        
+                properties {
+                    "project.build.sourceEncoding" "UTF-8"
+                    "maven.compiler.source" "1.8"
+                    "maven.compiler.target" "1.8"
+                    "checkstyle.config.location" "google_checks.xml"                
+                    "checkstyle.consoleOutput" "true"
+                }
+                reporting  {
+                    plugins {
+                        plugin {
+                            groupId "org.apache.maven.plugins"
+                            artifactId "maven-checkstyle-plugin"
+                            version "2.17"
+                        }
+                    }
+                    plugins {
+                        plugin {
+                            groupId "org.apache.maven.plugins"
+                            artifactId "maven-javadoc-plugin"
+                            version "2.10.4"                        
+                        }
                     }
                 }
             }
-        }
-    }.writeTo("pom.xml")
+        }.writeTo("pom.xml")
+    }
 }

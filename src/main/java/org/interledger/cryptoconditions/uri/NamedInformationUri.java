@@ -7,14 +7,28 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
 
+/**
+ * Provides utility methods related to named information (ni://) URI's.
+ */
 public class NamedInformationUri {
 
   public static final String SCHEME = "ni";
   public static final String SCHEME_PREFIX = SCHEME + "://";
-  public static final String REGEX_STRICT = "^" + SCHEME_PREFIX + "([A-Za-z0-9_-]?)/" + getHashFunctionRegexGroup() + ";([a-zA-Z0-9_-]{0,86})\\?(.+)$";
+  public static final String REGEX_STRICT = "^" + SCHEME_PREFIX + "([A-Za-z0-9_-]?)/"
+      + getHashFunctionRegexGroup() + ";([a-zA-Z0-9_-]{0,86})\\?(.+)$";
 
-  //TODO Could implement a parse function but for now it's probably faster to just parse the condition directly and not wrap that around an ni URI parser
-  
+  // TODO Could implement a parse function but for now it's probably faster to just parse the
+  // condition directly and not wrap that around an ni URI parser
+
+  /**
+   * Creates a URI for the hash function and values.
+   * 
+   * @param hashFunction The hash function used.
+   * @param hash The value of the hash.
+   * @param queryStringParams Additional values to include in the query string portion of the URI
+   * @return A URI containing the hash function, the hashed value and any additional query
+   *         parameters.
+   */
   public static URI getUri(HashFunction hashFunction, byte[] hash,
       Map<String, String> queryStringParams) {
 
@@ -23,9 +37,9 @@ public class NamedInformationUri {
         // No authority portion
         .append("/") // Path prefix
         .append(hashFunction.getName()).append(";") // Hash function name
-        .append(Base64.getUrlEncoder().withoutPadding().encodeToString(hash)); //Hash
-    
-    if(!queryStringParams.isEmpty()) {
+        .append(Base64.getUrlEncoder().withoutPadding().encodeToString(hash)); // Hash
+
+    if (!queryStringParams.isEmpty()) {
       sb.append("?");
       queryStringParams.forEach((key, value) -> {
         try {
@@ -35,49 +49,61 @@ public class NamedInformationUri {
           throw new RuntimeException(e);
         }
       });
-      
-      //Delete the trailing "&"
+
+      // Delete the trailing "&"
       sb.deleteCharAt(sb.length() - 1);
     }
-    
+
     return URI.create(sb.toString());
-    
   }
-  
+
+  /**
+   * Returns a regex listing the names of the HashFunctions.
+   */
   private static String getHashFunctionRegexGroup() {
-    return "(" + String.join("|", Arrays.stream(HashFunction.values()).map(s -> s.getName()).toArray(String[]::new))  + ")";
+    return "("
+        + String.join("|",
+            Arrays.stream(HashFunction.values()).map(s -> s.getName()).toArray(String[]::new))
+        + ")";
   }
-  
+
   /**
    * From https://www.iana.org/assignments/hash-function-text-names/hash-function-text-names.xhtml
+   * 
    * @author adrianhopebailie
    *
    */
   public enum HashFunction {
-    MD2("md2", "1.2.840.113549.2.2"),
-    MD5("md5", "1.2.840.113549.2.5"),
-    SHA_1("sha-1", "1.3.14.3.2.26"),
-    SHA_224("sha-224", "2.16.840.1.101.3.4.2.4"),
-    SHA_256("sha-256", "2.16.840.1.101.3.4.2.1"),
-    SHA_384("sha-384", "2.16.840.1.101.3.4.2.2"),
+    MD2("md2", "1.2.840.113549.2.2"), 
+    MD5("md5", "1.2.840.113549.2.5"), 
+    SHA_1("sha-1", "1.3.14.3.2.26"), 
+    SHA_224("sha-224", "2.16.840.1.101.3.4.2.4"), 
+    SHA_256("sha-256", "2.16.840.1.101.3.4.2.1"), 
+    SHA_384("sha-384", "2.16.840.1.101.3.4.2.2"), 
     SHA_512("sha-512", "2.16.840.1.101.3.4.2.3");
-    
+
     private String name;
     private String oid;
-    
+
     HashFunction(String name, String oid) {
       this.name = name;
       this.oid = oid;
     }
-    
+
+    /**
+     * Returns the name of the hash function.
+     */
     public String getName() {
       return name;
     }
-    
+
+    /**
+     * Returns the OID for the hash function.
+     */
     public String getOid() {
       return oid;
     }
-    
+
   }
 
 }

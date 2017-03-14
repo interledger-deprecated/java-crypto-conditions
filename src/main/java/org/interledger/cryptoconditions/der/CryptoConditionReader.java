@@ -1,19 +1,8 @@
 package org.interledger.cryptoconditions.der;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
+import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
+import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 import org.interledger.cryptoconditions.Condition;
 import org.interledger.cryptoconditions.ConditionType;
@@ -29,52 +18,94 @@ import org.interledger.cryptoconditions.types.RsaSha256Fulfillment;
 import org.interledger.cryptoconditions.types.ThresholdSha256Condition;
 import org.interledger.cryptoconditions.types.ThresholdSha256Fulfillment;
 
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
-import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+
+/**
+ * Provides utility methods to read a crypto-condition from DER encoding.
+ */
 public class CryptoConditionReader {
 
-  public static Condition readCondition(byte[] buffer) throws DEREncodingException {
+  /**
+   * Reads a DER encoded condition from the buffer.
+   * 
+   * @param buffer contains the raw DER encoded condition.
+   * @return The condition read from the buffer.
+   */
+  public static Condition readCondition(byte[] buffer) throws DerEncodingException {
     return readCondition(buffer, 0, buffer.length);
   }
 
+  /**
+   * Reads a DER encoded condition from the buffer.
+   * 
+   * @param buffer contains the raw DER encoded condition.
+   * @param offset the position within the buffer to begin reading the condition.
+   * @param length the number of bytes to read.
+   * @return The condition read from the buffer.
+   */
   public static Condition readCondition(byte[] buffer, int offset, int length)
-      throws DEREncodingException {
+      throws DerEncodingException {
 
     ByteArrayInputStream bais = new ByteArrayInputStream(buffer, offset, length);
-    DERInputStream in = new DERInputStream(bais);
+    DerInputStream in = new DerInputStream(bais);
 
     try {
-      Condition c = readCondition(in);
-      return c;
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
+      return readCondition(in);
+    } catch (IOException ioe) {
+      throw new UncheckedIOException(ioe);
     } finally {
       try {
         in.close();
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
+      } catch (IOException ioe) {
+        throw new UncheckedIOException(ioe);
       }
     }
   }
 
-  public static Condition readCondition(DERInputStream in)
-      throws DEREncodingException, IOException {
+  /**
+   * Reads a DER encoded condition from the input stream.
+   * 
+   * @param in The input stream containing the DER encoded condition.
+   * @return The condition read from the stream.
+   */
+  public static Condition readCondition(DerInputStream in)
+      throws DerEncodingException, IOException {
     return readCondition(in, new AtomicInteger());
   }
 
-  public static Condition readCondition(DERInputStream in, AtomicInteger bytesRead)
-      throws DEREncodingException, IOException {
+  /**
+   * Reads a DER encoded condition from the input stream.
+   * 
+   * @param in The input stream containing the DER encoded condition.
+   * @param bytesRead will be updated with the number of bytes read from the stream.
+   * @return The condition read from the stream.
+   */
+  public static Condition readCondition(DerInputStream in, AtomicInteger bytesRead)
+      throws DerEncodingException, IOException {
 
-    int tag = in.readTag(bytesRead, DERTags.CONSTRUCTED, DERTags.TAGGED);
+    int tag = in.readTag(bytesRead, DerTag.CONSTRUCTED, DerTag.TAGGED);
     ConditionType type = ConditionType.valueOf(tag);
     int length = in.readLength(bytesRead);
 
     AtomicInteger innerBytesRead = new AtomicInteger();
-    byte[] fingerprint = in.readTaggedObject(0, length - innerBytesRead.get(), innerBytesRead).getValue();
-    long cost =
-        new BigInteger(in.readTaggedObject(1, length - innerBytesRead.get(), innerBytesRead).getValue())
+    byte[] fingerprint =
+        in.readTaggedObject(0, length - innerBytesRead.get(), innerBytesRead).getValue();
+    long cost = new BigInteger(
+        in.readTaggedObject(1, length - innerBytesRead.get(), innerBytesRead).getValue())
             .longValue();
     EnumSet<ConditionType> subtypes = null;
     if (type == ConditionType.PREFIX_SHA256 || type == ConditionType.THRESHOLD_SHA256) {
@@ -94,21 +125,34 @@ public class CryptoConditionReader {
         return new RsaSha256Condition(fingerprint, cost);
       case ED25519_SHA256:
         return new Ed25519Sha256Condition(fingerprint, cost);
+      default:
+        throw new DerEncodingException("Unknown condition type: " + type);
     }
-
-    throw new DEREncodingException("Unrecogized tag: " + tag);
-
   }
-    
-  public static Fulfillment readFulfillment(byte[] buffer) throws DEREncodingException {
+
+  /**
+   * Reads a DER encoded fulfillment from the buffer.
+   * 
+   * @param buffer The buffer holding the DER encoded fulfillment
+   * @return The fulfillment read from the buffer.
+   */
+  public static Fulfillment readFulfillment(byte[] buffer) throws DerEncodingException {
     return readFulfillment(buffer, 0, buffer.length);
   }
 
+  /**
+   * Reads a DER encoded fulfillment from the buffer.
+   * 
+   * @param buffer The buffer holding the DER encoded fulfillment
+   * @param offset the position within the buffer to begin reading the fulfilment.
+   * @param length the number of bytes to read.
+   * @return The fulfillment read from the buffer.
+   */
   public static Fulfillment readFulfillment(byte[] buffer, int offset, int length)
-      throws DEREncodingException {
+      throws DerEncodingException {
 
     ByteArrayInputStream bais = new ByteArrayInputStream(buffer, offset, length);
-    DERInputStream in = new DERInputStream(bais);
+    DerInputStream in = new DerInputStream(bais);
 
     try {
       return readFulfillment(in);
@@ -123,21 +167,34 @@ public class CryptoConditionReader {
     }
   }
 
-  public static Fulfillment readFulfillment(DERInputStream in)
-      throws DEREncodingException, IOException {
+  /**
+   * Reads a DER encoded fulfillment from the input stream.
+   * 
+   * @param in The input stream containing the DER encoded fulfillment.
+   * @return The fulfillment read from the stream.
+   */
+  public static Fulfillment readFulfillment(DerInputStream in)
+      throws DerEncodingException, IOException {
     return readFulfillment(in, new AtomicInteger());
   }
 
-  // TODO No length checks
-  public static Fulfillment readFulfillment(DERInputStream in, AtomicInteger bytesRead)
-      throws DEREncodingException, IOException {
+  /**
+   * Reads a DER encoded fulfillment from the input stream.
+   * 
+   * @param in The input stream containing the DER encoded fulfillment.
+   * @param bytesRead will be updated with the number of bytes read from the stream.
+   * @return The fulfillment read from the stream.
+   */
+  public static Fulfillment readFulfillment(DerInputStream in, AtomicInteger bytesRead)
+      throws DerEncodingException, IOException {
+    // TODO No length checks
 
-    int tag = in.readTag(bytesRead, DERTags.CONSTRUCTED, DERTags.TAGGED);
+    int tag = in.readTag(bytesRead, DerTag.CONSTRUCTED, DerTag.TAGGED);
     ConditionType type = ConditionType.valueOf(tag);
     int length = in.readLength(bytesRead);
 
-    if(length == 0) {
-      throw new DEREncodingException("Encountered an empty fulfillment.");      
+    if (length == 0) {
+      throw new DerEncodingException("Encountered an empty fulfillment.");
     }
 
     AtomicInteger innerBytesRead = new AtomicInteger();
@@ -153,11 +210,13 @@ public class CryptoConditionReader {
 
       case PREFIX_SHA256:
 
-        byte[] prefix = in.readTaggedObject(0, length - innerBytesRead.get(), innerBytesRead).getValue();
-        long maxMessageLength = new BigInteger(
-            in.readTaggedObject(1, length - innerBytesRead.get(), innerBytesRead).getValue()).longValue();
+        final byte[] prefix =
+            in.readTaggedObject(0, length - innerBytesRead.get(), innerBytesRead).getValue();
+        final long maxMessageLength = new BigInteger(
+            in.readTaggedObject(1, length - innerBytesRead.get(), innerBytesRead).getValue())
+                .longValue();
 
-        tag = in.readTag(2, innerBytesRead, DERTags.CONSTRUCTED, DERTags.TAGGED);
+        tag = in.readTag(2, innerBytesRead, DerTag.CONSTRUCTED, DerTag.TAGGED);
         length = in.readLength(innerBytesRead);
 
         Fulfillment subfulfillment = readFulfillment(in, innerBytesRead);
@@ -170,7 +229,7 @@ public class CryptoConditionReader {
 
         List<Fulfillment> subfulfillments = new ArrayList<>();
 
-        tag = in.readTag(innerBytesRead, DERTags.CONSTRUCTED, DERTags.TAGGED);
+        tag = in.readTag(innerBytesRead, DerTag.CONSTRUCTED, DerTag.TAGGED);
         length = in.readLength(innerBytesRead);
 
         // It is legal (per the encoding rules) for a THRESHOLD fulfillment to have only
@@ -183,12 +242,12 @@ public class CryptoConditionReader {
             subfulfillments.add(readFulfillment(in, subfulfillmentsBytesRead));
           }
           innerBytesRead.addAndGet(subfulfillmentsBytesRead.get());
-          
-          tag = in.readTag(1, innerBytesRead, DERTags.CONSTRUCTED, DERTags.TAGGED);
+
+          tag = in.readTag(1, innerBytesRead, DerTag.CONSTRUCTED, DerTag.TAGGED);
           length = in.readLength(innerBytesRead);
 
         } else if (tag != 1) {
-          throw new DEREncodingException("Expected tag: 1, got: " + tag);
+          throw new DerEncodingException("Expected tag: 1, got: " + tag);
         }
 
         List<Condition> subconditions = new ArrayList<>();
@@ -213,8 +272,9 @@ public class CryptoConditionReader {
             in.readTaggedObject(1, length - innerBytesRead.get(), innerBytesRead).getValue();
 
         bytesRead.addAndGet(innerBytesRead.get());
-        
-        RSAPublicKeySpec rsaSpec = new RSAPublicKeySpec(modulus, RsaSha256Fulfillment.PUBLIC_EXPONENT);
+
+        RSAPublicKeySpec rsaSpec =
+            new RSAPublicKeySpec(modulus, RsaSha256Fulfillment.PUBLIC_EXPONENT);
 
         try {
           KeyFactory rsaKeyFactory = KeyFactory.getInstance("RSA");
@@ -225,7 +285,7 @@ public class CryptoConditionReader {
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
           throw new RuntimeException("Error creating RSA key.", e);
         }
-        
+
 
       case ED25519_SHA256:
         byte[] ed25519key =
@@ -240,9 +300,9 @@ public class CryptoConditionReader {
         EdDSAPublicKey ed25519PublicKey = new EdDSAPublicKey(ed25519spec);
 
         return new Ed25519Sha256Fulfillment(ed25519PublicKey, ed25519Signature);
+
+      default:
+        throw new DerEncodingException("Unrecogized condition type: " + type);
     }
-
-    throw new DEREncodingException("Unrecogized tag: " + tag);
-
   }
 }

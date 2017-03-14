@@ -1,16 +1,19 @@
 package org.interledger.cryptoconditions.types;
 
+import org.interledger.cryptoconditions.Condition;
+import org.interledger.cryptoconditions.ConditionType;
+import org.interledger.cryptoconditions.Fulfillment;
+import org.interledger.cryptoconditions.der.DerOutputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import org.interledger.cryptoconditions.Condition;
-import org.interledger.cryptoconditions.ConditionType;
-import org.interledger.cryptoconditions.Fulfillment;
-import org.interledger.cryptoconditions.der.DEROutputStream;
-
+/**
+ * Implementation of a fulfillment based on a prefix, a sub fulfillment, and the SHA-256 function.
+ */
 public class PrefixSha256Fulfillment implements Fulfillment {
 
   private PrefixSha256Condition condition;
@@ -19,6 +22,13 @@ public class PrefixSha256Fulfillment implements Fulfillment {
   private long maxMessageLength;
   private byte[] prefix;
 
+  /**
+   * Constructs an instance of the fulfillment.
+   * 
+   * @param prefix The prefix associated with the condition and fulfillment
+   * @param maxMessageLength The maximum length of a message.
+   * @param subfulfillment The sub fulfillments that this fulfillment depends on.
+   */
   public PrefixSha256Fulfillment(byte[] prefix, long maxMessageLength, Fulfillment subfulfillment) {
     this.prefix = new byte[prefix.length];
     System.arraycopy(prefix, 0, this.prefix, 0, prefix.length);
@@ -33,17 +43,26 @@ public class PrefixSha256Fulfillment implements Fulfillment {
   public ConditionType getType() {
     return ConditionType.PREFIX_SHA256;
   }
-  
+
+  /**
+   * Returns a copy of the prefix used in this fulfillment.
+   */
   public byte[] getPrefix() {
     byte[] prefix = new byte[this.prefix.length];
     System.arraycopy(this.prefix, 0, prefix, 0, this.prefix.length);
     return prefix;
   }
-  
-  public long getMaxMessageLenght() {
+
+  /**
+   * Returns the maximum allowable message length.
+   */
+  public long getMaxMessageLength() {
     return maxMessageLength;
   }
-  
+
+  /**
+   * Returns the sub fulfillment that this fulfillment depends on.
+   */
   public Fulfillment getSubfulfillment() {
     return subfulfillment;
   }
@@ -53,7 +72,7 @@ public class PrefixSha256Fulfillment implements Fulfillment {
     try {
       // Build prefix sequence
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      DEROutputStream out = new DEROutputStream(baos);
+      DerOutputStream out = new DerOutputStream(baos);
       out.writeTaggedObject(0, prefix);
       out.writeTaggedObject(1, BigInteger.valueOf(maxMessageLength).toByteArray());
       out.writeTaggedConstructedObject(2, subfulfillment.getEncoded());
@@ -62,14 +81,14 @@ public class PrefixSha256Fulfillment implements Fulfillment {
 
       // Wrap CHOICE
       baos = new ByteArrayOutputStream();
-      out = new DEROutputStream(baos);
+      out = new DerOutputStream(baos);
       out.writeTaggedConstructedObject(getType().getTypeCode(), buffer);
       out.close();
 
       return baos.toByteArray();
 
-    } catch (IOException e) {
-      throw new UncheckedIOException("DER Encoding Error", e);
+    } catch (IOException ioe) {
+      throw new UncheckedIOException("DER Encoding Error", ioe);
     }
   }
 

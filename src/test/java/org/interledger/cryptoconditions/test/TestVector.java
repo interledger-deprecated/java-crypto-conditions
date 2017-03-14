@@ -1,9 +1,14 @@
 package org.interledger.cryptoconditions.test;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
+
+/**
+ * POJO class that defines a test vector containing pre-calculated and verified test data used to
+ * test the various crypto-condition implementations.
+ */
 public class TestVector {
 
   private String name;
@@ -19,11 +24,11 @@ public class TestVector {
   public String getName() {
     return name;
   }
-  
+
   public void setName(String name) {
     this.name = name;
   }
-  
+
   @JsonProperty
   public TestVectorJson getJson() {
     return json;
@@ -32,7 +37,7 @@ public class TestVector {
   public void setJson(TestVectorJson json) {
     this.json = json;
   }
-  
+
   @JsonProperty
   public long getCost() {
     return cost;
@@ -41,7 +46,7 @@ public class TestVector {
   public void setCost(long cost) {
     this.cost = cost;
   }
-  
+
   @JsonProperty
   public List<String> getSubtypes() {
     return subtypes;
@@ -96,7 +101,7 @@ public class TestVector {
   public void setMessage(String message) {
     this.message = message;
   }
-  
+
   @Override
   public String toString() {
     return getName();

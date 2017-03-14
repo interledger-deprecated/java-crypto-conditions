@@ -1,8 +1,8 @@
 package org.interledger.cryptoconditions.der;
 
-public class DEREncodingException extends Exception {
+public class DerEncodingException extends Exception {
 
-  public DEREncodingException(String message) {
+  public DerEncodingException(String message) {
     super(message);
   }
 

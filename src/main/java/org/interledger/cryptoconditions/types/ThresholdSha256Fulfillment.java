@@ -1,20 +1,29 @@
 package org.interledger.cryptoconditions.types;
 
+import org.interledger.cryptoconditions.Condition;
+import org.interledger.cryptoconditions.ConditionType;
+import org.interledger.cryptoconditions.Fulfillment;
+import org.interledger.cryptoconditions.der.DerOutputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-import org.interledger.cryptoconditions.Condition;
-import org.interledger.cryptoconditions.ConditionType;
-import org.interledger.cryptoconditions.Fulfillment;
-import org.interledger.cryptoconditions.der.DEROutputStream;
-
+/**
+ * Implementation of a fulfillment based on a number of subconditions and subfulfillments.
+ */
 public class ThresholdSha256Fulfillment implements Fulfillment {
 
   private ThresholdSha256Condition condition;
   private Condition[] subconditions;
   private Fulfillment[] subfulfillments;
 
+  /**
+   * Constructs an instance of the fulfillment.
+   * 
+   * @param subconditions A set of conditions that this fulfillment relates to.
+   * @param subfulfillments A set of subfulfillments this fulfillment relates to.
+   */
   public ThresholdSha256Fulfillment(Condition[] subconditions, Fulfillment[] subfulfillments) {
     this.subconditions = new Condition[subconditions.length];
     System.arraycopy(subconditions, 0, this.subconditions, 0, subconditions.length);
@@ -22,7 +31,6 @@ public class ThresholdSha256Fulfillment implements Fulfillment {
     // TODO Clone each fulfillment?
     this.subfulfillments = new Fulfillment[subfulfillments.length];
     System.arraycopy(subfulfillments, 0, this.subfulfillments, 0, subfulfillments.length);
-
   }
 
   @Override
@@ -34,18 +42,24 @@ public class ThresholdSha256Fulfillment implements Fulfillment {
     return subfulfillments.length;
   }
 
+  /**
+   * Returns a copy of the subconditions linked to this fulfillment.
+   */
   public Condition[] getSubconditions() {
     Condition[] subconditions = new Condition[this.subconditions.length];
     System.arraycopy(this.subconditions, 0, subconditions, 0, this.subconditions.length);
     return subconditions;
   }
-  
+
+  /**
+   * Returns a copy of the subfulfillments linked to this fulfillment.
+   */
   public Fulfillment[] getSubfulfillments() {
     Fulfillment[] subfulfillments = new Fulfillment[this.subfulfillments.length];
     System.arraycopy(this.subfulfillments, 0, subfulfillments, 0, this.subfulfillments.length);
     return subfulfillments;
   }
-  
+
   @Override
   public byte[] getEncoded() {
     try {
@@ -59,7 +73,7 @@ public class ThresholdSha256Fulfillment implements Fulfillment {
 
       // Wrap SET OF
       baos = new ByteArrayOutputStream();
-      DEROutputStream out = new DEROutputStream(baos);
+      DerOutputStream out = new DerOutputStream(baos);
       out.writeTaggedConstructedObject(0, fulfillmentsBuffer);
       out.close();
       fulfillmentsBuffer = baos.toByteArray();
@@ -74,7 +88,7 @@ public class ThresholdSha256Fulfillment implements Fulfillment {
 
       // Wrap SET OF
       baos = new ByteArrayOutputStream();
-      out = new DEROutputStream(baos);
+      out = new DerOutputStream(baos);
       out.writeTaggedConstructedObject(1, conditionsBuffer);
       out.close();
       conditionsBuffer = baos.toByteArray();
@@ -86,14 +100,14 @@ public class ThresholdSha256Fulfillment implements Fulfillment {
 
       // Wrap CHOICE
       baos = new ByteArrayOutputStream();
-      out = new DEROutputStream(baos);
+      out = new DerOutputStream(baos);
       out.writeTaggedConstructedObject(getType().getTypeCode(), buffer);
       out.close();
 
       return baos.toByteArray();
 
-    } catch (IOException e) {
-      throw new UncheckedIOException("DER Encoding Error", e);
+    } catch (IOException ioe) {
+      throw new UncheckedIOException("DER Encoding Error", ioe);
     }
   }
 
@@ -101,15 +115,14 @@ public class ThresholdSha256Fulfillment implements Fulfillment {
   public ThresholdSha256Condition getCondition() {
     if (condition == null) {
 
-      // Copy all subconditions into another array along with the conditions derived from all
+      // Copy all subconditions into another array along with the conditions *derived* from all
       // subfulfillments
       Condition[] allConditions = new Condition[subconditions.length + subfulfillments.length];
       System.arraycopy(subconditions, 0, allConditions, 0, subconditions.length);
-
-      int j = subconditions.length;
+      int idx = subconditions.length;
       for (int i = 0; i < subfulfillments.length; i++) {
-        allConditions[j] = subfulfillments[i].getCondition();
-        j++;
+        allConditions[idx] = subfulfillments[i].getCondition();
+        idx++;
       }
       condition = new ThresholdSha256Condition(subfulfillments.length, allConditions);
     }
@@ -141,7 +154,6 @@ public class ThresholdSha256Fulfillment implements Fulfillment {
     }
 
     return true;
-
   }
 
 }

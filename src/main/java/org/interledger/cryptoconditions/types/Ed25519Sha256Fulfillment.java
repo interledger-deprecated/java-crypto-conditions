@@ -1,5 +1,13 @@
 package org.interledger.cryptoconditions.types;
 
+import net.i2p.crypto.eddsa.EdDSAEngine;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
+
+import org.interledger.cryptoconditions.Condition;
+import org.interledger.cryptoconditions.ConditionType;
+import org.interledger.cryptoconditions.Fulfillment;
+import org.interledger.cryptoconditions.der.DerOutputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -9,20 +17,22 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.security.SignatureException;
 
-import org.interledger.cryptoconditions.Condition;
-import org.interledger.cryptoconditions.ConditionType;
-import org.interledger.cryptoconditions.Fulfillment;
-import org.interledger.cryptoconditions.der.DEROutputStream;
 
-import net.i2p.crypto.eddsa.EdDSAEngine;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-
+/**
+ * Implements a fulfullment using the ED-25519 and SHA-256 functions.
+ */
 public class Ed25519Sha256Fulfillment implements Fulfillment {
 
   private Ed25519Sha256Condition condition;
   private EdDSAPublicKey publicKey;
   private byte[] signature;
 
+  /**
+   * Constructs an instance of the fulfillment.
+   * 
+   * @param publicKey   The public key associated with the condition and fulfillment.
+   * @param signature   The signature associated with the fulfillment.
+   */
   public Ed25519Sha256Fulfillment(EdDSAPublicKey publicKey, byte[] signature) {
     this.signature = new byte[signature.length];
     System.arraycopy(signature, 0, this.signature, 0, signature.length);
@@ -33,11 +43,17 @@ public class Ed25519Sha256Fulfillment implements Fulfillment {
   public ConditionType getType() {
     return ConditionType.ED25519_SHA256;
   }
-  
+
+  /**
+   * Returns the public key used.
+   */
   public EdDSAPublicKey getPublicKey() {
     return publicKey;
   }
-  
+
+  /**
+   * Returns a copy of the signature linked to this fulfillment.
+   */
   public byte[] getSignature() {
     byte[] signature = new byte[this.signature.length];
     System.arraycopy(this.signature, 0, signature, 0, this.signature.length);
@@ -49,7 +65,7 @@ public class Ed25519Sha256Fulfillment implements Fulfillment {
     try {
       // Build preimage sequence
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      DEROutputStream out = new DEROutputStream(baos);
+      DerOutputStream out = new DerOutputStream(baos);
       out.writeTaggedObject(0, publicKey.getA().toByteArray());
       out.writeTaggedObject(1, signature);
       out.close();
@@ -57,7 +73,7 @@ public class Ed25519Sha256Fulfillment implements Fulfillment {
 
       // Wrap CHOICE
       baos = new ByteArrayOutputStream();
-      out = new DEROutputStream(baos);
+      out = new DerOutputStream(baos);
       out.writeTaggedConstructedObject(getType().getTypeCode(), buffer);
       out.close();
 
@@ -111,6 +127,9 @@ public class Ed25519Sha256Fulfillment implements Fulfillment {
   private static MessageDigest getSha512Digest() {
     if (_DIGEST == null) {
       try {
+        // TODO: i havent read up on fulfillments, but this seems counter-intuitive - why is this
+        // class called ...Sha256, but we use a 512 digest? If this is right, we should definitely
+        // include some comments here to explain.
         _DIGEST = MessageDigest.getInstance("SHA-512");
       } catch (NoSuchAlgorithmException e) {
         throw new RuntimeException(e);

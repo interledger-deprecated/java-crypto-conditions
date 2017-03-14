@@ -1,4 +1,4 @@
-# Java Crypto-Conditions [![gitter][gitter-image]][gitter-url]
+# Java Crypto-Conditions [![gitter][gitter-image]][gitter-url] [![CircleCI](https://circleci.com/gh/interledger/java-crypto-conditions.svg?style=svg)](https://circleci.com/gh/interledger/java-crypto-conditions)
 
 [gitter-image]: https://badges.gitter.im/interledger/java-crypto-conditions.svg
 [gitter-url]: https://gitter.im/interledger/java-crypto-conditions

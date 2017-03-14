@@ -2,7 +2,7 @@ package org.interledger.cryptoconditions.der;
 
 import java.math.BigInteger;
 
-public class DERObject {
+public class DerObject {
   
   private int tag;
   private int length;

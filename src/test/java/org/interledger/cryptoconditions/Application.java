@@ -1,5 +1,23 @@
 package org.interledger.cryptoconditions;
 
+import net.i2p.crypto.eddsa.EdDSAEngine;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import org.interledger.cryptoconditions.der.CryptoConditionReader;
+import org.interledger.cryptoconditions.der.DerEncodingException;
+import org.interledger.cryptoconditions.types.Ed25519Sha256Condition;
+import org.interledger.cryptoconditions.types.Ed25519Sha256Fulfillment;
+import org.interledger.cryptoconditions.types.PrefixSha256Condition;
+import org.interledger.cryptoconditions.types.PrefixSha256Fulfillment;
+import org.interledger.cryptoconditions.types.PreimageSha256Condition;
+import org.interledger.cryptoconditions.types.PreimageSha256Fulfillment;
+import org.interledger.cryptoconditions.types.RsaSha256Condition;
+import org.interledger.cryptoconditions.types.RsaSha256Fulfillment;
+import org.interledger.cryptoconditions.types.ThresholdSha256Condition;
+import org.interledger.cryptoconditions.types.ThresholdSha256Fulfillment;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -16,27 +34,14 @@ import java.security.SignatureException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAKeyGenParameterSpec;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.interledger.cryptoconditions.der.CryptoConditionReader;
-import org.interledger.cryptoconditions.der.DEREncodingException;
-import org.interledger.cryptoconditions.types.Ed25519Sha256Condition;
-import org.interledger.cryptoconditions.types.Ed25519Sha256Fulfillment;
-import org.interledger.cryptoconditions.types.PrefixSha256Condition;
-import org.interledger.cryptoconditions.types.PrefixSha256Fulfillment;
-import org.interledger.cryptoconditions.types.PreimageSha256Condition;
-import org.interledger.cryptoconditions.types.PreimageSha256Fulfillment;
-import org.interledger.cryptoconditions.types.RsaSha256Condition;
-import org.interledger.cryptoconditions.types.RsaSha256Fulfillment;
-import org.interledger.cryptoconditions.types.ThresholdSha256Condition;
-import org.interledger.cryptoconditions.types.ThresholdSha256Fulfillment;
 
-import net.i2p.crypto.eddsa.EdDSAEngine;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-
+/**
+ * Playground / test class. Will be removed at a future date.
+ */
 public class Application {
 
   public static void main(String[] args) throws NoSuchAlgorithmException,
-      InvalidAlgorithmParameterException, IOException, InvalidKeyException, SignatureException, DEREncodingException {
+      InvalidAlgorithmParameterException, IOException, InvalidKeyException, SignatureException, DerEncodingException {
 
     Provider bc = new BouncyCastleProvider();
     System.out.println(bc.getInfo());

@@ -1,22 +1,29 @@
 package org.interledger.cryptoconditions.types;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.math.BigInteger;
-import java.security.interfaces.RSAPublicKey;
-
 import org.interledger.cryptoconditions.ConditionType;
 import org.interledger.cryptoconditions.Sha256Condition;
 import org.interledger.cryptoconditions.SimpleCondition;
 import org.interledger.cryptoconditions.UnsignedBigInteger;
-import org.interledger.cryptoconditions.der.DEROutputStream;
-import org.interledger.cryptoconditions.der.DERTags;
+import org.interledger.cryptoconditions.der.DerOutputStream;
+import org.interledger.cryptoconditions.der.DerTag;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.security.interfaces.RSAPublicKey;
+
+/**
+ * Implementation of a condition based on RSA PKI and the SHA-256 function.
+ */
 public class RsaSha256Condition extends Sha256Condition implements SimpleCondition {
 
   private RSAPublicKey key;
 
+  /**
+   * Constructs an instance of the condition.
+   * 
+   * @param key The RSA public key associated with the condition.
+   */
   public RsaSha256Condition(RSAPublicKey key) {
     super(calculateCost(key));
 
@@ -33,6 +40,12 @@ public class RsaSha256Condition extends Sha256Condition implements SimpleConditi
     this.key = key;
   }
 
+  /**
+   * Constructs an instance of the condition.
+   * 
+   * @param fingerprint The calculated fingerprint for the condition.
+   * @param cost The calculated cost of the condition.
+   */
   public RsaSha256Condition(byte[] fingerprint, long cost) {
     super(fingerprint, cost);
   }
@@ -47,15 +60,15 @@ public class RsaSha256Condition extends Sha256Condition implements SimpleConditi
     try {
       // Build modulus
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      DEROutputStream out = new DEROutputStream(baos);
+      DerOutputStream out = new DerOutputStream(baos);
       out.writeTaggedObject(0, UnsignedBigInteger.toUnsignedByteArray(key.getModulus()));
       out.close();
       byte[] buffer = baos.toByteArray();
 
       // Wrap SEQUENCE
       baos = new ByteArrayOutputStream();
-      out = new DEROutputStream(baos);
-      out.writeEncoded(DERTags.CONSTRUCTED.getTag() + DERTags.SEQUENCE.getTag(), buffer);
+      out = new DerOutputStream(baos);
+      out.writeEncoded(DerTag.CONSTRUCTED.getTag() + DerTag.SEQUENCE.getTag(), buffer);
       out.close();
       return baos.toByteArray();
 
@@ -65,10 +78,10 @@ public class RsaSha256Condition extends Sha256Condition implements SimpleConditi
   }
 
   /**
-   * cost = (modulus size in bytes) ^ 2
+   * Calculates the cost of a condition based on an RSA key as (modulus size in bytes) ^ 2
    * 
-   * @param key
-   * @return cost
+   * @param key The key used in the condition.
+   * @return the cost of a condition using this key.
    */
   private static long calculateCost(RSAPublicKey key) {
     return (long) Math.pow(UnsignedBigInteger.toUnsignedByteArray(key.getModulus()).length, 2);
