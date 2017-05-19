@@ -1,19 +1,37 @@
+group = 'org.interledger'
+description = 'Crypto Conditions'
+version = '2.0.0-SNAPSHOT'
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
 
-targetCompatibility = 1.8
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
-group = 'org.interledger'
-version = '2.0.0-SNAPSHOT'
-description = 'Crypto Conditions'
 
+/* 
+ custom checkstyle properties for the build.
+ see https://docs.gradle.org/current/dsl/org.gradle.api.plugins.quality.CheckstyleExtension.html
+*/
 checkstyle {
     configFile file('google_checks.xml')
     toolVersion '7.1'
-    showViolations = true    
+    showViolations = true
+    /* 
+       by default, checkstyle warnings dont fail the build. but we want exactly that for circle-ci 
+       pass/fail reporting, so tell the plugin to break the build on the first error 
+    */
+	maxWarnings = 0 
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
 }
 
 jar {

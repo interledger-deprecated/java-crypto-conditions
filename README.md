@@ -1,7 +1,12 @@
-# Java Crypto-Conditions [![gitter][gitter-image]][gitter-url] [![CircleCI](https://circleci.com/gh/interledger/java-crypto-conditions.svg?style=svg)](https://circleci.com/gh/interledger/java-crypto-conditions)
+# Java Crypto-Conditions [![join the chat on gitter][gitter-image]][gitter-url] [![circle-ci][circle-image]][circle-url] [![codecov][codecov-image]][codecov-url]
 
 [gitter-image]: https://badges.gitter.im/interledger/java-crypto-conditions.svg
 [gitter-url]: https://gitter.im/interledger/java-crypto-conditions
+[circle-image]: https://circleci.com/gh/interledger/java-crypto-conditions.svg?style=shield
+[circle-url]: https://circleci.com/gh/interledger/java-crypto-conditions
+[codecov-image]: https://codecov.io/gh/interledger/java-crypto-conditions/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/interledger/java-crypto-conditions
+
 
 Java implementation of Crypto-Conditions (See [RFC](https://datatracker.ietf.org/doc/draft-thomas-crypto-conditions/)).
 
@@ -18,7 +23,11 @@ For ED25519 the library depends on [net.i2p.crypto.eddsa](https://github.com/str
  
 ## Usage
 
-### Step 1: Clone repo
+### Requirements
+This project uses Gradle to manage dependencies and other aspects of the build.  
+To install Gradle, follow the instructions at [https://gradle.org](https://gradle.org/).
+
+### Get the code
 
 ``` sh
 git clone https://github.com/interledger/java-crypto-conditions
@@ -26,18 +35,23 @@ git clone https://github.com/interledger/java-crypto-conditions
 cd java-crypto-conditions
 ```
 
-### Step 2: Install
+### Build the Project
+To build the project, execute the following command:
 
-#### Gradle:
-``` 
-gradle clean install [check]
-
+```bash
+$ gradle build test
 ```
 
-#### Maven: 
-``` 
-mvn clean install [checkstyle:check]
+#### Checkstyle
+The project uses checkstyle to keep code style consistent. To run the style checks:
 
+```bash
+$ gradle build check
+```
+
+#### Maven is also supported:
+```
+mvn clean install [checkstyle:check]
 ```
 
 ### Step 3: Use
