@@ -1,6 +1,6 @@
 group = 'org.interledger'
 description = 'Crypto Conditions'
-version = '2.0.1-SNAPSHOT'
+version = '0.2.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
