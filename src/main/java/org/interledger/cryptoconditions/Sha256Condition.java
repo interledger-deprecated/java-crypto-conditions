@@ -2,22 +2,28 @@ package org.interledger.cryptoconditions;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 /**
- * Abstract base class for the *-SHA-256 condition types.
- * 
- * <p>Provides a concrete implementation for the generation of a SHA256 fingerprint via a shared 
- * static digest.
- * 
- * @author adrianhopebailie
- *
+ * Abstract base class for the *-SHA-256 condition types. Provides concrete implementation of
+ * generation of SHA256 fingerprint via a shared static digest.
  */
 public abstract class Sha256Condition extends ConditionBase {
+
+  // This is not static because all of the instances returned from MessageDigest.getInstance() are
+  // distinct in order to maintain separate digests.  Additionally, MessageDigest isn't
+  // particularly expensive to construct (see MessageDigest source).
+  private final MessageDigest messageDigest;
 
   private byte[] fingerprint;
 
   protected Sha256Condition(long cost) {
     super(cost);
+    try {
+      this.messageDigest = MessageDigest.getInstance("SHA-256");
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   protected Sha256Condition(byte[] fingerprint, long cost) {
@@ -27,15 +33,25 @@ public abstract class Sha256Condition extends ConditionBase {
     if (fingerprint.length != 32) {
       throw new IllegalArgumentException("Fingerprint must be 32 bytes.");
     }
+
+    try {
+      this.messageDigest = MessageDigest.getInstance("SHA-256");
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
-   * Returns the un-hashed fingerprint content for this condition as defined in the specification.
+   * This method allows sub-classes to provide the fingerprint contents (un-hashed) so
+   * that {@link #getFingerprint()} can be lazily computed.
    */
   protected abstract byte[] getFingerprintContents();
 
   /**
-   * Returns a copy of the (internally generated and cached) fingerprint on first call.
+   * Generates and caches the fingerprint on first call. Returns a copy of the internally cached
+   * fingerprint once constructed.  This is lazily computed because some
+   * implementation's fingerprints involve a full ASN.1 DER serialization, which might be
+   * expensive if the fingerprint is not needed.
    */
   @Override
   public byte[] getFingerprint() {
@@ -43,26 +59,11 @@ public abstract class Sha256Condition extends ConditionBase {
       fingerprint = getDigest(getFingerprintContents());
     }
 
-    byte[] returnVal = new byte[fingerprint.length];
-    System.arraycopy(fingerprint, 0, returnVal, 0, fingerprint.length);
-
-    return returnVal;
+    return Arrays.copyOf(fingerprint, fingerprint.length);
   }
 
-  private static MessageDigest _DIGEST;
-
-  //TODO: we should consider making this public and non-static, so that other classes could simply 
-  //override this method to implement other digests (e.g. SHA512 etc)?
-  private static byte[] getDigest(byte[] input) {
-    if (_DIGEST == null) {
-      try {
-        _DIGEST = MessageDigest.getInstance("SHA-256");
-      } catch (NoSuchAlgorithmException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    return _DIGEST.digest(input);
+  private byte[] getDigest(byte[] input) {
+    return messageDigest.digest(input);
   }
 
 }
