@@ -33,11 +33,12 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 /**
  * Provides utility methods to read a crypto-condition from DER encoding.
  */
 public class CryptoConditionReader {
+
+  public static final String ED_25519 = "Ed25519";
 
   /**
    * Reads a DER encoded condition from the buffer.
@@ -296,7 +297,7 @@ public class CryptoConditionReader {
         bytesRead.addAndGet(innerBytesRead.get());
 
         EdDSAPublicKeySpec ed25519spec = new EdDSAPublicKeySpec(ed25519key,
-            EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.CURVE_ED25519_SHA512));
+            EdDSANamedCurveTable.getByName(ED_25519));
         EdDSAPublicKey ed25519PublicKey = new EdDSAPublicKey(ed25519spec);
 
         return new Ed25519Sha256Fulfillment(ed25519PublicKey, ed25519Signature);

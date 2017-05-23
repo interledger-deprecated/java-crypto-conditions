@@ -13,6 +13,7 @@ import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 import org.interledger.cryptoconditions.ConditionType;
+import org.interledger.cryptoconditions.der.CryptoConditionReader;
 import org.junit.Test;
 
 import java.net.URI;
@@ -69,9 +70,8 @@ public class Ed25519Sha256ConditionTest extends AbstractCryptoConditionTest {
    * @return An instance of {@link KeyPair}.
    */
   protected KeyPair constructEd25519KeyPair() throws InvalidKeySpecException {
-    final EdDSANamedCurveSpec edParams
-        // = EdDSANamedCurveTable.getByName(ED_25519);
-        = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.CURVE_ED25519_SHA512);
+    final EdDSANamedCurveSpec edParams = EdDSANamedCurveTable
+        .getByName(CryptoConditionReader.ED_25519);
     assert (edParams != null);
 
     final EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(TEST_PUBKEY, edParams);

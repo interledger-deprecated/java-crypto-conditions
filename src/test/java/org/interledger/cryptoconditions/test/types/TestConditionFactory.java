@@ -7,6 +7,7 @@ import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 import org.interledger.cryptoconditions.Condition;
 import org.interledger.cryptoconditions.ConditionType;
 import org.interledger.cryptoconditions.UnsignedBigInteger;
+import org.interledger.cryptoconditions.der.CryptoConditionReader;
 import org.interledger.cryptoconditions.test.TestCondition;
 import org.interledger.cryptoconditions.test.TestVectorJson;
 
@@ -69,8 +70,9 @@ public class TestConditionFactory {
 
         byte[] publicKeyBytes = Base64.getUrlDecoder().decode(condition.getPublicKey());
 
-        EdDSAPublicKeySpec publicKeyspec = new EdDSAPublicKeySpec(publicKeyBytes,
-            EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.CURVE_ED25519_SHA512));
+        EdDSAPublicKeySpec publicKeyspec = new EdDSAPublicKeySpec(
+            publicKeyBytes, EdDSANamedCurveTable.getByName(CryptoConditionReader.ED_25519)
+        );
         EdDSAPublicKey publicKey = new EdDSAPublicKey(publicKeyspec);
         return new TestEd25519Sha256Condition(publicKey);
 
