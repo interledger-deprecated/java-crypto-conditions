@@ -4,7 +4,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.interledger</groupId>
   <artifactId>java-crypto-conditions</artifactId>
-  <version>2.0.1-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
+  <name>Crypto Conditions (Java)</name>
+  <description>Java implementation of the Crypto-Conditions RFC found at https://tools.ietf.org/html/draft-thomas-crypto-conditions-02.</description>
+  <url>http://github.com/interledger/java-crypto-conditions</url>
   <inceptionYear>2016</inceptionYear>
   <licenses>
     <license>
@@ -13,6 +16,29 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+  <developers>
+    <developer>
+      <name>Adrian Hope-Bailie</name>
+      <organizationUrl>https://github.com/adrianhopebailie</organizationUrl>
+    </developer>
+    <developer>
+      <name>Enrique Benito</name>
+      <organizationUrl>https://github.com/earizon</organizationUrl>
+    </developer>
+    <developer>
+      <name>David Fuelling</name>
+      <organizationUrl>https://github.com/sappenin</organizationUrl>
+    </developer>
+    <developer>
+      <name>Manuel Polo</name>
+      <organizationUrl>https://github.com/mrmx</organizationUrl>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/interledger/java-crypto-conditions.git</connection>
+    <developerConnection>scm:git:git@github.com:interledger/java-crypto-conditions.git</developerConnection>
+    <url>https://github.com/interledger/crypto-conditions</url>
+  </scm>
   <properties>
     <checkstyle.consoleOutput>true</checkstyle.consoleOutput>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -66,6 +92,10 @@
   </dependencies>
   <reporting>
     <plugins>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.17</version>
+      </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.10.4</version>
