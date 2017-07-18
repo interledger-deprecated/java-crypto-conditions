@@ -1,11 +1,6 @@
 group = 'org.interledger'
 description = 'Crypto Conditions (Java)'
 version = '0.2.0-SNAPSHOT'
-project.ext {
-    isReleaseVersion = !version.endsWith('SNAPSHOT')
-    ossrhUsername = ''
-    ossrhPassword = ''
-}
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -25,6 +20,10 @@ checkstyle {
     configFile file('google_checks.xml')
     toolVersion '7.1'
     showViolations = true
+    /*
+       by default, checkstyle warnings dont fail the build. but we want exactly that for circle-ci
+       pass/fail reporting, so tell the plugin to break the build on the first error
+    */
     maxWarnings = 0
 }
 
@@ -41,8 +40,7 @@ jacocoTestReport {
 
 jar {
     manifest {
-        attributes 'Implementation-Title': description,
-                'Implementation-Version': version
+        attributes 'Implementation-Title': description, 'Implementation-Version': version
     }
 }
 
@@ -61,47 +59,59 @@ dependencies {
     testCompile 'com.google.guava:guava:21.0'
 }
 
+if (project.hasProperty('sign')) {
+    signing {
+        sign configurations.archives
+    }
+}
+
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from tasks.javadoc.destinationDir
 }
 
 task sourcesJar(type: Jar) {
-    from sourceSets.main.allSource
     classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
 artifacts {
-    archives jar
-
-    archives javadocJar
-    archives sourcesJar
+    archives javadocJar, sourcesJar
 }
 
-signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
-}
+//signing {
+//    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+//    sign configurations.archives
+//}
 
 uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                authentication(userName: hasProperty('ossrhUsername') ? ossrhUsername : '', password: hasProperty('ossrhPassword') ? ossrhPassword : '')
             }
 
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+                authentication(userName: hasProperty('ossrhUsername') ? ossrhUsername : '', password: hasProperty('ossrhPassword') ? ossrhPassword : '')
             }
 
             pom.project {
                 name 'Crypto Conditions (Java)'
-                artifactId 'crypto-conditions'
                 packaging 'jar'
-                description 'Java implementation of the Crypto-Conditions RFC found at https://tools.ietf.org/html/draft-thomas-crypto-conditions-02.'
+                description 'Java implementation of the Crypto-Conditions RFC found at https://tools.ietf.org/html/draft-thomas-crypto-conditions-03.'
                 url 'http://github.com/interledger/java-crypto-conditions'
+
+                inceptionYear '2016'
+
+                properties {
+                    "project.build.sourceEncoding" "UTF-8"
+                    "maven.compiler.source" "1.8"
+                    "maven.compiler.target" "1.8"
+                    "checkstyle.config.location" "google_checks.xml"
+                    "checkstyle.consoleOutput" "true"
+                }
 
                 scm {
                     connection 'scm:git:git://github.com/interledger/java-crypto-conditions.git'
@@ -133,6 +143,21 @@ uploadArchives {
                     developer {
                         name 'Manuel Polo'
                         organizationUrl 'https://github.com/mrmx'
+                    }
+                }
+
+                reporting {
+                    plugins {
+                        plugin {
+                            groupId "org.apache.maven.plugins"
+                            artifactId "maven-checkstyle-plugin"
+                            version "2.17"
+                        }
+                        plugin {
+                            groupId "org.apache.maven.plugins"
+                            artifactId "maven-javadoc-plugin"
+                            version "2.10.4"
+                        }
                     }
                 }
             }
