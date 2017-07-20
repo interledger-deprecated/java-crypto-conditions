@@ -1,5 +1,5 @@
 group = 'org.interledger'
-description = 'Crypto Conditions (Java)'
+description = 'Java implementation of the Crypto-Conditions RFC.'
 version = '0.2.0-SNAPSHOT'
 
 apply plugin: 'java'
@@ -98,9 +98,9 @@ uploadArchives {
             }
 
             pom.project {
-                name 'Crypto Conditions (Java)'
+                name 'Crypto Conditions'
                 packaging 'jar'
-                description 'Java implementation of the Crypto-Conditions RFC found at https://tools.ietf.org/html/draft-thomas-crypto-conditions-03.'
+                description 'Java implementation of the Crypto-Conditions RFC.'
                 url 'http://github.com/interledger/java-crypto-conditions'
 
                 inceptionYear '2016'
@@ -182,9 +182,9 @@ task writePom {
     doLast {
         pom {
             project {
-                name 'Crypto Conditions (Java)'
+                name 'Crypto Conditions'
                 packaging 'jar'
-                description 'Java implementation of the Crypto-Conditions RFC found at https://tools.ietf.org/html/draft-thomas-crypto-conditions-02.'
+                description 'Java implementation of the Crypto-Conditions RFC.'
                 url 'http://github.com/interledger/java-crypto-conditions'
                 inceptionYear '2016'
                 licenses {
