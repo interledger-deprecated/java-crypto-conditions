@@ -7,6 +7,7 @@ import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 import org.interledger.cryptoconditions.Condition;
 import org.interledger.cryptoconditions.ConditionType;
 import org.interledger.cryptoconditions.Fulfillment;
+import org.interledger.cryptoconditions.UnsignedBigInteger;
 import org.interledger.cryptoconditions.types.Ed25519Sha256Condition;
 import org.interledger.cryptoconditions.types.Ed25519Sha256Fulfillment;
 import org.interledger.cryptoconditions.types.PrefixSha256Condition;
@@ -267,7 +268,7 @@ public class CryptoConditionReader {
 
       case RSA_SHA256:
 
-        BigInteger modulus = new BigInteger(
+        BigInteger modulus = UnsignedBigInteger.fromUnsignedByteArray(
             in.readTaggedObject(0, length - innerBytesRead.get(), innerBytesRead).getValue());
         byte[] rsaSignature =
             in.readTaggedObject(1, length - innerBytesRead.get(), innerBytesRead).getValue();

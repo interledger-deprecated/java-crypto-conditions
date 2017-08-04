@@ -6,18 +6,17 @@ import java.util.Arrays;
 /**
  * Utility class for encoding and decoding a {@link BigInteger} as a {@link byte[]} without sign
  * prefix.
- * 
- * @author adrianhopebailie
  *
+ * @author adrianhopebailie
  */
 public class UnsignedBigInteger {
 
   /**
    * Get a positive {@link BigInteger} encoded as a {@link byte[]} with no sign-prefix.
-   * 
+   *
    * @param value a positive BigInteger value
    * @return input value encoded as a byte[] with leading 0x00 prefix trimmed.
-   * @throws IllegalArgumentException if the input value is <0
+   * @throws IllegalArgumentException if the input value is &lt; 0
    */
   public static byte[] toUnsignedByteArray(BigInteger value) {
 
@@ -30,8 +29,8 @@ public class UnsignedBigInteger {
   }
 
   /**
-   * Get {@link BigInteger} from byte encoding that assumes the value is >0.
-   * 
+   * Get {@link BigInteger} from byte encoding that assumes the value is  &gt; 0.
+   *
    * @param value a byte encoded integer
    * @return a positive {@link BigInteger}
    */
