@@ -1,0 +1,8 @@
+machine:
+  java:
+    version: oraclejdk8
+
+test:
+  post:
+    # publish the coverage report to codecov.io
+    - bash <(curl -s https://codecov.io/bash)

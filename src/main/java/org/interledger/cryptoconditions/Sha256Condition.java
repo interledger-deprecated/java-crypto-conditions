@@ -2,70 +2,92 @@ package org.interledger.cryptoconditions;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Objects;
 
 /**
- * Abstract base class for the *-SHA-256 condition types.
- * 
- * Provides concrete implementation of generation of 
- * SHA256 fingerprint via a shared static digest.
- *  
- * @author adrianhopebailie
- *
+ * Abstract base class for the *-SHA-256 condition rsa.
  */
 public abstract class Sha256Condition extends ConditionBase {
 
-  private byte[] fingerprint;
+  private final byte[] fingerprint;
+  private final String fingerprintBase64Url;
 
-  protected Sha256Condition(long cost) {
-    super(cost);
-  }
+  /**
+   * Constructor that accepts a fingerprint and a cost number.
+   *
+   * @param type        A {@link CryptoConditionType} that represents the type of this condition.
+   * @param cost        A {@link long} representing the anticipated cost of this condition,
+   *                    calculated per
+   *                    the rules of the crypto-conditions specification.
+   * @param fingerprint The binary representation of the fingerprint for this condition.
+   */
+  protected Sha256Condition(
+      final CryptoConditionType type, final long cost, final byte[] fingerprint
+  ) {
+    super(type, cost);
 
-  protected Sha256Condition(byte[] fingerprint, long cost) {
-    super(cost);
-    this.fingerprint = fingerprint;
-    
-    if(fingerprint.length != 32) {
+    Objects.requireNonNull(fingerprint);
+    if (fingerprint.length != 32) {
       throw new IllegalArgumentException("Fingerprint must be 32 bytes.");
     }
+
+    Objects.requireNonNull(fingerprint);
+    this.fingerprint = Arrays.copyOf(fingerprint, fingerprint.length);
+    this.fingerprintBase64Url = Base64.getUrlEncoder().encodeToString(this.fingerprint);
   }
 
-  /**
-   * Super-classes must provide the un-hashed fingerprint content
-   * for this condition as defined in the specification.
-   * 
-   * @return
-   */
-  protected abstract byte[] getFingerprintContents();
-
-  /**
-   * Generates and caches the fingerprint on first call.
-   * 
-   * Returns a copy of the internally cached fingerprint.
-   */
+  @Deprecated
   @Override
-  public byte[] getFingerprint() {
-    if (fingerprint == null) {
-      fingerprint = getDigest(getFingerprintContents());
-    }
-    
-    byte[] returnVal = new byte[fingerprint.length];
-    System.arraycopy(fingerprint, 0, returnVal, 0, fingerprint.length);
-    
-    return returnVal;
+  public final byte[] getFingerprint() {
+    return fingerprint;
   }
 
-  private static MessageDigest _DIGEST;
-
-  private static byte[] getDigest(byte[] input) {
-    if (_DIGEST == null) {
-      try {
-        _DIGEST = MessageDigest.getInstance("SHA-256");
-      } catch (NoSuchAlgorithmException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    return _DIGEST.digest(input);
+  @Override
+  public final String getFingerprintBase64Url() {
+    return this.fingerprintBase64Url;
   }
 
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (object == null || getClass() != object.getClass()) {
+      return false;
+    }
+    if (!super.equals(object)) {
+      return false;
+    }
+
+    Sha256Condition that = (Sha256Condition) object;
+
+    return fingerprintBase64Url.equals(that.fingerprintBase64Url);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = super.hashCode();
+    result = 31 * result + fingerprintBase64Url.hashCode();
+    return result;
+  }
+
+  /**
+   * Constructs the fingerprint of this condition by taking the SHA-256 digest of the contents of
+   * this condition, per the crypto-conditions RFC.
+   *
+   * @param fingerprintContents A byte array containing the unhashed contents of this condition
+   *                            as assembled per the rules of the RFC.
+   * @return A byte array containing the hashed fingerprint.
+   */
+  protected static final byte[] hashFingerprintContents(final byte[] fingerprintContents) {
+    Objects.requireNonNull(fingerprintContents);
+    try {
+      final MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+      return messageDigest.digest(fingerprintContents);
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }
