@@ -1,163 +1,104 @@
 package org.interledger.cryptoconditions;
 
-import org.interledger.cryptoconditions.der.DerOutputStream;
-import org.interledger.cryptoconditions.der.DerTag;
-import org.interledger.cryptoconditions.uri.CryptoConditionUri;
-import org.interledger.cryptoconditions.uri.NamedInformationUri;
-import org.interledger.cryptoconditions.uri.NamedInformationUri.HashFunction;
+import org.interledger.cryptoconditions.der.DerEncodingException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.math.BigInteger;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
 /**
- * The ConditionBase class provides shared logic for conditions. It provides concrete
- * implementations of {@link #getCost()}, {@link #getEncoded()}, {@link #getUri()},
- * {@link #equals(Object)}, {@link #hashCode()} and {@link #toString()}.
- * 
- * @author adrianhopebailie
- *
+ * This class provides shared, concrete logic for all conditions.
  */
 public abstract class ConditionBase implements Condition {
 
-  private long cost;
-  private URI uri;
-  private byte[] encoded;
+  private final CryptoConditionType type;
+  private final long cost;
 
   /**
    * Default internal constructor for all conditions. Sub-classes must statically calculate the cost
    * of a condition and call this constructor with the correct cost value.
-   * 
+   *
+   * @param type The type of this condition.
    * @param cost the cost value for this condition.
    */
-  protected ConditionBase(long cost) {
+  protected ConditionBase(final CryptoConditionType type, final long cost) {
+    this.type = Objects.requireNonNull(type);
+
+    if (cost < 0) {
+      throw new IllegalArgumentException("Cost must be positive!");
+    }
     this.cost = cost;
   }
 
   @Override
-  public long getCost() {
+  public final CryptoConditionType getType() {
+    return this.type;
+  }
+
+  @Override
+  public final long getCost() {
     return cost;
   }
 
-  /**
-   * Returns a copy of the (internally generated and cached) DER encoded condition byte array.
-   */
   @Override
-  public byte[] getEncoded() {
-
-    if (encoded == null) {
-      try {
-        // Build Fingerprint and Cost SEQUENCE
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DerOutputStream out = new DerOutputStream(baos);
-        out.writeTaggedObject(0, getFingerprint());
-        out.writeTaggedObject(1, BigInteger.valueOf(getCost()).toByteArray());
-        if (this instanceof CompoundCondition) {
-          byte[] bitStringData =
-              ConditionType.getEnumOfTypesAsBitString(((CompoundCondition) this).getSubtypes());
-          out.writeTaggedObject(2, bitStringData);
-        }
-        out.close();
-        byte[] buffer = baos.toByteArray();
-
-        // Wrap CHOICE
-        baos = new ByteArrayOutputStream();
-        out = new DerOutputStream(baos);
-        out.writeEncoded(
-            DerTag.CONSTRUCTED.getTag() + DerTag.TAGGED.getTag() + getType().getTypeCode(),
-            buffer);
-        out.close();
-        return baos.toByteArray();
-      } catch (IOException ioe) {
-        throw new UncheckedIOException("DER Encoding Error.", ioe);
-      }
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (object == null || getClass() != object.getClass()) {
+      return false;
     }
 
-    byte[] returnVal = new byte[encoded.length];
-    System.arraycopy(encoded, 0, returnVal, 0, encoded.length);
+    ConditionBase that = (ConditionBase) object;
 
-    return returnVal;
-  }
-
-  @Override
-  public URI getUri() {
-
-    if (uri == null) {
-      Map<String, String> params = new HashMap<>();
-      params.put(CryptoConditionUri.QueryParams.TYPE, getType().toString().toLowerCase());
-      params.put(CryptoConditionUri.QueryParams.COST, Long.toString(getCost()));
-
-      if (this instanceof CompoundCondition) {
-        CompoundCondition cc = (CompoundCondition) this;
-        if (cc.getSubtypes() != null && !cc.getSubtypes().isEmpty()) {
-          params.put(CryptoConditionUri.QueryParams.SUBTYPES,
-              ConditionType.getEnumOfTypesAsString(cc.getSubtypes()));
-        }
-      }
-
-      uri = NamedInformationUri.getUri(HashFunction.SHA_256, getFingerprint(), params);
+    if (cost != that.cost) {
+      return false;
     }
-
-    return uri;
+    return type == that.type;
   }
 
-  /**
-   * Overrides the default {@link java.lang.Object#hashCode()} to generate the hashCode from the
-   * type and fingerprint.
-   */
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    int typeCode = getType().getTypeCode();
-    result = prime * result + (int) (typeCode ^ (typeCode >>> 32));
-    result = prime * result + Arrays.hashCode(getEncoded());
+    int result = type.hashCode();
+    result = 31 * result + (int) (cost ^ (cost >>> 32));
     return result;
   }
 
   /**
-   * Overrides the default {@link java.lang.Object#equals(Object)} to compare the type and
-   * fingerprint.
+   * Overrides the default {@link java.lang.Object#toString()} and returns the result of {@link
+   * CryptoConditionUri#toUri(Condition)} as a string.
    */
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (!(obj instanceof Condition)) {
-      return false;
-    }
-
-    Condition other = (Condition) obj;
-    if (getType() != other.getType()) {
-      return false;
-    }
-    if (getCost() != other.getCost()) {
-      return false;
-    }
-    if (!Arrays.equals(getFingerprint(), other.getFingerprint())) {
-      return false;
-    }
-
-    return true;
+  public final String toString() {
+    return CryptoConditionUri.toUri(this).toString();
   }
 
   /**
-   * Overrides the default {@link java.lang.Object#toString()} and returns the result of
-   * {@link #getUri()} as a string.
-   * 
+   * <p>An implementation of {@link Comparable#compareTo(Object)} to conform to the {@link
+   * Comparable} interface.</p>
+   *
+   * <p>This implementation merely loops through the bytes of each encoded condition and returns the
+   * result of that comparison.</p>
+   *
+   * @param that A {@link Condition} to compare against this condition.
+   * @return a negative integer, zero, or a positive integer as this object is less than, equal to,
+   *     or greater than the specified object.
    */
   @Override
-  public String toString() {
-    return getUri().toString();
-  }
+  public final int compareTo(Condition that) {
+    try {
+      byte[] c1encoded = CryptoConditionWriter.writeCondition(this);
+      byte[] c2encoded = CryptoConditionWriter.writeCondition(that);
 
+      int minLength = Math.min(c1encoded.length, c2encoded.length);
+      for (int i = 0; i < minLength; i++) {
+        int result = Integer.compareUnsigned(c1encoded[i], c2encoded[i]);
+        if (result != 0) {
+          return result;
+        }
+      }
+      return c1encoded.length - c2encoded.length;
+
+    } catch (DerEncodingException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

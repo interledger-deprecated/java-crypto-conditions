@@ -3,18 +3,6 @@ machine:
     version: oraclejdk8
 
 test:
-  override:
-    # we override the standard circleci test to force it to pick gradle (since there is a pom.xml file checked in too)
-    - if [ -e ./gradlew ]; then ./gradlew test;else gradle test;fi
   post:
-    # run the checkstyle checks
-    - if [ -e ./gradlew ]; then ./gradlew check;else gradle check ;fi
-    # run the code coverage report 
-    - if [ -e ./gradlew ]; then ./gradlew jacocoTestReport;else gradle jacocoTestReport;fi
-    # see https://circleci.com/docs/test-metadata/#gradle-junit-results
-    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
-    - mkdir -p $CIRCLE_TEST_REPORTS/checkstyle/
-    - find . -type f -regex ".*/build/reports/checkstyle/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/checkstyle/ \;
     # publish the coverage report to codecov.io
     - bash <(curl -s https://codecov.io/bash)

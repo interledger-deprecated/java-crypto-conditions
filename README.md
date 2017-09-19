@@ -10,7 +10,8 @@
 
 Java implementation of Crypto-Conditions (See [RFC](https://datatracker.ietf.org/doc/draft-thomas-crypto-conditions/)).
 
-v2.0 implements the latest RFC (draft-02)
+* v0.0.2-SNAPSHOT implements the latest RFC [draft-02](https://tools.ietf.org/html/draft-thomas-crypto-conditions-02).  
+* v0.0.3-SNAPSHOT implements the latest RFC [draft-03](https://tools.ietf.org/html/draft-thomas-crypto-conditions-03).
 
 ## Dependencies
 
@@ -24,14 +25,14 @@ For ED25519 the library depends on [net.i2p.crypto.eddsa](https://github.com/str
 ## Usage
 
 ### Requirements
-This project uses Gradle to manage dependencies and other aspects of the build.  
-To install Gradle, follow the instructions at [https://gradle.org](https://gradle.org/).
+This project uses Maven to manage dependencies and other aspects of the build. 
+To install Maven, follow the instructions at [https://maven.apache.org/install.html](https://maven.apache.org/install.html).
+
 
 ### Get the code
 
 ``` sh
 git clone https://github.com/interledger/java-crypto-conditions
-
 cd java-crypto-conditions
 ```
 
@@ -39,25 +40,21 @@ cd java-crypto-conditions
 To build the project, execute the following command:
 
 ```bash
-$ gradle build test
+$ mvn clean install
 ```
 
 #### Checkstyle
-The project uses checkstyle to keep code style consistent. To run the style checks:
+The project uses checkstyle to keep code style consistent. All Checkstyle checks are run by default during the build, but if you would like to run checkstyle checks, use the following command:
+
 
 ```bash
-$ gradle build check
-```
-
-#### Maven is also supported:
-```
-mvn clean install [checkstyle:check]
+$ mvn checkstyle:checkstyle
 ```
 
 ### Step 3: Use
 
 #### PREIMAGE-SHA-256 Example:
-~~~java
+```java
 byte[] preimage = "Hello World!".getBytes(Charset.defaultCharset());
 PreimageSha256Condition condition = new PreimageSha256Condition(preimage);
 
@@ -65,10 +62,10 @@ PreimageSha256Fulfillment fulfillment = new PreimageSha256Fulfillment(preimage);
 if(fulfillment.validate(condition)) {
     System.out.println("Fulfillment is valid!");
 }
-~~~
+```
 
 #### THRESHOLD-SHA-256, ED25519-SHA-256 and RSA-SHA-256 Example:
-~~~java
+```java
 //Generate RSA-SHA-256 condition
 KeyPairGenerator rsaKpg = KeyPairGenerator.getInstance("RSA");
 rsaKpg.initialize(new RSAKeyGenParameterSpec(2048, new BigInteger("65537")));
@@ -81,17 +78,16 @@ net.i2p.crypto.eddsa.KeyPairGenerator edDsaKpg = new net.i2p.crypto.eddsa.KeyPai
 KeyPair edDsaKeyPair = edDsaKpg.generateKeyPair();
 Signature edDsaSigner = new EdDSAEngine(sha512Digest);
 
-
 PreimageSha256Fulfillment fulfillment = new PreimageSha256Fulfillment(preimage);
 //Verify against empty message
 if(fulfillment.verify(condition, new byte[0])) {
     System.out.println("Fulfillment is valid!");
 }
-~~~
+```
 
 
 #### Encoding Example:
-~~~java
+```java
 //Read a condition from a stream (InputStream in)
 DERInputStream derStream = new DERInputStream(in);
 Condition condition = CryptoConditionReader.readCondition(derStream);
@@ -107,15 +103,14 @@ Condition condition = CryptoConditionReader.readCondition(buffer);
 Fulfillment fulfillment = CryptoConditionReader.readFulfillment(buffer);
 
 //Get binary encoding of condition that can be written to stream
-byte[] binaryEncodedCondition = condition.getEncoded();
+byte[] binaryEncodedCondition = CryptoConditionWriter.writeCondition(condition);
 
 //Get binary encoding of fulfillment that can be written to stream
-byte[] binaryEncodedCondition = fulfillment.getEncoded();
+byte[] binaryEncodedCondition = CryptoConditionWriter.writeFulfillment(fulfillment);
 
 //Get ni: URI form for sharing via text-based protocols
-URI uriEncodedCondition = condition.getUri();
-
-~~~
+URI uriEncodedCondition = CryptoConditionUri.toUri(condition);
+```
 
 ## Contributors
 
@@ -125,11 +120,8 @@ Any contribution is very much appreciated!
 
 ## TODO
 
-  - More Unit tests
-  - Finish implementing test runner for shared integration tests from [https://github.com/rfcs/crypto-conditions](https://github.com/rfcs/crypto-conditions).
-  - Helper functions for generating fulfillments
-  	- From private keys and messages
-  	- Using a builder
+  - More Unit tests (see #62)
+  - Replace current ASN.1 DER Input/Outputstream code with Codec framework (see java-ilp-core).
   - Validate condition against a global max cost
 
 ## License

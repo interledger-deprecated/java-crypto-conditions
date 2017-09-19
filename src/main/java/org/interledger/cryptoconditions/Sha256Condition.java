@@ -3,67 +3,91 @@ package org.interledger.cryptoconditions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Objects;
 
 /**
- * Abstract base class for the *-SHA-256 condition types. Provides concrete implementation of
- * generation of SHA256 fingerprint via a shared static digest.
+ * Abstract base class for the *-SHA-256 condition rsa.
  */
 public abstract class Sha256Condition extends ConditionBase {
 
-  // This is not static because all of the instances returned from MessageDigest.getInstance() are
-  // distinct in order to maintain separate digests.  Additionally, MessageDigest isn't
-  // particularly expensive to construct (see MessageDigest source).
-  private final MessageDigest messageDigest;
+  private final byte[] fingerprint;
+  private final String fingerprintBase64Url;
 
-  private byte[] fingerprint;
+  /**
+   * Constructor that accepts a fingerprint and a cost number.
+   *
+   * @param type        A {@link CryptoConditionType} that represents the type of this condition.
+   * @param cost        A {@link long} representing the anticipated cost of this condition,
+   *                    calculated per
+   *                    the rules of the crypto-conditions specification.
+   * @param fingerprint The binary representation of the fingerprint for this condition.
+   */
+  protected Sha256Condition(
+      final CryptoConditionType type, final long cost, final byte[] fingerprint
+  ) {
+    super(type, cost);
 
-  protected Sha256Condition(long cost) {
-    super(cost);
-    try {
-      this.messageDigest = MessageDigest.getInstance("SHA-256");
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  protected Sha256Condition(byte[] fingerprint, long cost) {
-    super(cost);
-    this.fingerprint = fingerprint;
-
+    Objects.requireNonNull(fingerprint);
     if (fingerprint.length != 32) {
       throw new IllegalArgumentException("Fingerprint must be 32 bytes.");
     }
 
+    Objects.requireNonNull(fingerprint);
+    this.fingerprint = Arrays.copyOf(fingerprint, fingerprint.length);
+    this.fingerprintBase64Url = Base64.getUrlEncoder().encodeToString(this.fingerprint);
+  }
+
+  @Deprecated
+  @Override
+  public final byte[] getFingerprint() {
+    return fingerprint;
+  }
+
+  @Override
+  public final String getFingerprintBase64Url() {
+    return this.fingerprintBase64Url;
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (object == null || getClass() != object.getClass()) {
+      return false;
+    }
+    if (!super.equals(object)) {
+      return false;
+    }
+
+    Sha256Condition that = (Sha256Condition) object;
+
+    return fingerprintBase64Url.equals(that.fingerprintBase64Url);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = super.hashCode();
+    result = 31 * result + fingerprintBase64Url.hashCode();
+    return result;
+  }
+
+  /**
+   * Constructs the fingerprint of this condition by taking the SHA-256 digest of the contents of
+   * this condition, per the crypto-conditions RFC.
+   *
+   * @param fingerprintContents A byte array containing the unhashed contents of this condition
+   *                            as assembled per the rules of the RFC.
+   * @return A byte array containing the hashed fingerprint.
+   */
+  protected static final byte[] hashFingerprintContents(final byte[] fingerprintContents) {
+    Objects.requireNonNull(fingerprintContents);
     try {
-      this.messageDigest = MessageDigest.getInstance("SHA-256");
+      final MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+      return messageDigest.digest(fingerprintContents);
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
   }
-
-  /**
-   * This method allows sub-classes to provide the fingerprint contents (un-hashed) so
-   * that {@link #getFingerprint()} can be lazily computed.
-   */
-  protected abstract byte[] getFingerprintContents();
-
-  /**
-   * Generates and caches the fingerprint on first call. Returns a copy of the internally cached
-   * fingerprint once constructed.  This is lazily computed because some
-   * implementation's fingerprints involve a full ASN.1 DER serialization, which might be
-   * expensive if the fingerprint is not needed.
-   */
-  @Override
-  public byte[] getFingerprint() {
-    if (fingerprint == null) {
-      fingerprint = getDigest(getFingerprintContents());
-    }
-
-    return Arrays.copyOf(fingerprint, fingerprint.length);
-  }
-
-  private byte[] getDigest(byte[] input) {
-    return messageDigest.digest(input);
-  }
-
 }

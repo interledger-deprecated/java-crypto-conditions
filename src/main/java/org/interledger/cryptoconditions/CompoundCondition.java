@@ -11,6 +11,6 @@ import java.util.EnumSet;
  */
 public interface CompoundCondition extends Condition {
 
-  EnumSet<ConditionType> getSubtypes();
+  EnumSet<CryptoConditionType> getSubtypes();
 
 }
