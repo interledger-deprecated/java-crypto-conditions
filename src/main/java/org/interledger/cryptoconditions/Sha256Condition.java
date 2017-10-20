@@ -34,14 +34,13 @@ public abstract class Sha256Condition extends ConditionBase {
     }
 
     Objects.requireNonNull(fingerprint);
-    this.fingerprint = Arrays.copyOf(fingerprint, fingerprint.length);
-    this.fingerprintBase64Url = Base64.getUrlEncoder().encodeToString(this.fingerprint);
+    this.fingerprint = Arrays.copyOf(fingerprint, 32);
+    this.fingerprintBase64Url = Base64.getUrlEncoder().withoutPadding().encodeToString(this.fingerprint);
   }
 
-  @Deprecated
   @Override
   public final byte[] getFingerprint() {
-    return fingerprint;
+    return Arrays.copyOf(fingerprint, 32);
   }
 
   @Override

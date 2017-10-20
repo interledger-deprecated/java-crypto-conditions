@@ -22,15 +22,12 @@ public interface Condition extends Comparable<Condition> {
    * the fingerprint are defined by the condition type. The fingerprint is a cryptographically
    * secure hash of the data which defines the condition, such as a public key.</p>
    *
+   * WARNING: This method MUST perform a safe copy of the internal data to protect immutability.
+   * Callers should use {@link #getFingerprintBase64Url()} instead if possible.
+   *
    * @return A read-only byte array that contains the unique fingerprint of this condition.
    *
-   * @deprecated This method may be removed in future versions, so callers should use {@link
-   *     #getFingerprintBase64Url()} instead. Java 8 does not currently have the concept of an
-   *     immutable byte array, which means outside callers could manipulate the bytes returned from
-   *     this method and unintentionally (or purposefully) mutate the internal state of this
-   *     Condition.
    */
-  @Deprecated
   byte[] getFingerprint();
 
   /**

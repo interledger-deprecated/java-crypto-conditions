@@ -16,11 +16,17 @@ public final class PreimageSha256Condition extends Sha256Condition implements Si
 
   /**
    * Required-args Constructor.  Constructs an instance of {@link PreimageSha256Condition} based
-   * on a supplied preimage. This constructor variant is intended to be used by developers
-   * wishing to construct a Preimage condition from a secret preimage.
+   * on a supplied preimage.
+   *
+   * @deprecated This constructor will be made package-private in future versions because it is only used from within
+   * {@link PreimageSha256Fulfillment}.
+   *
+   * <p>Developers that wish to create a new {@link PreimageSha256Condition} from the preimage should instead create a new
+   * {@link PreimageSha256Fulfillment} and call {@link PreimageSha256Fulfillment#getCondition()}.
    *
    * @param preimage An instance of byte array containing preimage data.
    */
+  @Deprecated
   public PreimageSha256Condition(final byte[] preimage) {
     super(
         CryptoConditionType.PREIMAGE_SHA256,
@@ -36,23 +42,23 @@ public final class PreimageSha256Condition extends Sha256Condition implements Si
    * that this constructor variant does not include a preimage, and is thus intended to be used
    * to construct a condition that does not include a preimage (for example, if a condition is
    * supplied by a remote system).
-   * <p/>
-   * Note this constructor is package-private because it is used primarily for testing purposes.
    *
    * @param cost        The cost associated with this condition.
    * @param fingerprint An instance of byte array that contains the calculated fingerprint for
    */
-  PreimageSha256Condition(final long cost, final byte[] fingerprint) {
+  public PreimageSha256Condition(final long cost, final byte[] fingerprint) {
     super(PREIMAGE_SHA256, cost, fingerprint);
   }
 
   /**
    * Constructs the fingerprint for this condition.
-   * <p/>
-   * Note: This method is package-private as (opposed to private) for testing purposes.
+   *
+   * <p>Note: This method is package-private as (opposed to private) for testing purposes.
+   *
+   * @param preimage An instance of byte array containing preimage data.
    */
-  static final byte[] constructFingerprintContents(final byte[] prefix) {
-    return Objects.requireNonNull(prefix);
+  static final byte[] constructFingerprintContents(final byte[] preimage) {
+    return Objects.requireNonNull(preimage);
   }
 
   /**
