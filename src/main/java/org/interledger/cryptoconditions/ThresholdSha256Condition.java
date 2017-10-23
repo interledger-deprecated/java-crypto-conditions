@@ -21,7 +21,11 @@ public final class ThresholdSha256Condition extends CompoundSha256Condition
     implements CompoundCondition {
 
   /**
-   * Constructs an instance of the condition.
+   * <p>Constructs an instance of the condition.</p>
+   *
+   * <p>Developers that wish to create a new instance of this class from an existing list of
+   * subconditions should instead create a new {@link ThresholdSha256Fulfillment} and call {@link
+   * ThresholdSha256Fulfillment#getCondition()}.</p>
    *
    * @param threshold     The number of subconditions that must be fulfilled.
    * @param subconditions A set of subconditions that this condition is dependent on.
@@ -38,24 +42,25 @@ public final class ThresholdSha256Condition extends CompoundSha256Condition
   }
 
   /**
-   * Constructs an instance of the condition.
-   * <p/>
-   * Note this constructor is package-private because it is used primarily for testing purposes.
+   * <p>Constructs an instance of the condition.</p>
+   *
+   * <p>Note this constructor is package-private because it is used primarily for testing
+   * purposes.</p>
    *
    * @param cost        The calculated cost of this condition.
    * @param fingerprint The calculcated fingerprint for the condition.
    * @param subtypes    A set of condition rsa for the subconditions that this one depends on.
    */
-  ThresholdSha256Condition(
+  public ThresholdSha256Condition(
       final long cost, final byte[] fingerprint, final EnumSet<CryptoConditionType> subtypes
   ) {
     super(THRESHOLD_SHA256, cost, fingerprint, subtypes);
   }
 
   /**
-   * Constructs the fingerprint for this condition.
-   * <p/>
-   * Note: This method is package-private as (opposed to private) for testing purposes.
+   * <p>Constructs the fingerprint for this condition.</p>
+   *
+   * <p>Note: This method is package-private as (opposed to private) for testing purposes.</p>
    */
   static final byte[] constructFingerprintContents(
       final int threshold, final List<Condition> subconditions
@@ -135,6 +140,7 @@ public final class ThresholdSha256Condition extends CompoundSha256Condition
    *
    * @param threshold     The number of subconditions that must be met.
    * @param subconditions The list of subconditions.
+   *
    * @return The calculated cost of a threshold condition.
    */
   private static final long calculateCost(
@@ -158,6 +164,7 @@ public final class ThresholdSha256Condition extends CompoundSha256Condition
    * Determines the set of condition rsa that are ultimately held via the sub condition.
    *
    * @param subconditions The sub conditions that this condition depends on.
+   *
    * @return The set of condition rsa related to the sub condition.
    */
   private static final EnumSet<CryptoConditionType> calculateSubtypes(

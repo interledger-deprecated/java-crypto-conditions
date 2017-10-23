@@ -5,11 +5,7 @@ import java.util.List;
 
 /**
  * A helper class for asserting crypto conditions.
- *
- * @deprecated Determine if this class should be removed since issues #52 allows URIs to be compared
- *     for string equality.
  */
-@Deprecated
 public class CryptoConditionAssert {
 
   /**
@@ -19,9 +15,10 @@ public class CryptoConditionAssert {
    * @param expected A list of expected condition rsa.
    * @param actual   A set of condition rsa to compare against the ones expected.
    */
-  public static void assertSetOfTypesIsEqual(String message, List<String> expected,
-      EnumSet<CryptoConditionType> actual) {
-    EnumSet<CryptoConditionType> expectedSet = CryptoConditionType
+  public static void assertSetOfTypesIsEqual(
+      final String message, final List<String> expected, final EnumSet<CryptoConditionType> actual
+  ) {
+    final EnumSet<CryptoConditionType> expectedSet = CryptoConditionType
         .getEnumOfTypesFromString(String.join(",", expected.toArray(new String[expected.size()])));
 
     if (!expectedSet.containsAll(actual)) {

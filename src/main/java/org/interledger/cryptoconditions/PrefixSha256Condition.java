@@ -14,7 +14,8 @@ import java.util.EnumSet;
 import java.util.Objects;
 
 /**
- * Implementation of a crypto condition based on a prefix, a sub-condition and the SHA-256 function.
+ * Implementation of a crypto condition based on a prefix, a sub-condition and the SHA-256
+ * function.
  */
 public final class PrefixSha256Condition extends CompoundSha256Condition
     implements CompoundCondition {
@@ -40,24 +41,27 @@ public final class PrefixSha256Condition extends CompoundSha256Condition
   }
 
   /**
-   * Constructs an instance of the condition.
-   * <p/>
-   * Note this constructor is package-private because it is used primarily for testing purposes.
+   * <p>Constructs an instance of the condition.</p>
+   *
+   * <p>This constructor _should_ be primarily used by Codecs, whereas developers should, in
+   * general, use the {@link #PrefixSha256Condition(byte[], long, Condition)} constructor, or else
+   * create an actual fulfillment via {@link PrefixSha256Fulfillment#PrefixSha256Fulfillment(byte[],
+   * long, Fulfillment)} and then generate a condition from that object.</p>
    *
    * @param cost        The cost of this condition.
    * @param fingerprint The calculated fingerprint.
    * @param subtypes    A set of condition rsa for the conditions that this one depends on.
    */
-  PrefixSha256Condition(
+  public PrefixSha256Condition(
       final long cost, final byte[] fingerprint, final EnumSet<CryptoConditionType> subtypes
   ) {
     super(PREFIX_SHA256, cost, fingerprint, subtypes);
   }
 
   /**
-   * Constructs the fingerprint for this condition.
-   * <p/>
-   * Note: This method is package-private as (opposed to private) for testing purposes.
+   * <p>Constructs the fingerprint for this condition.</p>
+   *
+   * <p>Note: This method is package-private as (opposed to private) for testing purposes.</p>
    */
   static final byte[] constructFingerprintContents(
       final byte[] prefix, final long maxMessageLength, final Condition subcondition
@@ -97,6 +101,7 @@ public final class PrefixSha256Condition extends CompoundSha256Condition
    * @param prefix           The prefix included in this condition.
    * @param maxMessageLength The maximum length of the message.
    * @param subconditionCost The cost of the sub condition.
+   *
    * @return The calculated cost of this condition.
    */
   private static final long calculateCost(
@@ -109,6 +114,7 @@ public final class PrefixSha256Condition extends CompoundSha256Condition
    * Determines the set of condition rsa that are ultimately held via the sub condition.
    *
    * @param subcondition The sub condition that this condition depends on.
+   *
    * @return The set of condition rsa related to the sub condition.
    */
   private static EnumSet<CryptoConditionType> calculateSubtypes(Condition subcondition) {

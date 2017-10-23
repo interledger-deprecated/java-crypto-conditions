@@ -19,8 +19,7 @@ public abstract class Sha256Condition extends ConditionBase {
    *
    * @param type        A {@link CryptoConditionType} that represents the type of this condition.
    * @param cost        A {@link long} representing the anticipated cost of this condition,
-   *                    calculated per
-   *                    the rules of the crypto-conditions specification.
+   *                    calculated per the rules of the crypto-conditions specification.
    * @param fingerprint The binary representation of the fingerprint for this condition.
    */
   protected Sha256Condition(
@@ -34,14 +33,14 @@ public abstract class Sha256Condition extends ConditionBase {
     }
 
     Objects.requireNonNull(fingerprint);
-    this.fingerprint = Arrays.copyOf(fingerprint, fingerprint.length);
-    this.fingerprintBase64Url = Base64.getUrlEncoder().encodeToString(this.fingerprint);
+    this.fingerprint = Arrays.copyOf(fingerprint, 32);
+    this.fingerprintBase64Url = Base64.getUrlEncoder().withoutPadding()
+        .encodeToString(this.fingerprint);
   }
 
-  @Deprecated
   @Override
   public final byte[] getFingerprint() {
-    return fingerprint;
+    return Arrays.copyOf(fingerprint, 32);
   }
 
   @Override
@@ -77,8 +76,9 @@ public abstract class Sha256Condition extends ConditionBase {
    * Constructs the fingerprint of this condition by taking the SHA-256 digest of the contents of
    * this condition, per the crypto-conditions RFC.
    *
-   * @param fingerprintContents A byte array containing the unhashed contents of this condition
-   *                            as assembled per the rules of the RFC.
+   * @param fingerprintContents A byte array containing the unhashed contents of this condition as
+   *                            assembled per the rules of the RFC.
+   *
    * @return A byte array containing the hashed fingerprint.
    */
   protected static final byte[] hashFingerprintContents(final byte[] fingerprintContents) {

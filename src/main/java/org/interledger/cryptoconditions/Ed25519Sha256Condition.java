@@ -1,7 +1,6 @@
 package org.interledger.cryptoconditions;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
-
 import org.interledger.cryptoconditions.der.DerOutputStream;
 import org.interledger.cryptoconditions.der.DerTag;
 
@@ -9,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Objects;
+
 
 /**
  * Implementation of a crypto-condition using the ED-25519 and SHA-256 functions.
@@ -35,17 +35,17 @@ public final class Ed25519Sha256Condition extends Sha256Condition implements Sim
   }
 
   /**
-   * Constructs an instance of the condition with the given fingerprint and cost.
-   * <p/>
-   * Note this constructor is package-private because it is used primarily for testing purposes.
+   * <p>Constructs an instance of the condition with the given fingerprint and cost.</p>
    *
-   * @param cost        A {@link long} representing the anticipated cost of this condition,
-   *                    calculated per
-   *                    the rules of the crypto-conditions specification.
+   * <p>This constructor _should_ be primarily used by CODECs, whereas developers should, in
+   * general, use the {@link #Ed25519Sha256Condition(EdDSAPublicKey)} constructor, or else create an
+   * actual fulfillment via {@link Ed25519Sha256Fulfillment#Ed25519Sha256Fulfillment(EdDSAPublicKey,
+   * byte[])} and then generate a condition from that object.</p>
+   *
    * @param fingerprint The binary representation of the fingerprint for this condition.
    */
-  Ed25519Sha256Condition(final long cost, final byte[] fingerprint) {
-    super(CryptoConditionType.ED25519_SHA256, cost, fingerprint);
+  public Ed25519Sha256Condition(final byte[] fingerprint) {
+    super(CryptoConditionType.ED25519_SHA256, COST, fingerprint);
   }
 
   /**

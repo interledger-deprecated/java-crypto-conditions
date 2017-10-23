@@ -41,6 +41,7 @@ public class CryptoConditionUri {
    * Parses a URI formatted crypto-condition.
    *
    * @param uri The crypto-condition formatted as a URI.
+   *
    * @return The equivalent crypto-condition.
    */
   public static Condition parse(final URI uri) throws URISyntaxException {
@@ -106,7 +107,7 @@ public class CryptoConditionUri {
       case RSA_SHA256:
         return new RsaSha256Condition(cost, fingerprint);
       case ED25519_SHA256:
-        return new Ed25519Sha256Condition(cost, fingerprint);
+        return new Ed25519Sha256Condition(fingerprint);
       default:
         throw new URISyntaxException(uri.toString(), "No or invalid type provided");
     }
@@ -116,6 +117,7 @@ public class CryptoConditionUri {
    * Convert a crypto condition to its ni-schemed URI representation.
    *
    * @param condition A {@link Condition} to convert.
+   *
    * @return A {@link URI} representing the ni-schemed version of the supplied {@code condition}.
    */
   public static URI toUri(final Condition condition) {
@@ -160,6 +162,7 @@ public class CryptoConditionUri {
    * Unpacks an URL encoded string of query parameters into a map of keys and values.
    *
    * @param queryParams The url-encoded query parameters.
+   *
    * @return A map containing keyed on the query parameter names containing the associated values.
    */
   private static Map<String, List<String>> splitQuery(String queryParams)

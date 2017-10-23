@@ -18,7 +18,12 @@ import java.util.Objects;
 public final class RsaSha256Condition extends Sha256Condition implements SimpleCondition {
 
   /**
-   * Constructs an instance of the condition.
+   * <p>Constructs an instance of the condition.</p>
+   *
+   * <p>Development Note: This constructor is _not_ package-private because it may be desirable for
+   * a party who only has a public-key to be able to create an RSA-SHA-256 Condition. For example,
+   * it might be useful to create a condition that some other party, who _does_ have access to the
+   * RSA private key, to fulfill the condition.</p>
    *
    * @param key The RSA public key associated with the condition.
    */
@@ -33,14 +38,17 @@ public final class RsaSha256Condition extends Sha256Condition implements SimpleC
   }
 
   /**
-   * Constructs an instance of the condition.
-   * <p/>
-   * Note this constructor is package-private because it is used primarily for testing purposes.
+   * <p>Constructs an instance of this condition from it's corresponding parts.</p>
+   *
+   * <p>This constructor _should_ be primarily used by Codecs, whereas developers should, in
+   * general, use the {@link #RsaSha256Condition(RSAPublicKey)} constructor, or else create an
+   * actual fulfillment via {@link RsaSha256Fulfillment#RsaSha256Fulfillment(RSAPublicKey, byte[])}
+   * and then generate a condition from that object.</p>
    *
    * @param cost        The calculated cost of the condition.
    * @param fingerprint The calculated fingerprint for the condition.
    */
-  RsaSha256Condition(final long cost, final byte[] fingerprint) {
+  public RsaSha256Condition(final long cost, final byte[] fingerprint) {
     super(RSA_SHA256, cost, fingerprint);
   }
 
@@ -77,6 +85,7 @@ public final class RsaSha256Condition extends Sha256Condition implements SimpleC
    * Calculates the cost of a condition based on an RSA key as ((modulus size in bytes)^2).
    *
    * @param key The key used in the condition.
+   *
    * @return the cost of a condition using this key.
    */
   private static final long calculateCost(RSAPublicKey key) {
