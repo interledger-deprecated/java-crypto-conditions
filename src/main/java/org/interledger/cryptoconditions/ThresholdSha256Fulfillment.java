@@ -17,18 +17,27 @@ import java.util.stream.Collectors;
 public class ThresholdSha256Fulfillment extends FulfillmentBase<ThresholdSha256Condition>
     implements Fulfillment<ThresholdSha256Condition> {
 
-  // TODO: Remove subconditions as a property...?
   private final List<Condition> subconditions;
   private final List<Fulfillment> subfulfillments;
   private final ThresholdSha256Condition condition;
 
   /**
-   * Required-args Constructor.
+   * Required-args Constructor. In order to create a threshold fulfillment,
    *
-   * @param subconditions   An ordered {@link List} of sub-conditions that this
-   *                        fulfillment contains.
-   * @param subfulfillments An ordered {@link List} of sub-fulfillments that this
-   *                        fulfillment contains.
+   * @param subconditions   An ordered {@link List} of unfulfilled sub-conditions that correspond to
+   *                        the threshold condition being fulfilled. For example, if a given
+   *                        Threshold condition has 2 preimage sub-conditions, but a threshold of 1,
+   *                        then a valid fulfillment would have one of those preimage conditions in
+   *                        this List, and a fulfillment for the other preimage condition in the
+   *                        {@code fulfillments} list. Note that this list must be combined with the
+   *                        list of conditions derived from the subfulfillments, and the combined
+   *                        list, sorted, is used as the value when deriving the fingerprint of this
+   *                        threshold fulfillment.
+   * @param subfulfillments An ordered {@link List} of fulfillments.  The number of elements in this
+   *                        list is equal to the threshold of this fulfillment (i.e., per the
+   *                        crypto-condtions specification, implementations must use the length of
+   *                        this list as the threshold value when deriving the fingerprint of this
+   *                        crypto-condition).
    */
   public ThresholdSha256Fulfillment(
       final List<Condition> subconditions, final List<Fulfillment> subfulfillments
@@ -53,6 +62,9 @@ public class ThresholdSha256Fulfillment extends FulfillmentBase<ThresholdSha256C
         this.subfulfillments.stream().map(Fulfillment::getCondition).collect(Collectors.toList())
     );
 
+    // Per the crypto-condtions specification, implementations must use the length of the
+    // fulfillments list as the threshold value when deriving the fingerprint of this
+    // crypto-condition.
     return new ThresholdSha256Condition(this.subfulfillments.size(), allConditions);
   }
 
@@ -79,6 +91,22 @@ public class ThresholdSha256Fulfillment extends FulfillmentBase<ThresholdSha256C
     return this.condition;
   }
 
+  /**
+   * <p>A THRESHOLD-SHA-256 fulfillment is valid iff:</p>
+   *
+   * <p>1. All (F).subfulfillments are valid.</p>
+   *
+   * <p>2. The derived condition (D) (found in {@code condition}) is equal to the given condition
+   * (C).</p>
+   *
+   * <p>For more general details about Fulfillment validation, see the Javadoc in {@link
+   * Fulfillment#verify(Condition, byte[])}.</p>
+   *
+   * @param condition A {@link Condition} that this fulfillment should verify.
+   * @param message   A byte array that is part of verifying the supplied condition.
+   *
+   * @return {@code true} if the condition validates this fulfillment; {@code false} otherwise.
+   */
   @Override
   public boolean verify(final ThresholdSha256Condition condition, final byte[] message) {
     Objects.requireNonNull(condition,

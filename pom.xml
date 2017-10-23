@@ -7,7 +7,7 @@
 
   <groupId>org.interledger</groupId>
   <artifactId>java-crypto-conditions</artifactId>
-  <version>0.3.1-SNAPSHOT</version>
+  <version>0.4.0-SNAPSHOT</version>
 
   <name>Crypto Conditions (Java)</name>
   <description>Java implementation of the Crypto-Conditions RFC.</description>
@@ -51,9 +51,9 @@
   <properties>
     <maven-checkstyle-plugin.version>2.17</maven-checkstyle-plugin.version>
     <checkstyle.consoleOutput>true</checkstyle.consoleOutput>
-    <checkstyle.failsOnError>false</checkstyle.failsOnError>
-    <checkstyle.failOnViolation>false</checkstyle.failOnViolation>
-    <checkstyle.configLocation>google_checks.xml</checkstyle.configLocation>
+    <checkstyle.failsOnError>true</checkstyle.failsOnError>
+    <checkstyle.failOnViolation>true</checkstyle.failOnViolation>
+    <checkstyle.configLocation>./google_checks2.xml</checkstyle.configLocation>
     <checkstyle.linkXRef>false</checkstyle.linkXRef>
 
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -141,7 +141,7 @@
           </execution>
         </executions>
         <configuration>
-          <configLocation>google_checks.xml</configLocation>
+          <configLocation>./google_checks.xml</configLocation>
           <!--Do not bother checking the test Application or HexDump classes -->
           <excludes>org/interledger/cryptoconditions/Application*</excludes>
         </configuration>
@@ -233,7 +233,7 @@
           </reportSet>
         </reportSets>
         <configuration>
-          <configLocation>google_checks.xml</configLocation>
+          <configLocation>./google_checks.xml</configLocation>
           <!--Do not bother checking the test Application or HexDump classes -->
           <excludes>org/interledger/cryptoconditions/Application*</excludes>
         </configuration>

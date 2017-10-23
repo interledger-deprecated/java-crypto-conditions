@@ -49,6 +49,8 @@ public class RsaSha256Fulfillment extends FulfillmentBase<RsaSha256Condition>
 
   /**
    * Returns the public key used in this fulfillment.
+   *
+   * @return The {@link RSAPublicKey} for this fulfillment.
    */
   public RSAPublicKey getPublicKey() {
     return publicKey;
@@ -56,6 +58,8 @@ public class RsaSha256Fulfillment extends FulfillmentBase<RsaSha256Condition>
 
   /**
    * Returns a copy of the signature used in this fulfillment.
+   *
+   * @return A {@link byte[]} containing the signature for this fulfillment.
    *
    * @deprecated Java 8 does not have the concept of an immutable byte array, so this method allows
    *     external callers to accidentally or intentionally mute the prefix. As such, this method may
@@ -68,6 +72,8 @@ public class RsaSha256Fulfillment extends FulfillmentBase<RsaSha256Condition>
 
   /**
    * Returns the signature used in this fulfillment.
+   *
+   * @return A {@link String} containing the Base64Url-encoded signature for this fulfillment.
    */
   public String getSignatureBase64Url() {
     return this.signatureBase64Url;

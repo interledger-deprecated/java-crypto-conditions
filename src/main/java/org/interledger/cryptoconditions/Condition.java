@@ -22,11 +22,10 @@ public interface Condition extends Comparable<Condition> {
    * the fingerprint are defined by the condition type. The fingerprint is a cryptographically
    * secure hash of the data which defines the condition, such as a public key.</p>
    *
-   * WARNING: This method MUST perform a safe copy of the internal data to protect immutability.
-   * Callers should use {@link #getFingerprintBase64Url()} instead if possible.
+   * <p>WARNING: This method MUST perform a safe copy of the internal data to protect immutability.
+   * Callers should use {@link #getFingerprintBase64Url()} instead if possible.</p>
    *
    * @return A read-only byte array that contains the unique fingerprint of this condition.
-   *
    */
   byte[] getFingerprint();
 

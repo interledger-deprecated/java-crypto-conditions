@@ -7,11 +7,10 @@
 [codecov-image]: https://codecov.io/gh/interledger/java-crypto-conditions/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/interledger/java-crypto-conditions
 
-
 Java implementation of Crypto-Conditions (See [RFC](https://datatracker.ietf.org/doc/draft-thomas-crypto-conditions/)).
 
-* v0.0.2-SNAPSHOT implements the latest RFC [draft-02](https://tools.ietf.org/html/draft-thomas-crypto-conditions-02).  
-* v0.0.3-SNAPSHOT implements the latest RFC [draft-03](https://tools.ietf.org/html/draft-thomas-crypto-conditions-03).
+* v0.3.x-SNAPSHOT (and above) implements the latest RFC [draft-03](https://tools.ietf.org/html/draft-thomas-crypto-conditions-03).
+* v0.2.x-SNAPSHOT implements the latest RFC [draft-02](https://tools.ietf.org/html/draft-thomas-crypto-conditions-02).  
 
 ## Dependencies
 

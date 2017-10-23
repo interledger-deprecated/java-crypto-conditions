@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
 
-
 /**
  * An implementation of {@link Fulfillment} for a crypto-condition fulfillment of type
  * "ED25519-SHA256" using the ED-25519 and SHA-256 functions.
@@ -50,6 +49,8 @@ public class Ed25519Sha256Fulfillment extends FulfillmentBase<Ed25519Sha256Condi
 
   /**
    * Returns the public key used.
+   *
+   * @return The {@link EdDSAPublicKey} for this fulfillment.
    */
   public EdDSAPublicKey getPublicKey() {
     return publicKey;
@@ -57,6 +58,8 @@ public class Ed25519Sha256Fulfillment extends FulfillmentBase<Ed25519Sha256Condi
 
   /**
    * Returns a copy of the signature linked to this fulfillment.
+   *
+   * @return A {@link byte[]} containing the signature for this fulfillment.
    *
    * @deprecated Java 8 does not have the concept of an immutable byte array, so this method allows
    *     external callers to accidentally or intentionally mute the prefix. As such, this method may
@@ -69,6 +72,8 @@ public class Ed25519Sha256Fulfillment extends FulfillmentBase<Ed25519Sha256Condi
 
   /**
    * Returns a copy of the signature linked to this fulfillment.
+   *
+   * @return A {@link String} containing the Base64Url-encoded signature for this fulfillment.
    */
   public String getSignatureBase64Url() {
     return this.signatureBase64Url;
