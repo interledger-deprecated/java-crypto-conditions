@@ -55,7 +55,7 @@ public abstract class AbstractCryptoConditionTest {
     logger.info(String.format("About to run %s threads...", numThreads));
     // Actually runs the Runnables above using multiple threads.
     assertConcurrent("Test did not complete before the harness timed-out. Please consider "
-        + "increasing the timeout value for this test.", builder.build(), 150);
+        + "increasing the timeout value for this test.", builder.build(), 15);
     logger.info(String.format("Ran %s threads!", numThreads));
   }
 
