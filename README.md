@@ -1,3 +1,14 @@
+# WE'VE MOVED
+
+This project has been incorproated into [Hyperledger Quilt](https://github.com/hyperledger/quilt/tree/master/crypto-conditions).
+
+Thanks to all of the core contributors that got this work to this point:
+
+- @adrianhopebailie
+- @andrew-g-za
+- @earizon
+- @sappenin
+
 # Java Crypto-Conditions [![join the chat on gitter][gitter-image]][gitter-url] [![circle-ci][circle-image]][circle-url] [![codecov][codecov-image]][codecov-url]
 
 [gitter-image]: https://badges.gitter.im/interledger/java-crypto-conditions.svg
